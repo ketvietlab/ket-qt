@@ -3,6 +3,7 @@
 
 #include "KetAppearance.h"
 
+#include <QAbstractItemView>
 #include <QApplication>
 #include <QPainter>
 #include <QPainterPath>
@@ -84,6 +85,10 @@ int Style::pixelMetric(PixelMetric metric, const QStyleOption* option,
 
 void Style::drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter,
                           const QWidget* widget) const {
+    if (element == PE_FrameFocusRect && qobject_cast<const QAbstractItemView*>(widget)) {
+        // Item views mark the current cell with their selection, not a ring around it.
+        return;
+    }
     if (element == PE_FrameFocusRect) {
         // A 2px design-system focus ring instead of the platform's dotted rectangle.
         painter->save();

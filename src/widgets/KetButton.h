@@ -5,6 +5,8 @@
 
 #include <QAbstractButton>
 
+#include <optional>
+
 namespace ket {
 
 // Design-system button for Qt Widgets; colours and metrics come from ket::buttonRecipe.
@@ -19,6 +21,10 @@ class Button final : public QAbstractButton {
     [[nodiscard]] ControlSize controlSize() const { return size_; }
     void setControlSize(ControlSize size);
 
+    // Draws a fixed interaction state instead of the live one, for documentation pages and
+    // screenshot tests (the kitchensink state matrix). std::nullopt returns to live state.
+    void setPreviewState(std::optional<InteractionState> state);
+
     [[nodiscard]] ButtonRecipe recipe() const;
     [[nodiscard]] QSize sizeHint() const override;
     [[nodiscard]] QSize minimumSizeHint() const override { return sizeHint(); }
@@ -32,6 +38,7 @@ class Button final : public QAbstractButton {
     ButtonVariant variant_;
     ControlSize size_ = ControlSize::Medium;
     bool hovered_ = false;
+    std::optional<InteractionState> preview_;
 };
 
 } // namespace ket

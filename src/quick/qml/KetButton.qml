@@ -9,8 +9,15 @@ Basic.Button {
 
     property int variant: KetTheme.ButtonVariant.Secondary
     property int controlSize: KetTheme.ControlSize.Medium
-    readonly property var recipe: KetTheme.buttonRecipe(KetTheme.dark, KetTheme.zoom, variant,
-                                                        controlSize, hovered, down, enabled, visualFocus)
+    // A fixed state such as { hovered: true } for documentation pages and screenshot tests;
+    // null follows the live interaction state.
+    property var previewState: null
+    readonly property var recipe: previewState
+        ? KetTheme.buttonRecipe(KetTheme.dark, KetTheme.zoom, variant, controlSize,
+                                !!previewState.hovered, !!previewState.pressed,
+                                previewState.enabled !== false, !!previewState.focused)
+        : KetTheme.buttonRecipe(KetTheme.dark, KetTheme.zoom, variant, controlSize,
+                                hovered, down, enabled, visualFocus)
 
     implicitHeight: recipe.height
     implicitWidth: Math.max(implicitHeight, implicitContentWidth + leftPadding + rightPadding)

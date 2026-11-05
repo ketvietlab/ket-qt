@@ -5,7 +5,7 @@ project(KetQt VERSION 0.1.0 DESCRIPTION "Két Design System components for Qt" L
 option(KETQT_BUILD_WIDGETS "Build KetQt::Widgets" ON)
 option(KETQT_BUILD_QUICK "Build the Ket QML module (KetQt::Quick)" ON)
 option(KETQT_BUILD_TESTS "Build KetQt tests" ${PROJECT_IS_TOP_LEVEL})
-option(KETQT_BUILD_EXAMPLES "Build the KetQt gallery" ${PROJECT_IS_TOP_LEVEL})
+option(KETQT_BUILD_EXAMPLES "Build the KetQt kitchensink" ${PROJECT_IS_TOP_LEVEL})
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -97,7 +97,7 @@ if(KETQT_BUILD_TESTS)
 endif()
 
 if(KETQT_BUILD_EXAMPLES AND KETQT_BUILD_WIDGETS AND KETQT_BUILD_QUICK)
-    add_subdirectory(examples/gallery)
+    add_subdirectory(examples/kitchensink)
 endif()
 
 # Install Tokens and Widgets as a CMake package. The static QML module is consumed with

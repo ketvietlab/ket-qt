@@ -14,7 +14,8 @@ Read `docs/architecture.md` and `docs/decisions/` before changing code.
 - A component is a recipe first (`src/tokens/KetRecipes.*`). The Widgets and Qt Quick
   layers draw recipes and never pick colours or sizes themselves.
 - Every component ships in both layers, with tests that compare them against the same
-  recipe, and appears in `examples/gallery`.
+  recipe, and appears in the kitchensink (`examples/kitchensink`) in every variant,
+  size and state (`setPreviewState()` / `previewState` pin a state).
 - Keep Qt 6.8 compatibility. Do not use native platform styles for kit components.
 - No app-specific code (KetPlus, KétChat) and no fonts, credentials or machine paths.
 - Format C++ with the repository `.clang-format`. Run `ctest` and `git diff --check`

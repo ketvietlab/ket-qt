@@ -20,10 +20,19 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-Tests run with `QT_QPA_PLATFORM=offscreen`. The gallery shows both toolkits side by side:
+Tests run with `QT_QPA_PLATFORM=offscreen`.
+
+## Kitchensink
+
+`examples/kitchensink` shows every foundation (colours, typography, spacing and radius,
+elevation, all tokens) and every component, with the Qt Widgets version above its Qt Quick
+twin in each variant, size and state. Theme and zoom switch live from the toolbar.
 
 ```sh
-build/examples/gallery/ketqt_gallery [--dark] [--screenshot=gallery.png]
+open build/examples/kitchensink/ketqt_kitchensink.app        # macOS
+build/examples/kitchensink/ketqt_kitchensink                 # Windows, Linux
+ketqt_kitchensink --page=button --dark --zoom=1.25 --screenshot=button-dark.png
+ketqt_kitchensink --smoke   # every page, light and dark; non-zero on QML errors (a CTest)
 ```
 
 ## Using it
