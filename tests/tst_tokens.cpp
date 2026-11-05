@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetAppearance.h"
+#include "KetProfile.h"
 #include "KetRecipes.h"
 #include "KetTokens.h"
 
@@ -182,6 +183,39 @@ class TokensTest final : public QObject {
         QCOMPARE(row.labelWidth, 180.0);
         QCOMPARE(row.label, Tokens::color(u"text-secondary", Theme::Light));
         QCOMPARE(row.error, Tokens::color(u"danger", Theme::Light));
+    }
+
+    void recipesFollowTheCurrentProfile() {
+        QCOMPARE(Profile::current().name, QStringLiteral("ketplus"));
+        const ButtonRecipe ketPlus =
+            buttonRecipe(ButtonVariant::Secondary, ControlSize::Medium, {}, Theme::Light);
+        QCOMPARE(ketPlus.radius, Tokens::px(u"radius-sm"));
+
+        Profile::setCurrent(Profile::designSystem());
+        const ButtonRecipe base =
+            buttonRecipe(ButtonVariant::Secondary, ControlSize::Medium, {}, Theme::Light);
+        QCOMPARE(base.radius, Tokens::px(u"control-radius"));
+        QCOMPARE(base.fontPixels, Tokens::px(u"action-font-size"));
+        QCOMPARE(base.fontWeight, 500);
+        QCOMPARE(buttonRecipe(ButtonVariant::Secondary, ControlSize::Medium,
+                              {false, false, false, false}, Theme::Light)
+                     .opacity,
+                 Tokens::number(u"opacity-pending"));
+        QCOMPARE(fieldRecipe({}, false, Theme::Light).height, Tokens::px(u"control-height-md"));
+        // Colours never come from a profile.
+        QCOMPARE(base.background, ketPlus.background);
+
+        // A product profile starts from a shipped one and changes what its design needs.
+        Profile glass = Profile::designSystem();
+        glass.name = QStringLiteral("lampion-glass");
+        glass.controlRadius = Tokens::px(u"radius-lg");
+        Profile::setCurrent(glass);
+        QCOMPARE(fieldRecipe({}, false, Theme::Dark).radius, Tokens::px(u"radius-lg"));
+
+        Profile::setCurrent(Profile::ketPlus());
+        QCOMPARE(
+            buttonRecipe(ButtonVariant::Secondary, ControlSize::Medium, {}, Theme::Light).radius,
+            ketPlus.radius);
     }
 
     void tagRecipesTintTheAppColour() {

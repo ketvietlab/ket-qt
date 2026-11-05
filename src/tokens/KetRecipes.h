@@ -10,9 +10,9 @@ namespace ket {
 // Component specifications resolved from tokens. The Widgets and Qt Quick layers draw
 // from these so a variant's colours, sizes and states are defined exactly once.
 //
-// Compositions follow the KetPlus desktop mock (`ketplus.ketatlas`, the `.btn`, `.icon-btn`,
-// `.badge` and `.conversation-tag` rules), which is built on the same Két DS release. Where
-// the mock uses a literal that has no token, the recipe names it next to its source rule.
+// Colours come from tokens. Sizes, spacing, weights and opacities that a product decides
+// come from the current ket::Profile (KetProfile.h): ketPlus() by default, which follows
+// the KetPlus desktop mock, or designSystem() and product profiles such as Lampion's.
 
 // GhostDanger is the mock's `.btn.ghost.danger`: a transparent destructive action.
 enum class ButtonVariant { Primary, Secondary, Ghost, Danger, GhostDanger };

@@ -82,26 +82,28 @@ int main(int argc, char** argv) {
 
     if (parser.isSet(smoke)) {
         // A Qt Quick view whose root is not exactly its size draws a stretched texture.
-        const auto checkViews = [&window](const QString& id) {
+        const auto mismatched = [&window] {
+            QList<QQuickWidget*> result;
             for (QQuickWidget* view : window.findChildren<QQuickWidget*>()) {
                 const QQuickItem* root = view->rootObject();
-                if (!root || !view->isVisibleTo(&window))
-                    continue;
-                if (QSizeF(view->size()) != root->size()) {
-                    std::fprintf(stderr, "%s: view %dx%d, root %gx%g\n", qPrintable(id),
-                                 view->width(), view->height(), root->width(), root->height());
-                    ++failures;
-                }
+                if (root && view->isVisibleTo(&window) && QSizeF(view->size()) != root->size())
+                    result.append(view);
             }
+            return result;
         };
         for (const qreal factor : {1.0, 1.25}) {
             Appearance::instance().setZoom(factor);
             for (const QString& id : kitchensink::KitchenSinkWindow::pageIds()) {
                 window.showPage(id);
                 // Views resize through queued calls; let them settle before checking.
-                for (int pass = 0; pass < 4; ++pass)
+                for (int pass = 0; pass < 50 && (pass < 2 || !mismatched().isEmpty()); ++pass)
                     QApplication::processEvents();
-                checkViews(id);
+                for (const QQuickWidget* view : mismatched()) {
+                    std::fprintf(stderr, "%s: view %dx%d, root %gx%g\n", qPrintable(id),
+                                 view->width(), view->height(), view->rootObject()->width(),
+                                 view->rootObject()->height());
+                    ++failures;
+                }
             }
         }
         Appearance::instance().setMode(Appearance::Mode::Dark);
