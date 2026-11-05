@@ -280,6 +280,50 @@ class TokensTest final : public QObject {
         QCOMPARE(tip.maxWidth, 360.0);
     }
 
+    void navigationRecipesFollowTheKetPlusMock() {
+        const NavItemRecipe idle = navItemRecipe(false, {}, Theme::Light);
+        QCOMPARE(idle.height, 34.0);
+        QCOMPARE(idle.background.alpha(), 0);
+        QCOMPARE(idle.text, Tokens::color(u"text-secondary", Theme::Light));
+        QCOMPARE(navItemRecipe(false, {true, false, true, false}, Theme::Light).background,
+                 Tokens::color(u"surface-hover", Theme::Light));
+        const NavItemRecipe active = navItemRecipe(true, {true, false, true, false}, Theme::Dark);
+        QCOMPARE(active.background, Tokens::color(u"accent-subtle", Theme::Dark));
+        QCOMPARE(active.text, Tokens::color(u"nav-selected-text", Theme::Dark));
+        QCOMPARE(active.fontWeight, 550);
+
+        QCOMPARE(segmentedRecipe(Theme::Light).radius, 6.0);
+        const SegmentRecipe on = segmentRecipe(true, {}, Theme::Light);
+        QCOMPARE(on.background, Tokens::color(u"panel-bg", Theme::Light));
+        QVERIFY(on.shadow.color.isValid());
+        QCOMPARE(segmentRecipe(false, {}, Theme::Light).text,
+                 Tokens::color(u"text-muted", Theme::Light));
+
+        QCOMPARE(tabBarRecipe(Theme::Light).height, 41.0);
+        const TabRecipe tab = tabRecipe(true, {}, Theme::Light);
+        QCOMPARE(tab.indicator, Tokens::color(u"accent", Theme::Light));
+        QCOMPARE(tab.indicatorHeight, 2.0);
+        QCOMPARE(tabRecipe(false, {}, Theme::Light).indicator.alpha(), 0);
+
+        QCOMPARE(progressRecipe(Theme::Light).height, 6.0);
+        QCOMPARE(emptyStateRecipe(Theme::Light).iconSize, 35.0);
+        QCOMPARE(emptyStateRecipe(Theme::Light).icon, Tokens::color(u"accent-text", Theme::Light));
+    }
+
+    void activityBarsFollowTheWorkingKeyframes() {
+        const ActivityRecipe r = activityRecipe(Theme::Light);
+        QCOMPARE(r.color, Tokens::color(u"success", Theme::Light));
+        QCOMPARE(activityRecipe(Theme::Light, QColor(Qt::red)).color, QColor(Qt::red));
+        QCOMPARE(activityBarFrame(r, 0, 0).first, 10.0);
+        const auto middle = activityBarFrame(r, 0, r.durationMs / 2);
+        QCOMPARE(middle.first, 4.0);
+        QCOMPARE(middle.second, 0.5);
+        // The second bar waits for its delay, then runs the same cycle.
+        QCOMPARE(activityBarFrame(r, 1, r.durationMs / 2 - 1).first,
+                 activityBarFrame(r, 0, r.durationMs / 2 - 1 - r.staggerMs).first);
+        QCOMPARE(activityBarFrame(r, 2, 100).first, 10.0);
+    }
+
     void appearanceZoomRoundsToWholePixels() {
         Appearance& appearance = Appearance::instance();
         appearance.setZoom(1.25);

@@ -208,6 +208,41 @@ class QuickTest final : public QObject {
         QCOMPARE(dialog->property("width").toReal(), 625.0);
     }
 
+    void navigationAndStatusLoad() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "Item { width: 800; height: 600\n"
+            "  property alias nav: nav; property alias segments: segments\n"
+            "  property alias tabs: tabs; property alias progress: progress\n"
+            "  property alias activity: activity; property alias empty: empty\n"
+            "  KetNavItem { id: nav; text: \"Files\"; iconName: \"folder\"; count: 3;"
+            "               checked: true }\n"
+            "  KetKbd { text: \"⌘K\" }\n"
+            "  KetSegmentedControl { id: segments; options: [\"Claude\", \"Codex\"] }\n"
+            "  KetTabBar { id: tabs\n"
+            "    KetTabButton { text: \"README.md\"; iconName: \"file\"; closable: true }\n"
+            "    KetTabButton { text: \"main.cpp\" } }\n"
+            "  KetProgressBar { id: progress; value: 0.4 }\n"
+            "  KetActivityIndicator { id: activity }\n"
+            "  KetEmptyState { id: empty; iconName: \"success\"; title: \"Clean\";"
+            "                  message: \"Nothing to commit.\"; actionText: \"Back\" }\n"
+            "}\n"));
+        QVERIFY(root);
+        auto* nav = root->property("nav").value<QQuickItem*>();
+        QCOMPARE(nav->implicitHeight(), 34.0);
+        auto* navBackground = nav->property("background").value<QQuickItem*>();
+        QCOMPARE(navBackground->property("color").value<QColor>(),
+                 Tokens::color(u"accent-subtle", Theme::Light));
+        auto* segments = root->property("segments").value<QQuickItem*>();
+        QMetaObject::invokeMethod(segments, "select", Q_ARG(QVariant, 1));
+        QCOMPARE(segments->property("currentIndex").toInt(), 1);
+        QCOMPARE(root->property("tabs").value<QQuickItem*>()->implicitHeight(), 41.0);
+        QCOMPARE(root->property("progress").value<QQuickItem*>()->implicitHeight(), 6.0);
+        auto* activity = root->property("activity").value<QQuickItem*>();
+        QCOMPARE(activity->implicitWidth(), 15.0);
+        QVERIFY(root->property("empty").value<QQuickItem*>()->implicitHeight() > 35);
+    }
+
     std::unique_ptr<QObject> create(const QByteArray& source) {
         QQmlComponent component(&engine_);
         component.setData(source, QUrl()); // a local URL loads imports synchronously

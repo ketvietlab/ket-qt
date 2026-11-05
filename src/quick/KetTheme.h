@@ -77,6 +77,22 @@ class QuickTheme final : public QObject {
     Q_INVOKABLE QVariantMap menuItemRecipe(bool dark, qreal zoom, bool highlighted, bool enabled,
                                            bool danger) const;
     Q_INVOKABLE QVariantMap tooltipRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap navItemRecipe(bool dark, qreal zoom, bool selected, bool hovered,
+                                          bool pressed, bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap kbdRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap segmentedRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap segmentRecipe(bool dark, qreal zoom, bool selected, bool hovered,
+                                          bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap tabBarRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap tabRecipe(bool dark, qreal zoom, bool selected, bool hovered,
+                                      bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap progressRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap activityRecipe(bool dark, qreal zoom, const QColor& color) const;
+    // [height, opacity] of one activity bar `elapsedMs` into the animation, in the units of
+    // `recipe` (an activityRecipe() result, already scaled).
+    Q_INVOKABLE QVariantList activityBarFrame(const QVariantMap& recipe, int bar,
+                                              qreal elapsedMs) const;
+    Q_INVOKABLE QVariantMap emptyStateRecipe(bool dark, qreal zoom) const;
     // Két Symbol (ket::Icons): the qrc URL of the master for a `box` (already zoomed), the
     // logical size the drawing occupies and its whole-device-pixel offset in the box.
     Q_INVOKABLE QString iconSource(const QString& code, qreal box, int weight) const;

@@ -9,12 +9,15 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
 - `KetQt::Icons`: Két Symbol icons with their size and weight rules (`ket::Icons`).
 - `KetQt::Widgets`: `ket::Style` (Fusion-based), `ket::Button`, `ket::IconButton`,
   `ket::Badge`, `ket::Tag`, `ket::Icon`, `ket::TextField`, `ket::Select`, `ket::Checkbox`,
-  `ket::Radio`, `ket::Choice`, `ket::FieldRow`, `ket::Banner`, `ket::Toast`, `ket::Dialog`;
-  `ket::Style` also draws every `QMenu`, the select popup and `QToolTip`.
+  `ket::Radio`, `ket::Choice`, `ket::FieldRow`, `ket::Banner`, `ket::Toast`, `ket::Dialog`,
+  `ket::NavItem`, `ket::Kbd`, `ket::SegmentedControl`, `ket::ActivityIndicator`,
+  `ket::EmptyState`; `ket::Style` also draws every `QMenu`, the select popup, `QToolTip`, top
+  `QTabBar`s and horizontal `QProgressBar`s.
 - `KetQt::Quick`: the QML module `Ket` with `KetTheme`, `KetButton`, `KetIconButton`,
   `KetBadge`, `KetTag`, `KetIcon`, `KetTextField`, `KetSelect`, `KetCheckbox`, `KetRadio`,
   `KetChoice`, `KetFieldRow`, `KetBanner`, `KetToast`, `KetDialog`, `KetMenu`, `KetMenuItem`,
-  `KetMenuSeparator`, `KetToolTip`.
+  `KetMenuSeparator`, `KetToolTip`, `KetNavItem`, `KetKbd`, `KetSegmentedControl`, `KetTabBar`,
+  `KetTabButton`, `KetProgressBar`, `KetActivityIndicator`, `KetEmptyState`.
 
 Components follow the new KetPlus desktop mock and are added in the order KetPlus uses
 them; see [docs/architecture.md](docs/architecture.md#component-scope-and-source).

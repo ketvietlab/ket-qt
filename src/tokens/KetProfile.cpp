@@ -81,6 +81,43 @@ Profile Profile::designSystem() {
     p.tooltipPaddingBlock = px(u"space-1-5");
     p.tooltipMaxWidth = px(u"space-16") * 5;
     p.tooltipDelayMs = 600;
+    p.navItemHeight = px(u"control-height-md");
+    p.navItemPadding = px(u"space-2");
+    p.navItemGap = px(u"space-2");
+    p.navItemRadius = px(u"radius-sm");
+    p.navItemFontPixels = px(u"text-sm");
+    p.navItemActiveWeight = qRound(Tokens::number(u"weight-semibold"));
+    p.navCountHeight = px(u"space-5");
+    p.navCountPadding = px(u"space-1");
+    p.navCountRadius = px(u"radius-sm");
+    p.kbdFontPixels = px(u"text-xs");
+    p.segmentedPadding = px(u"space-0-5");
+    p.segmentedRadius = px(u"radius-md");
+    p.segmentRadius = px(u"radius-sm");
+    p.segmentPaddingInline = px(u"space-3");
+    p.segmentPaddingBlock = px(u"space-1");
+    p.segmentFontPixels = px(u"text-sm");
+    p.tabHeight = px(u"space-10");
+    p.tabPaddingInline = px(u"space-4");
+    p.tabGap = px(u"space-2");
+    p.tabIconSize = 16;
+    p.tabIndicator = 2;
+    p.tabFontPixels = px(u"text-sm");
+    p.progressHeight = px(u"space-1-5");
+    p.progressBusyDurationMs = 1500;
+    p.activityBarWidth = 3;
+    p.activityBarHeight = 10;
+    p.activityBarMinHeight = 4;
+    p.activityGap = 3;
+    p.activityDurationMs = 1100;
+    p.activityStaggerMs = 150;
+    p.activityMinOpacity = 0.5;
+    p.emptyIconSize = 32;
+    p.emptyGap = px(u"space-3");
+    p.emptyTitlePixels = px(u"text-xl");
+    p.emptyMessagePixels = px(u"text-md");
+    p.emptyMessageMaxWidth = px(u"space-16") * 6;
+    p.emptyLineHeight = 1.6;
     return p;
 }
 
@@ -152,6 +189,43 @@ Profile Profile::ketPlus() {
     p.tooltipPaddingBlock = 6;
     p.tooltipMaxWidth = 360;
     p.tooltipDelayMs = 600;
+    p.navItemHeight = 34; // `.nav-item`
+    p.navItemPadding = 9;
+    p.navItemGap = 9;
+    p.navItemRadius = 5;
+    p.navItemFontPixels = px(u"text-md"); // kp-text-base, 14 px
+    p.navItemActiveWeight = 550;          // `.nav-item.is-active`
+    p.navCountHeight = 19;                // `.nav-count`: 17 px line plus the border
+    p.navCountPadding = 6;                // 5 px plus the border
+    p.navCountRadius = 4;
+    p.kbdFontPixels = px(u"text-xs"); // `kbd` at kp-text-sm, 12 px
+    p.segmentedPadding = 4;           // `.pill-tabs` 3 px plus the border
+    p.segmentedRadius = 6;
+    p.segmentRadius = 4;
+    p.segmentPaddingInline = 12;
+    p.segmentPaddingBlock = 5;
+    p.segmentFontPixels = px(u"text-sm"); // kp-text-md, 13 px
+    p.tabHeight = 41;                     // `.file-tabs`
+    p.tabPaddingInline = 15;
+    p.tabGap = 8;
+    p.tabIconSize = 13;
+    p.tabIndicator = 2;               // the active tab's bottom border
+    p.tabFontPixels = px(u"text-xs"); // kp-text-sm, 12 px
+    p.progressHeight = 6;             // `.modal progress`
+    p.progressBusyDurationMs = 1500;
+    p.activityBarWidth = 3; // `.working-bars i`
+    p.activityBarHeight = 10;
+    p.activityBarMinHeight = 4; // @keyframes working
+    p.activityGap = 3;
+    p.activityDurationMs = 1100;
+    p.activityStaggerMs = 150; // nth-child delays
+    p.activityMinOpacity = 0.5;
+    p.emptyIconSize = 35; // `.empty-state > .icon`
+    p.emptyGap = 14;
+    p.emptyTitlePixels = 21;               // `h2`, 18 px at the 15 px interface scale
+    p.emptyMessagePixels = px(u"text-md"); // kp-text-base
+    p.emptyMessageMaxWidth = 390;
+    p.emptyLineHeight = 1.8;
     return p;
 }
 
