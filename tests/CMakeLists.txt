@@ -21,4 +21,7 @@ if(Python3_Interpreter_FOUND)
     # The committed token table must match a fresh run of the generator.
     add_test(NAME generated_tokens_current
         COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/tools/generate_tokens.py" --check)
+    # The committed Két Symbol qrc and name table must match the vendored icons.
+    add_test(NAME generated_icons_current
+        COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/tools/generate_icons.py" --check)
 endif()
