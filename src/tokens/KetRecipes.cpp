@@ -8,64 +8,99 @@ QColor token(QStringView name, Theme theme) { return Tokens::color(name, theme);
 
 QColor transparent() { return QColor(Qt::transparent); }
 
+// Mock literals without a design-system token.
+constexpr qreal kDisabledOpacity = 0.48; // `button:disabled`
+constexpr qreal kButtonGap = 7;          // `.btn` gap
+// Icon boxes: the mock's `.icon` (17 px) and compact header icons (14 px). ket::Icons draws
+// the 16 px Két Symbol master centred in the 17 px box and scales it down only for 14 px.
+constexpr qreal kIconSize = 17;
+constexpr qreal kSmallIconSize = 14;
+constexpr qreal kIconButtonSize = 30; // `.icon-btn`
+constexpr qreal kTagHeight = 18;      // `.conversation-tag`
+constexpr qreal kTagRadius = 4;
+constexpr qreal kTagMaxWidth = 104;
+constexpr qreal kTagPadding = 6;
+constexpr qreal kTagOverflowPadding = 5; // `.tag-more`
+constexpr qreal kTagTint = 0.13;         // color-mix(tag 13%, transparent)
+constexpr qreal kTagHoverTint = 0.22;
+
 struct Palette {
-    QStringView rest;
+    QStringView rest; // empty: transparent
     QStringView hover;
     QStringView pressed;
     QStringView border; // empty: no border
+    QStringView hoverBorder;
     QStringView text;
 };
 
 Palette paletteFor(ButtonVariant variant) {
     switch (variant) {
     case ButtonVariant::Primary:
-        return {u"action-primary-bg",
-                u"action-primary-hover",
-                u"action-primary-active",
-                {},
+        return {u"action-primary-bg", u"action-primary-hover", u"action-primary-active", {}, {},
                 u"action-primary-ink"};
     case ButtonVariant::Secondary:
-        return {u"interactive-bg", u"interactive-hover", u"interactive-active", u"border-default",
-                u"text-main"};
+        return {u"interactive-bg", u"interactive-hover", u"interactive-active",
+                u"border-default", u"border-strong",     u"text-main"};
     case ButtonVariant::Ghost:
-        return {{}, u"interactive-hover", u"interactive-active", {}, u"text-main"};
+        return {{}, u"surface-hover", u"interactive-active", {}, {}, u"text-main"};
     case ButtonVariant::Danger:
-        return {u"danger-bg", u"danger-bg", u"danger-bg", u"danger-border", u"danger"};
+        return {u"interactive-bg", u"interactive-hover", u"interactive-active",
+                u"danger-border",  u"danger-border",     u"danger"};
+    case ButtonVariant::GhostDanger:
+        return {
+            {},       u"surface-hover", u"interactive-active", u"danger-border", u"danger-border",
+            u"danger"};
     }
     return {};
+}
+
+QColor optionalToken(QStringView name, Theme theme) {
+    return name.isEmpty() ? transparent() : token(name, theme);
+}
+
+ButtonRecipe paint(const Palette& palette, const InteractionState& state, Theme theme) {
+    ButtonRecipe recipe;
+    const bool live = state.enabled;
+    QStringView fill = palette.rest;
+    if (live && state.pressed)
+        fill = palette.pressed;
+    else if (live && state.hovered)
+        fill = palette.hover;
+    recipe.background = optionalToken(fill, theme);
+    recipe.border = optionalToken(
+        live && (state.hovered || state.pressed) ? palette.hoverBorder : palette.border, theme);
+    recipe.text = token(palette.text, theme);
+    if (!live)
+        recipe.opacity = kDisabledOpacity;
+    recipe.focusRing = state.focused && live ? token(u"focus-border", theme) : transparent();
+    recipe.radius = Tokens::px(u"radius-sm");
+    recipe.fontWeight = qRound(Tokens::number(u"weight-normal"));
+    return recipe;
 }
 
 } // namespace
 
 ButtonRecipe buttonRecipe(ButtonVariant variant, ControlSize size, const InteractionState& state,
                           Theme theme) {
-    const Palette palette = paletteFor(variant);
-    ButtonRecipe recipe;
-    QStringView fill = palette.rest;
-    if (state.enabled && state.pressed)
-        fill = palette.pressed;
-    else if (state.enabled && state.hovered)
-        fill = palette.hover;
-    recipe.background = fill.isEmpty() ? transparent() : token(fill, theme);
-    recipe.border = palette.border.isEmpty() ? transparent() : token(palette.border, theme);
-    recipe.text = token(palette.text, theme);
-    if (variant == ButtonVariant::Danger && state.enabled && (state.hovered || state.pressed))
-        recipe.text = token(u"danger-hover", theme);
-    if (!state.enabled) {
-        // Disabled controls keep their shape and fade, as the design system's pending state does.
-        recipe.opacity = Tokens::number(u"opacity-pending");
-    }
-    recipe.focusRing =
-        state.focused && state.enabled ? token(u"focus-border", theme) : transparent();
-    recipe.height =
-        Tokens::px(size == ControlSize::Small ? u"control-height-sm" : u"control-height-md");
-    recipe.radius = Tokens::px(u"control-radius");
-    recipe.paddingInline =
-        Tokens::px(size == ControlSize::Small ? u"space-2-5" : u"control-padding-inline");
-    recipe.iconSize = 16;
-    recipe.spacing = Tokens::px(u"space-1-5");
-    recipe.fontPixels = Tokens::px(u"action-font-size");
-    recipe.fontWeight = qRound(Tokens::number(u"weight-medium"));
+    ButtonRecipe recipe = paint(paletteFor(variant), state, theme);
+    const bool small = size == ControlSize::Small;
+    recipe.height = Tokens::px(small ? u"control-height-sm" : u"control-height-md");
+    // The mock's 11 px padding plus its 1 px border.
+    recipe.paddingInline = Tokens::px(small ? u"space-2-5" : u"control-padding-inline");
+    recipe.iconSize = small ? kSmallIconSize : kIconSize;
+    recipe.spacing = kButtonGap;
+    // `--kp-text-base` at the default 15 px interface size.
+    recipe.fontPixels = Tokens::px(small ? u"text-sm" : u"text-md");
+    return recipe;
+}
+
+ButtonRecipe iconButtonRecipe(ControlSize size, const InteractionState& state, Theme theme) {
+    const Palette palette{{}, u"surface-hover", u"interactive-active", {}, {}, u"text-secondary"};
+    ButtonRecipe recipe = paint(palette, state, theme);
+    const bool small = size == ControlSize::Small;
+    recipe.height = small ? Tokens::px(u"control-height-xs") : kIconButtonSize;
+    recipe.iconSize = small ? kSmallIconSize : kIconSize;
+    recipe.fontPixels = Tokens::px(u"text-md");
     return recipe;
 }
 
@@ -73,8 +108,8 @@ BadgeRecipe badgeRecipe(BadgeTone tone, Theme theme) {
     BadgeRecipe recipe;
     switch (tone) {
     case BadgeTone::Neutral:
-        recipe.background = token(u"surface-hover", theme);
-        recipe.border = token(u"border-default", theme);
+        recipe.background = token(u"panel-bg", theme);
+        recipe.border = token(u"panel-border", theme);
         recipe.text = token(u"text-secondary", theme);
         break;
     case BadgeTone::Accent:
@@ -103,10 +138,30 @@ BadgeRecipe badgeRecipe(BadgeTone tone, Theme theme) {
         recipe.text = token(u"badge-danger-text", theme);
         break;
     }
-    recipe.height = Tokens::px(u"line-sm");
+    // `.badge`: a 20 px line inside a 1 px border, 7 px padding plus the border.
+    recipe.height = Tokens::px(u"line-sm") + 2;
     recipe.radius = Tokens::px(u"radius-sm");
-    recipe.paddingInline = Tokens::px(u"space-1-5");
+    recipe.paddingInline = Tokens::px(u"space-2");
     recipe.fontPixels = Tokens::px(u"text-xs");
+    recipe.fontWeight = qRound(Tokens::number(u"weight-normal"));
+    return recipe;
+}
+
+TagRecipe tagRecipe(const QColor& color, bool overflow, bool hovered, Theme theme) {
+    TagRecipe recipe;
+    if (overflow) {
+        recipe.background = token(u"surface-hover", theme);
+        recipe.text = token(u"text-muted", theme);
+    } else {
+        recipe.background = color;
+        recipe.background.setAlphaF(float(color.alphaF() * (hovered ? kTagHoverTint : kTagTint)));
+        recipe.text = token(u"text-secondary", theme);
+    }
+    recipe.height = kTagHeight;
+    recipe.radius = kTagRadius;
+    recipe.paddingInline = overflow ? kTagOverflowPadding : kTagPadding;
+    recipe.maxWidth = kTagMaxWidth;
+    recipe.fontPixels = Tokens::px(u"text-2xs");
     recipe.fontWeight = qRound(Tokens::number(u"weight-medium"));
     return recipe;
 }
@@ -133,6 +188,17 @@ QVariantMap toVariantMap(const BadgeRecipe& r) {
             {QStringLiteral("height"), r.height},
             {QStringLiteral("radius"), r.radius},
             {QStringLiteral("paddingInline"), r.paddingInline},
+            {QStringLiteral("fontPixels"), r.fontPixels},
+            {QStringLiteral("fontWeight"), r.fontWeight}};
+}
+
+QVariantMap toVariantMap(const TagRecipe& r) {
+    return {{QStringLiteral("background"), r.background},
+            {QStringLiteral("text"), r.text},
+            {QStringLiteral("height"), r.height},
+            {QStringLiteral("radius"), r.radius},
+            {QStringLiteral("paddingInline"), r.paddingInline},
+            {QStringLiteral("maxWidth"), r.maxWidth},
             {QStringLiteral("fontPixels"), r.fontPixels},
             {QStringLiteral("fontWeight"), r.fontWeight}};
 }

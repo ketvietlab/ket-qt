@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 import QtQuick
 import QtQuick.Controls.Basic as Basic
+import QtQuick.Controls.impl as Impl
 import Ket
 
 // Design-system button for Qt Quick; it draws ket::buttonRecipe, as ket::Button does.
+// Icons are tinted with the text colour, like the mock's `currentColor` icons.
 Basic.Button {
     id: control
 
@@ -12,6 +14,10 @@ Basic.Button {
     // A fixed state such as { hovered: true } for documentation pages and screenshot tests;
     // null follows the live interaction state.
     property var previewState: null
+    // A Két Symbol code drawn by KetIcon; icon.source still takes any other monochrome icon.
+    property string iconName
+    property int iconWeight: KetTheme.IconWeight.Light
+    readonly property bool hasIcon: iconName !== "" || icon.source.toString() !== ""
     readonly property var recipe: previewState
         ? KetTheme.buttonRecipe(KetTheme.dark, KetTheme.zoom, variant, controlSize,
                                 !!previewState.hovered, !!previewState.pressed,
@@ -35,20 +41,31 @@ Basic.Button {
     icon.height: recipe.iconSize
 
     contentItem: Row {
-        spacing: control.icon.source.toString() !== "" && control.text !== "" ? control.spacing : 0
+        spacing: control.hasIcon && control.text !== "" ? control.spacing : 0
 
-        Image {
+        KetIcon {
             anchors.verticalCenter: parent.verticalCenter
-            visible: control.icon.source.toString() !== ""
+            visible: control.iconName !== ""
+            name: control.iconName
+            weight: control.iconWeight
+            box: control.recipe.iconSize
+            color: control.recipe.text
+        }
+
+        Impl.IconImage {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: control.iconName === "" && control.icon.source.toString() !== ""
             source: control.icon.source
             sourceSize.width: control.icon.width
             sourceSize.height: control.icon.height
             width: visible ? control.icon.width : 0
             height: control.icon.height
+            color: control.recipe.text
         }
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
+            visible: control.text !== ""
             text: control.text
             font: control.font
             color: control.recipe.text

@@ -4,7 +4,10 @@
 flowchart LR
   DS["Két DS tokens.css<br/>(pinned copy)"] --> GEN["generate_tokens.py"]
   GEN --> TOK["KetQt::Tokens<br/>table · Appearance · recipes"]
-  TOK --> WID["KetQt::Widgets<br/>ket::Style · Button · Badge"]
+  TOK --> ICN["KetQt::Icons<br/>Két Symbol"]
+  ICN --> WID
+  ICN --> QK
+  TOK --> WID["KetQt::Widgets<br/>ket::Style · components"]
   TOK --> QK["KetQt::Quick<br/>module Ket · KetTheme"]
   WID --> APPS["KetPlus · KétChat"]
   QK --> APPS
@@ -15,8 +18,9 @@ flowchart LR
 | Target | Contents | Qt modules |
 |---|---|---|
 | `KetQt::Tokens` | `ket::Tokens` (generated table), `ket::Appearance`, `ket::*Recipe` | Core, Gui |
-| `KetQt::Widgets` | `ket::Style`, `ket::Button`, `ket::Badge` | Widgets |
-| `KetQt::Quick` + `KetQt::QuickPlugin` | QML module `Ket`: `KetTheme`, `KetButton`, `KetBadge` | Qml, Quick, QuickControls2 |
+| `KetQt::Icons` | `ket::Icons`: Két Symbol resources, size and weight rules | Gui, Svg |
+| `KetQt::Widgets` | `ket::Style`, `ket::Button`, `ket::IconButton`, `ket::Badge`, `ket::Tag`, `ket::Icon` | Widgets |
+| `KetQt::Quick` + `KetQt::QuickPlugin` | QML module `Ket`: `KetTheme`, `KetButton`, `KetIconButton`, `KetBadge`, `KetTag`, `KetIcon` | Qml, Quick, QuickControls2 |
 
 ## Tokens
 
@@ -44,17 +48,45 @@ have an appearance setting forward it here instead of keeping a second theme.
 In QML, pass `KetTheme.dark` and `KetTheme.zoom` to recipe functions and `KetTheme.px()`
 so bindings re-evaluate; recipes returned to QML are already scaled.
 
+## Component scope and source
+
+Components are added in the order the new KetPlus desktop mock uses them
+(`ketplus.ketatlas` in `ketvietlab/ketplus`, built on the same Két DS release). A recipe
+follows the mock's composition: which tokens fill, border and colour each state. Where the
+mock uses a literal with no token (for example the 7 px `.btn` gap, the 30 px `.icon-btn`,
+the 0.48 disabled opacity or the 18 px tag), the recipe keeps it as a named constant next
+to its source rule in `KetRecipes.cpp`; when the design system adds a token, the constant
+is replaced by it. Font sizes are the mock's at its default 15 px interface size.
+
+Icons are Két Symbol 0.11.0 (`third_party/ket-symbol`, CC BY 4.0, separate files with
+their own notice), compiled into `KetQt::Icons` by `tools/generate_icons.py`:
+
+- `ket::Icons` names icons by Két code; `codeForLucide()` maps KetPlus' Lucide names.
+- A box up to 18 px draws the 16 px master, 19-22 px the 20 px master and 23 px or more the
+  24 px master, at its own size and centred on whole device pixels (`offset()`). Only a box
+  smaller than its master, such as the 14 px compact size, scales it down.
+- Light is the default weight; Regular is for emphasis. A filled variant never marks
+  selection.
+- `ket::Icons::icon()` is a `QIcon` with those rules; `ket::Icon` and `KetIcon` draw a
+  standalone icon. Components draw icons in their text colour (the mock's `currentColor`):
+  rendered at size × device pixel ratio and filled with `SourceIn`, which keeps the alpha.
+  `KetButton` and `KetIconButton` take a Két code as `iconName`; `icon.source` still takes
+  any other monochrome icon.
+
+Colours that are user data, such as tag colours, are parameters.
+
+| Done | Next, from the mock |
+|---|---|
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon | TextField and search field, Select, Checkbox and Choice card, Field row, Banner, Toast, Dialog, Context menu, Tooltip, sidebar row, tabs, progress and spinner, empty state, kbd |
+
 ## Adding a component
 
-1. Add a recipe (`KetRecipes.h`) built only from tokens, with a token test.
+1. Add a recipe (`KetRecipes.h`) built from tokens, with a token test.
 2. Draw it in `src/widgets/` and `src/quick/qml/`; neither layer chooses colours itself.
 3. Add a Widgets test and a Quick test that compare against the same recipe.
 4. Add it to a kitchensink page (`examples/kitchensink`) in every variant, size and pinned
    state, and check light, dark and 125% zoom
    (`--page=<id> --dark --zoom=1.25 --screenshot=<file>`).
-
-Planned next, from the KetPlus and KétChat inventories: IconButton, TextField, Checkbox,
-Switch, Menu, Tooltip, Tag (label-only chip), ListRow (two-line sidebar row), Dialog.
 
 ## Consuming KetQt
 
@@ -63,7 +95,8 @@ Switch, Menu, Tooltip, Tag (label-only chip), ListRow (two-line sidebar row), Di
 - A Widgets app calls `ket::Style::install(app)` once after creating `QApplication`.
 - A QML app links `KetQt::Quick` and `KetQt::QuickPlugin`, adds
   `Q_IMPORT_QML_PLUGIN(KetPlugin)` once and writes `import Ket`.
-- `cmake --install` also installs `KetQt::Tokens` and `KetQt::Widgets` as a CMake package
+- `cmake --install` also installs `KetQt::Tokens`, `KetQt::Icons` and `KetQt::Widgets`, with the
+  Két Symbol notice and licence, as a CMake package
   (`find_package(KetQt)`). The static QML module is not installed yet.
 
 ## Fonts

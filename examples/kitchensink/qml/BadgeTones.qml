@@ -7,7 +7,7 @@ Row {
     spacing: KetTheme.px(KetTheme.t.space15, KetTheme.zoom)
 
     KetBadge { text: "Neutral" }
-    KetBadge { text: "Accent"; tone: KetTheme.BadgeTone.Accent }
+    KetBadge { text: "Accent (brand)"; tone: KetTheme.BadgeTone.Accent }
     KetBadge { text: "Info"; tone: KetTheme.BadgeTone.Info }
     KetBadge { text: "Success"; tone: KetTheme.BadgeTone.Success }
     KetBadge { text: "Warning"; tone: KetTheme.BadgeTone.Warning }

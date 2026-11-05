@@ -9,10 +9,12 @@ qt_add_executable(ketqt_kitchensink
 qt_add_qml_module(ketqt_kitchensink
     URI KetKitchenSink
     VERSION 1.0
-    QML_FILES qml/ButtonMatrix.qml qml/ButtonLive.qml qml/BadgeTones.qml
+    QML_FILES qml/ButtonMatrix.qml qml/ButtonLive.qml qml/IconButtonMatrix.qml qml/IconButtonLive.qml
+              qml/BadgeTones.qml qml/TagSamples.qml
+              qml/IconGallery.qml
     RESOURCE_PREFIX /qt/qml
 )
-foreach(file ButtonMatrix ButtonLive BadgeTones)
+foreach(file ButtonMatrix ButtonLive IconButtonMatrix IconButtonLive BadgeTones TagSamples IconGallery)
     set_source_files_properties(qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
 endforeach()
 set_target_properties(ketqt_kitchensink PROPERTIES

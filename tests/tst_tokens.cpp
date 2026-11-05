@@ -82,14 +82,76 @@ class TokensTest final : public QObject {
                  28.0);
         QCOMPARE(buttonRecipe(ButtonVariant::Secondary, ControlSize::Medium, disabled, Theme::Light)
                      .opacity,
-                 Tokens::number(u"opacity-pending"));
+                 0.48);
+    }
+
+    // The KetPlus mock's `.btn` rules: 5 px radius, strong border on hover, ghost hover on
+    // surface-hover, and danger as a secondary button with danger text and border.
+    void buttonRecipesFollowTheKetPlusMock() {
+        const InteractionState rest;
+        const InteractionState hover{true, false, true, false};
+        const ButtonRecipe secondary =
+            buttonRecipe(ButtonVariant::Secondary, ControlSize::Medium, rest, Theme::Light);
+        QCOMPARE(secondary.radius, Tokens::px(u"radius-sm"));
+        QCOMPARE(secondary.border, Tokens::color(u"border-default", Theme::Light));
+        QCOMPARE(secondary.fontWeight, 400);
+        QCOMPARE(secondary.spacing, 7.0);
+        QCOMPARE(secondary.iconSize, 17.0);
+        QCOMPARE(
+            buttonRecipe(ButtonVariant::Secondary, ControlSize::Medium, hover, Theme::Light).border,
+            Tokens::color(u"border-strong", Theme::Light));
+        QCOMPARE(
+            buttonRecipe(ButtonVariant::Ghost, ControlSize::Medium, hover, Theme::Dark).background,
+            Tokens::color(u"surface-hover", Theme::Dark));
+        const ButtonRecipe danger =
+            buttonRecipe(ButtonVariant::Danger, ControlSize::Medium, hover, Theme::Light);
+        QCOMPARE(danger.background, Tokens::color(u"interactive-hover", Theme::Light));
+        QCOMPARE(danger.border, Tokens::color(u"danger-border", Theme::Light));
+        QCOMPARE(danger.text, Tokens::color(u"danger", Theme::Light));
+        const ButtonRecipe ghostDanger =
+            buttonRecipe(ButtonVariant::GhostDanger, ControlSize::Medium, rest, Theme::Light);
+        QCOMPARE(ghostDanger.background.alpha(), 0);
+        QCOMPARE(ghostDanger.text, Tokens::color(u"danger", Theme::Light));
+    }
+
+    void iconButtonRecipesAreSquareAndMuted() {
+        const InteractionState rest;
+        const InteractionState pressed{true, true, true, false};
+        const ButtonRecipe medium = iconButtonRecipe(ControlSize::Medium, rest, Theme::Light);
+        QCOMPARE(medium.height, 30.0);
+        QCOMPARE(medium.background.alpha(), 0);
+        QCOMPARE(medium.border.alpha(), 0);
+        QCOMPARE(medium.text, Tokens::color(u"text-secondary", Theme::Light));
+        QCOMPARE(iconButtonRecipe(ControlSize::Medium, pressed, Theme::Light).background,
+                 Tokens::color(u"interactive-active", Theme::Light));
+        const ButtonRecipe small = iconButtonRecipe(ControlSize::Small, rest, Theme::Light);
+        QCOMPARE(small.height, Tokens::px(u"control-height-xs"));
+        QCOMPARE(small.iconSize, 14.0);
     }
 
     void badgeRecipesUseToneTokens() {
         const BadgeRecipe danger = badgeRecipe(BadgeTone::Danger, Theme::Dark);
         QCOMPARE(danger.text, Tokens::color(u"badge-danger-text", Theme::Dark));
         QCOMPARE(danger.background, Tokens::color(u"danger-bg", Theme::Dark));
-        QCOMPARE(danger.height, Tokens::px(u"line-sm"));
+        QCOMPARE(danger.height, Tokens::px(u"line-sm") + 2);
+        const BadgeRecipe neutral = badgeRecipe(BadgeTone::Neutral, Theme::Light);
+        QCOMPARE(neutral.background, Tokens::color(u"panel-bg", Theme::Light));
+        QCOMPARE(neutral.border, Tokens::color(u"panel-border", Theme::Light));
+        QCOMPARE(neutral.text, Tokens::color(u"text-secondary", Theme::Light));
+    }
+
+    void tagRecipesTintTheAppColour() {
+        const QColor blue(QStringLiteral("#2f6fde"));
+        const TagRecipe rest = tagRecipe(blue, false, false, Theme::Light);
+        QCOMPARE(rest.background.rgb(), blue.rgb());
+        QCOMPARE(rest.background.alpha(), qRound(0.13 * 255));
+        QCOMPARE(tagRecipe(blue, false, true, Theme::Light).background.alpha(), qRound(0.22 * 255));
+        QCOMPARE(rest.text, Tokens::color(u"text-secondary", Theme::Light));
+        QCOMPARE(rest.height, 18.0);
+        QCOMPARE(rest.fontPixels, Tokens::px(u"text-2xs"));
+        const TagRecipe more = tagRecipe(blue, true, false, Theme::Dark);
+        QCOMPARE(more.background, Tokens::color(u"surface-hover", Theme::Dark));
+        QCOMPARE(more.text, Tokens::color(u"text-muted", Theme::Dark));
     }
 
     void appearanceZoomRoundsToWholePixels() {

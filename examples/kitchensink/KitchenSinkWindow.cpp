@@ -31,7 +31,10 @@ const PageEntry kPages[] = {
     {"elevation", "Foundations", "Elevation", elevationPage},
     {"tokens", "Foundations", "All tokens", tokensPage},
     {"button", "Components", "Button", buttonPage},
+    {"icon-button", "Components", "Icon button", iconButtonPage},
     {"badge", "Components", "Badge", badgePage},
+    {"tag", "Components", "Tag", tagPage},
+    {"icons", "Components", "Icons", iconPage},
 };
 
 Theme theme() { return Appearance::instance().theme(); }

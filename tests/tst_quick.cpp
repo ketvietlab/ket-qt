@@ -59,7 +59,58 @@ class QuickTest final : public QObject {
         QVERIFY(badge);
         QCOMPARE(badge->property("color").value<QColor>(),
                  Tokens::color(u"danger-bg", Theme::Light));
-        QCOMPARE(badge->implicitHeight(), Tokens::px(u"line-sm"));
+        QCOMPARE(badge->implicitHeight(), Tokens::px(u"line-sm") + 2);
+    }
+
+    void iconButtonMatchesTheWidgetsRecipe() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "KetIconButton { text: \"Close\"; previewState: ({ hovered: true }) }\n"));
+        auto* button = qobject_cast<QQuickItem*>(root.get());
+        QVERIFY(button);
+        const ButtonRecipe recipe =
+            iconButtonRecipe(ControlSize::Medium, {true, false, true, false}, Theme::Light);
+        QCOMPARE(button->implicitWidth(), recipe.height);
+        QCOMPARE(button->implicitHeight(), recipe.height);
+        auto* background = button->property("background").value<QQuickItem*>();
+        QCOMPARE(background->property("color").value<QColor>(), recipe.background);
+        auto* icon = button->property("contentItem").value<QQuickItem*>();
+        QCOMPARE(icon->property("color").value<QColor>(), recipe.text);
+    }
+
+    void ketIconPicksTheMaster() {
+        std::unique_ptr<QObject> root = create(
+            QByteArrayLiteral("import QtQuick\nimport Ket\n"
+                              "KetIcon { name: KetTheme.iconForLucide(\"x\"); size: 17 }\n"));
+        auto* icon = qobject_cast<QQuickItem*>(root.get());
+        QVERIFY(icon);
+        QCOMPARE(icon->implicitWidth(), 17.0);
+        QCOMPARE(icon->property("drawSize").toReal(), 16.0);
+        QCOMPARE(icon->property("name").toString(), QStringLiteral("close"));
+        auto* image = icon->childItems().value(0);
+        QVERIFY(image);
+        QCOMPARE(image->property("source").toUrl(),
+                 QUrl(QStringLiteral("qrc:/ket-symbol/light/16/close.svg")));
+        QCOMPARE(image->property("color").value<QColor>(),
+                 Tokens::color(u"text-main", Theme::Light));
+        Appearance::instance().setZoom(1.25); // 21 px box: the 20 px master
+        QCOMPARE(image->property("source").toUrl(),
+                 QUrl(QStringLiteral("qrc:/ket-symbol/light/20/close.svg")));
+    }
+
+    void tagMatchesTheWidgetsRecipe() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "KetTag { text: \"A very long tag label that overflows\"; tagColor: \"#2f6fde\" }\n"));
+        auto* tag = qobject_cast<QQuickItem*>(root.get());
+        QVERIFY(tag);
+        const TagRecipe recipe = tagRecipe(QColor(0x2f6fde), false, false, Theme::Light);
+        QCOMPARE(tag->implicitHeight(), recipe.height);
+        QCOMPARE(tag->implicitWidth(), recipe.maxWidth);
+        QCOMPARE(tag->property("color").value<QColor>(), recipe.background);
+        tag->setProperty("previewHovered", true);
+        QCOMPARE(tag->property("color").value<QColor>(),
+                 tagRecipe(QColor(0x2f6fde), false, true, Theme::Light).background);
     }
 
     void themeExposesTokenMap() {
