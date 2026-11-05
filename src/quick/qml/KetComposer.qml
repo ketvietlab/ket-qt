@@ -30,6 +30,22 @@ Item {
     signal stopRequested()
     signal mentionQuery(string query)
     signal mentionClosed()
+    signal attachmentRemoved(int index, string name)
+
+    // Attachments (`.attachment-chips`) above the input: [{ name, icon }]. Removing a chip
+    // drops it from the list and emits attachmentRemoved().
+    property var attachments: []
+
+    function removeAttachment(index) {
+        if (index < 0 || index >= attachments.length)
+            return
+        const name = attachments[index].name
+        const next = attachments.slice()
+        next.splice(index, 1)
+        attachments = next
+        input.forceActiveFocus()
+        attachmentRemoved(index, name)
+    }
 
     function updateMention() {
         const found = input.selectedText === ""
@@ -139,6 +155,27 @@ Item {
         anchors.fill: parent
         anchors.margins: composer.recipe.ringWidth + 1 + composer.recipe.padding
         spacing: 0
+
+        Flow {
+            readonly property var chipRecipe: KetTheme.attachmentChipRecipe(KetTheme.dark,
+                                                                            KetTheme.zoom, false)
+            Layout.fillWidth: true
+            Layout.bottomMargin: visible ? chipRecipe.rowPaddingTop : 0
+            visible: composer.attachments.length > 0
+            spacing: chipRecipe.rowGap
+
+            Repeater {
+                model: composer.attachments
+
+                KetAttachmentChip {
+                    required property var modelData
+                    required property int index
+                    name: modelData.name
+                    iconName: modelData.icon || "file"
+                    onRemoveRequested: composer.removeAttachment(index)
+                }
+            }
+        }
 
         RowLayout {
             spacing: KetTheme.px(KetTheme.t.space1, KetTheme.zoom)

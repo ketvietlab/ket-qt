@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KitchenSinkWindow.h"
 
+#include "ChatPages.h"
 #include "ComponentPages.h"
 #include "ConversationPages.h"
 #include "FormPages.h"
@@ -45,6 +46,7 @@ const PageEntry kPages[] = {
     {"navigation", "Components", "Navigation", navigationPage},
     {"conversation", "Components", "Conversation", conversationPage},
     {"rich", "Components", "Rich transcript", richPage},
+    {"chat", "Components", "Chat extras", chatPage},
 };
 
 Theme theme() { return Appearance::instance().theme(); }

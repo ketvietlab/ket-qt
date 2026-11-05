@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetTheme.h"
+#include "KetThemeDetail.h"
 
 #include "KetAppearance.h"
 #include "KetConversationRecipes.h"
@@ -17,14 +18,9 @@
 namespace ket {
 namespace {
 
-Theme themeOf(bool dark) { return dark ? Theme::Dark : Theme::Light; }
-
-void scaleLengths(QVariantMap& recipe, qreal zoom, std::initializer_list<QStringView> keys) {
-    for (QStringView key : keys) {
-        const QString name = key.toString();
-        recipe.insert(name, Appearance::scale(recipe.value(name).toReal(), zoom));
-    }
-}
+using detail::kShadowLengths;
+using detail::scaleLengths;
+using detail::themeOf;
 
 static_assert(int(QuickTheme::ButtonVariant::GhostDanger) == int(ButtonVariant::GhostDanger));
 static_assert(int(QuickTheme::ControlSize::Medium) == int(ControlSize::Medium));
@@ -34,9 +30,6 @@ static_assert(int(QuickTheme::ToggleKind::Radio) == int(ket::ToggleKind::Radio))
 static_assert(int(QuickTheme::BannerTone::Danger) == int(ket::BannerTone::Danger));
 static_assert(int(QuickTheme::ConversationStatus::Stopped) ==
               int(ket::ConversationStatus::Stopped));
-
-constexpr std::initializer_list<QStringView> kShadowLengths = {u"shadowX", u"shadowY",
-                                                               u"shadowBlur"};
 
 } // namespace
 
