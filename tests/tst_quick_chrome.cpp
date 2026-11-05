@@ -83,6 +83,70 @@ class QuickChromeTest final : public QObject {
         QVERIFY(tree->implicitHeight() > 2 * 9 + 13);
     }
 
+    void surfacesLoadAndBehave() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "Window { width: 900; height: 700; visible: true\n"
+            "  property alias spotlight: spotlight; property alias diff: diff\n"
+            "  property alias bar: bar; property alias card: card; property alias file: file\n"
+            "  property alias changes: changes; property alias swatch: swatch\n"
+            "  property string chosen\n"
+            "  KetCommandPalette { id: spotlight\n"
+            "    groups: [{ title: \"Files\", items: [{ id: \"a\", title: \"A.qml\" },\n"
+            "                                        { id: \"b\", title: \"B.qml\" }] }]\n"
+            "    onActivated: item => chosen = item.id }\n"
+            "  KetFileRow { id: file; width: 280; text: \"src\"; folder: true; depth: 1 }\n"
+            "  KetChangedFiles { id: changes; y: 40; width: 400\n"
+            "    files: [{ name: \"a\", added: 2, removed: 1 }, { name: \"b\", added: 3 }] }\n"
+            "  KetDiffView { id: diff; y: 200; width: 400 }\n"
+            "  KetTaskBar { id: bar; y: 400; width: 500\n"
+            "    tasks: [{ title: \"npm run dev\" }, { title: \"ctest\", status: "
+            "KetTheme.TaskStatus.Failed }] }\n"
+            "  KetUpdateCard { id: card; y: 500; width: 400; title: \"1.8.0\"; progress: 40 }\n"
+            "  KetUpdatePill { y: 600; width: 240; text: \"Update\"; detail: \"1.8.0\" }\n"
+            "  KetThemeCard { x: 500; width: 220; text: \"Dark\"; previewDark: true }\n"
+            "  KetAccentSwatch { id: swatch; x: 500; y: 300 }\n"
+            "}\n"));
+        QVERIFY(root);
+        QObject* spotlight = root->property("spotlight").value<QObject*>();
+        QMetaObject::invokeMethod(spotlight, "open");
+        QTRY_VERIFY(spotlight->property("opened").toBool());
+        QCOMPARE(spotlight->property("itemCount").toInt(), 2);
+        QMetaObject::invokeMethod(spotlight, "setHighlightedIndex", Q_ARG(QVariant, -1));
+        QCOMPARE(spotlight->property("highlightedIndex").toInt(), 1); // wraps
+        QMetaObject::invokeMethod(spotlight, "activate", Q_ARG(QVariant, 1));
+        QCOMPARE(root->property("chosen").toString(), QStringLiteral("b"));
+        QTRY_VERIFY(!spotlight->property("visible").toBool());
+
+        auto* file = root->property("file").value<QQuickItem*>();
+        QCOMPARE(file->implicitHeight(), 28.0);
+        QVERIFY(file->property("checkable").toBool());
+        auto* changes = root->property("changes").value<QQuickItem*>();
+        QCOMPARE(changes->property("addedTotal").toInt(), 5);
+        QCOMPARE(changes->property("removedTotal").toInt(), 1);
+
+        auto* diff = root->property("diff").value<QQuickItem*>();
+        QVariant lines;
+        QMetaObject::invokeMethod(
+            diff, "parseUnified", Q_RETURN_ARG(QVariant, lines),
+            Q_ARG(QVariant, QStringLiteral("@@ -3 +3,2 @@\n a\n-b\n+c\n+d\n")));
+        const QVariantList parsed = lines.toList();
+        QCOMPARE(parsed.size(), 5);
+        QCOMPARE(parsed.at(2).toMap().value(QStringLiteral("kind")).toString(),
+                 QStringLiteral("remove"));
+        QCOMPARE(parsed.at(4).toMap().value(QStringLiteral("number")).toInt(), 5);
+        diff->setProperty("lines", lines);
+        QTRY_VERIFY(diff->implicitHeight() > 4 * 25);
+
+        auto* bar = root->property("bar").value<QQuickItem*>();
+        QTRY_VERIFY(bar->implicitHeight() > 2 * 34);
+        bar->setProperty("expanded", false);
+        QTRY_COMPARE(bar->implicitHeight(), 24.0);
+        auto* card = root->property("card").value<QQuickItem*>();
+        QVERIFY(card->implicitHeight() > 0);
+        QCOMPARE(root->property("swatch").value<QQuickItem*>()->implicitWidth(), 31.0);
+    }
+
   private:
     std::unique_ptr<QObject> create(const QByteArray& source) {
         QQmlComponent component(&engine_);

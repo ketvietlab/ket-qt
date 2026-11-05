@@ -12,6 +12,7 @@
 #include "NavigationPages.h"
 #include "OverlayPages.h"
 #include "RichPages.h"
+#include "SurfacePages.h"
 
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -49,6 +50,7 @@ const PageEntry kPages[] = {
     {"rich", "Components", "Rich transcript", richPage},
     {"chat", "Components", "Chat extras", chatPage},
     {"controls", "Components", "Controls and chrome", controlPage},
+    {"surfaces", "Components", "Surfaces", surfacePage},
 };
 
 Theme theme() { return Appearance::instance().theme(); }

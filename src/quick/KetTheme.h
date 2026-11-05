@@ -44,6 +44,8 @@ class QuickTheme final : public QObject {
     Q_ENUM(BannerTone)
     enum class ConversationStatus { NotStarted, Working, NeedsInput, Error, Completed, Stopped };
     Q_ENUM(ConversationStatus)
+    enum class TaskStatus { Running, Stopping, Completed, Failed, Stopped };
+    Q_ENUM(TaskStatus)
 
     explicit QuickTheme(QObject* parent = nullptr);
     static QuickTheme* create(QQmlEngine*, QJSEngine*);
@@ -155,6 +157,24 @@ class QuickTheme final : public QObject {
     Q_INVOKABLE QVariantMap statusBarRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap breadcrumbRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap paneHeaderRecipe(bool dark, qreal zoom) const;
+
+    // Surfaces (KetSurfaceRecipes).
+    Q_INVOKABLE QVariantMap commandPaletteRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap commandResultRecipe(bool dark, qreal zoom, bool highlighted) const;
+    Q_INVOKABLE QVariantMap fileRowRecipe(bool dark, qreal zoom, bool active, bool hovered,
+                                          bool pressed, bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap changedFilesRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap diffRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap taskRowRecipe(bool dark, qreal zoom, int status, bool current) const;
+    Q_INVOKABLE QVariantMap taskBarRecipe(bool dark, qreal zoom, bool hovered, bool pressed,
+                                          bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap updateCardRecipe(bool dark, qreal zoom, bool ready) const;
+    Q_INVOKABLE QVariantMap updatePillRecipe(bool dark, qreal zoom, bool hovered, bool pressed,
+                                             bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap themeCardRecipe(bool dark, qreal zoom, bool selected, bool previewDark,
+                                            bool hovered, bool pressed, bool enabled,
+                                            bool focused) const;
+    Q_INVOKABLE QVariantMap accentSwatchRecipe(bool dark, qreal zoom) const;
 
   signals:
     void themeChanged();

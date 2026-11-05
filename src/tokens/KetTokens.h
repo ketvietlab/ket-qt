@@ -36,6 +36,9 @@ class Tokens final {
     [[nodiscard]] static QStringList fontFamilies(QStringView name);
     // The first family of the stack that is installed, or an empty string (use the platform font).
     [[nodiscard]] static QString availableFamily(QStringView name);
+    // The installed family for the first of `families` that is installed. Names match without
+    // regard to case or accents: the KÉT Sans files register as "KET Sans".
+    [[nodiscard]] static QString installedFamily(const QStringList& families);
 
     // Every token as camelCase keys ("page-bg" -> "pageBg"): QColor, qreal, int or QString.
     [[nodiscard]] static QVariantMap map(Theme theme);

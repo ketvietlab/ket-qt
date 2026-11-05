@@ -6,6 +6,7 @@
 #include "KetRecipes.h"
 #include "KetTokens.h"
 
+#include <QFontDatabase>
 #include <QGuiApplication>
 #include <QTest>
 #include <QTextBlock>
@@ -57,6 +58,24 @@ class TokensTest final : public QObject {
         const QStringList families = Tokens::fontFamilies(u"font-sans");
         QCOMPARE(families.value(0), QStringLiteral("KÉT Sans"));
         QVERIFY(!families.contains(QStringLiteral("sans-serif")));
+    }
+
+    void installedFamiliesMatchWithoutAccents() {
+        // The KÉT Sans files register as "KET Sans", so names fold case and accents.
+        QString installed;
+        for (const QString& family : QFontDatabase::families())
+            if (family.contains(u'e')) {
+                installed = family;
+                break;
+            }
+        if (installed.isEmpty())
+            QSKIP("No installed family has an 'e'.");
+        QString spelled = installed.toUpper();
+        spelled.replace(u'E', QChar(0x00C9)); // É
+        QCOMPARE(Tokens::installedFamily({QStringLiteral("No Such Family"), spelled}), installed);
+        QVERIFY(Tokens::installedFamily({QStringLiteral("No Such Family")}).isEmpty());
+        QCOMPARE(Profile::ketPlus().monoFamilies.value(0), QStringLiteral("KÉT Sans Mono"));
+        QCOMPARE(Profile::designSystem().monoFamilies, Tokens::fontFamilies(u"font-mono"));
     }
 
     void mapsUseCamelCase() {

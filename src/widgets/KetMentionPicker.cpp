@@ -2,6 +2,7 @@
 #include "KetMentionPicker.h"
 
 #include "KetAppearance.h"
+#include "KetProfile.h"
 #include "KetShadow.h"
 
 #include <QMouseEvent>
@@ -64,7 +65,7 @@ void MentionPicker::moveHighlight(int step) {
 QFont MentionPicker::sized(qreal pixels, int weight, bool mono) const {
     QFont font = this->font();
     if (mono)
-        if (const QString family = Tokens::availableFamily(u"font-mono"); !family.isEmpty())
+        if (const QString family = Profile::current().monoFamily(); !family.isEmpty())
             font.setFamilies({family});
     font.setPixelSize(qRound(scaled(pixels)));
     font.setWeight(QFont::Weight(weight));
