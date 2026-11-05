@@ -60,5 +60,9 @@ KetButton { text: qsTr("Save"); variant: KetTheme.ButtonVariant.Primary }
 
 KetQt is licensed under the [Mozilla Public License 2.0](LICENSE). The pinned
 `third_party/ket-design-system/tokens.css` is MIT-licensed
-([licence](third_party/ket-design-system/LICENSE)). Qt is used under its LGPL 3.0,
+([licence](third_party/ket-design-system/LICENSE)). The Két Symbol icons in
+`third_party/ket-symbol/` are separate files under CC BY 4.0
+([notice](third_party/ket-symbol/NOTICE)): "Két Symbol © 2026 Két Việt, CC BY 4.0".
+The names Két, Két Symbol and Lampion are trademarks and are not licensed. Run
+`python3 tools/generate_icons.py` after changing them. Qt is used under its LGPL 3.0,
 GPL or commercial terms as the consuming app chooses.
