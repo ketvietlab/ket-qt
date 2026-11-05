@@ -21,7 +21,9 @@ Rectangle {
     signal clicked()
 
     implicitHeight: recipe.height
-    implicitWidth: Math.min(label.implicitWidth + 2 * recipe.paddingInline, recipe.maxWidth)
+    // Rows may cap chips tighter than the recipe (`.conversation-tags .conversation-tag`).
+    property real maxWidth: recipe.maxWidth
+    implicitWidth: Math.min(label.implicitWidth + 2 * recipe.paddingInline, maxWidth)
     radius: recipe.radius
     color: recipe.background
 

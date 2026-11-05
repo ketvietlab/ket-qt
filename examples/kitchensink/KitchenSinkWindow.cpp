@@ -2,6 +2,7 @@
 #include "KitchenSinkWindow.h"
 
 #include "ComponentPages.h"
+#include "ConversationPages.h"
 #include "FormPages.h"
 #include "FoundationPages.h"
 #include "KetAppearance.h"
@@ -41,6 +42,7 @@ const PageEntry kPages[] = {
     {"forms", "Components", "Forms", formPage},
     {"overlays", "Components", "Overlays", overlayPage},
     {"navigation", "Components", "Navigation", navigationPage},
+    {"conversation", "Components", "Conversation", conversationPage},
 };
 
 Theme theme() { return Appearance::instance().theme(); }

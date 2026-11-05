@@ -149,6 +149,69 @@ struct Profile {
     qreal emptyMessageMaxWidth = 0;
     qreal emptyLineHeight = 1.0;
 
+    // Sidebar conversation rows (two lines: title, then number and tags or status).
+    qreal conversationRowHeight = 0;
+    qreal conversationRowPaddingInline = 0;
+    qreal conversationRowPaddingBlock = 0;
+    qreal conversationRowRadius = 0;
+    qreal conversationRowGap = 0;
+    qreal conversationLineGap = 0;
+    qreal conversationTitlePixels = 0;
+    qreal conversationTitleLineHeight = 0; // pixels
+    int conversationTitleWeight = 400;
+    int conversationSelectedTitleWeight = 400;
+    qreal conversationNumberPixels = 0;
+    qreal conversationMetaPixels = 0;
+    qreal conversationMetaHeight = 0;
+    qreal conversationMetaGap = 0;
+    qreal conversationTagGap = 0;
+    qreal conversationTagMaxWidth = 0;
+    qreal conversationIndicatorSize = 0;
+    qreal conversationIndicatorTop = 0;
+    int conversationSpinMs = 0;
+
+    // Composer.
+    qreal composerRadius = 0;
+    qreal composerPadding = 0;
+    qreal composerRingWidth = 0;
+    qreal composerTextPixels = 0;
+    qreal composerLineHeight = 1.0;
+    qreal composerTextPaddingInline = 0;
+    qreal composerTextPaddingBlock = 0;
+    qreal composerMinInputHeight = 0;
+    int composerMaxLines = 0;
+    qreal composerSendSize = 0;
+    qreal composerStopIconSize = 0;
+    qreal composerToolbarHeight = 0;
+    qreal composerToolbarGap = 0;
+
+    // Transcript.
+    qreal readingPixels = 0;
+    qreal readingLineHeight = 1.0;
+    qreal userBubbleRadius = 0;
+    qreal userBubblePaddingInline = 0;
+    qreal userBubblePaddingBlock = 0;
+    qreal userBubbleMaxWidth = 1.0; // fraction of the transcript width
+    qreal userBubbleShade = 0;      // how much of the accent stays when mixed with black
+    qreal messageSpacing = 0;
+    qreal avatarSize = 0;
+    qreal avatarRadius = 0;
+    qreal assistantGap = 0;
+    qreal messageNamePixels = 0;
+    qreal messageTimePixels = 0;
+    qreal messageMetaGap = 0;
+    qreal messageMetaBottom = 0;
+    qreal dayDividerPixels = 0;
+    qreal dayDividerGap = 0;
+    qreal dayDividerMarginTop = 0;
+    qreal dayDividerMarginBottom = 0;
+    qreal activityRowHeight = 0;
+    qreal activityRowPaddingInline = 0;
+    qreal activityRowGap = 0;
+    qreal activityRowPixels = 0;
+    qreal activityRowIconSize = 0;
+    qreal activityRowChevronSize = 0;
+
     [[nodiscard]] static Profile designSystem();
     [[nodiscard]] static Profile ketPlus();
 

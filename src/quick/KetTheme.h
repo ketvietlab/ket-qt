@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <QObject>
+#include <QQuickTextDocument>
 #include <QStringList>
 #include <QVariantMap>
 #include <QtQml/qqmlregistration.h>
@@ -41,6 +42,8 @@ class QuickTheme final : public QObject {
     Q_ENUM(ToggleKind)
     enum class BannerTone { Info, Warning, Danger };
     Q_ENUM(BannerTone)
+    enum class ConversationStatus { NotStarted, Working, NeedsInput, Error, Completed, Stopped };
+    Q_ENUM(ConversationStatus)
 
     explicit QuickTheme(QObject* parent = nullptr);
     static QuickTheme* create(QQmlEngine*, QJSEngine*);
@@ -93,6 +96,19 @@ class QuickTheme final : public QObject {
     Q_INVOKABLE QVariantList activityBarFrame(const QVariantMap& recipe, int bar,
                                               qreal elapsedMs) const;
     Q_INVOKABLE QVariantMap emptyStateRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap conversationRowRecipe(bool dark, qreal zoom, bool selected,
+                                                  bool hovered, bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap conversationStatusRecipe(bool dark, int status) const;
+    Q_INVOKABLE QString conversationStatusLabel(int status) const;
+    Q_INVOKABLE QVariantMap composerRecipe(bool dark, qreal zoom, bool focused) const;
+    Q_INVOKABLE QVariantMap userMessageRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap assistantMessageRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap dayDividerRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap activityRowRecipe(bool dark, qreal zoom, bool hovered, bool enabled,
+                                              bool focused) const;
+    // Gives every block of a TextEdit's document a CSS line box of `pixels` (font size × line
+    // height); Qt's proportional height would scale the font's line spacing instead.
+    Q_INVOKABLE void applyLineHeight(QQuickTextDocument* document, qreal pixels) const;
     // Két Symbol (ket::Icons): the qrc URL of the master for a `box` (already zoomed), the
     // logical size the drawing occupies and its whole-device-pixel offset in the box.
     Q_INVOKABLE QString iconSource(const QString& code, qreal box, int weight) const;

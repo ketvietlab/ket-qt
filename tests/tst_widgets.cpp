@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetActivityIndicator.h"
+#include "KetActivityRow.h"
 #include "KetAppearance.h"
 #include "KetBadge.h"
 #include "KetBanner.h"
 #include "KetButton.h"
 #include "KetChoice.h"
+#include "KetComposer.h"
+#include "KetConversationRow.h"
 #include "KetDialog.h"
 #include "KetEmptyState.h"
 #include "KetFieldRow.h"
@@ -19,6 +22,7 @@
 #include "KetTextField.h"
 #include "KetToast.h"
 #include "KetToggle.h"
+#include "KetTranscript.h"
 
 #include <QAction>
 #include <QApplication>
@@ -30,6 +34,7 @@
 #include <QStyleOptionMenuItem>
 #include <QTabBar>
 #include <QTest>
+#include <QTextEdit>
 #include <QToolTip>
 
 using namespace ket;
@@ -372,6 +377,80 @@ class WidgetsTest final : public QObject {
         QVERIFY(empty.action());
         empty.resize(600, 400);
         QVERIFY(!empty.grab().isNull());
+    }
+
+    void conversationRowsFitWholeTags() {
+        ConversationRow row(QStringLiteral("Navigation rail polish"));
+        row.setNumber(QStringLiteral("4821"));
+        row.setStatus(ConversationStatus::Working);
+        QCOMPARE(row.sizeHint().height(), 48);
+        row.resize(320, 48);
+        QCOMPARE(row.visibleTagCount(), 0);
+        row.setTags({{QStringLiteral("ui"), QColor(0x2f6fde)},
+                     {QStringLiteral("review"), QColor(0x23875a)},
+                     {QStringLiteral("perf"), QColor(0xb7791f)},
+                     {QStringLiteral("account"), QColor(0x7a55d6)}});
+        const int wide = row.visibleTagCount();
+        QVERIFY(wide >= 3);
+        row.resize(170, 48);
+        const int narrow = row.visibleTagCount();
+        QVERIFY(narrow < wide);
+        QVERIFY(narrow >= 0);
+        QVERIFY(!row.grab().isNull());
+        QCOMPARE(row.statusLabel(), QStringLiteral("Working"));
+        row.setStatusLabel(QStringLiteral("Đang làm"));
+        QCOMPARE(row.statusLabel(), QStringLiteral("Đang làm"));
+    }
+
+    void composersSendOnEnterAndGrow() {
+        Composer composer;
+        QSignalSpy submitted(&composer, &Composer::submitted);
+        composer.resize(600, composer.sizeHint().height());
+        composer.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&composer));
+        QVERIFY(!composer.sendButton()->isEnabled());
+        const int oneLine = composer.editor()->height();
+        QCOMPARE(oneLine, 48);
+        composer.editor()->setFocus();
+        QTest::keyClicks(composer.editor(), QStringLiteral("Hello"));
+        QVERIFY(composer.sendButton()->isEnabled());
+        QTest::keyClick(composer.editor(), Qt::Key_Return, Qt::ShiftModifier);
+        QTest::keyClicks(composer.editor(), QStringLiteral("there"));
+        QTest::keyClick(composer.editor(), Qt::Key_Return, Qt::ShiftModifier);
+        QTest::keyClicks(composer.editor(), QStringLiteral("again"));
+        QVERIFY(composer.editor()->height() > oneLine);
+        QCOMPARE(composer.recipe().border, Tokens::color(u"accent-border", Theme::Light));
+        QTest::keyClick(composer.editor(), Qt::Key_Return);
+        QCOMPARE(submitted.count(), 1);
+        QCOMPARE(submitted.first().first().toString(), QStringLiteral("Hello\nthere\nagain"));
+        QVERIFY(composer.text().isEmpty());
+        QSignalSpy stopped(&composer, &Composer::stopRequested);
+        composer.setBusy(true);
+        QCOMPARE(composer.sendButton()->accessibleName(), QStringLiteral("Send guidance"));
+    }
+
+    void transcriptBlocksWrapAndAlign() {
+        UserMessage user(QStringLiteral("Make the sidebar rows two lines and show the tags."));
+        user.resize(700, user.heightForWidth(700));
+        QVERIFY(user.bubbleRect().right() >= 698);
+        QVERIFY(user.bubbleRect().width() <= qRound(700 * 0.8));
+        UserMessage longMessage(QString(QStringLiteral("word ")).repeated(80));
+        QVERIFY(longMessage.heightForWidth(300) > longMessage.heightForWidth(700));
+
+        AssistantMessage assistant(QStringLiteral("Claude"), QStringLiteral("10:42"));
+        assistant.setText(QStringLiteral("The rows now wrap their tags."));
+        QVERIFY(qobject_cast<ReadingText*>(assistant.body()));
+        assistant.resize(600, 200);
+        QVERIFY(!assistant.grab().isNull());
+
+        DayDivider day(QStringLiteral("Today"));
+        QVERIFY(day.sizeHint().height() > 22);
+        ActivityRow step(QStringLiteral("Read 3 files"), QStringLiteral("file"));
+        step.setExpandable(true);
+        QVERIFY(step.isCheckable());
+        QCOMPARE(step.sizeHint().height(), 32);
+        step.click();
+        QVERIFY(step.isChecked());
     }
 
     void tagElidesAtTheRecipeWidth() {

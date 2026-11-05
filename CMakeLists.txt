@@ -42,6 +42,7 @@ add_library(ketqt_tokens STATIC
     src/tokens/KetRecipes.h src/tokens/KetRecipes.cpp
     src/tokens/KetOverlayRecipes.cpp
     src/tokens/KetNavigationRecipes.cpp
+    src/tokens/KetConversationRecipes.h src/tokens/KetConversationRecipes.cpp
     src/tokens/KetProfile.h src/tokens/KetProfile.cpp
 )
 add_library(KetQt::Tokens ALIAS ketqt_tokens)
@@ -89,6 +90,11 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetActivityIndicator.h src/widgets/KetActivityIndicator.cpp
         src/widgets/KetEmptyState.h src/widgets/KetEmptyState.cpp
         src/widgets/KetBarPainter.h src/widgets/KetBarPainter.cpp
+        src/widgets/KetParagraph.h
+        src/widgets/KetConversationRow.h src/widgets/KetConversationRow.cpp
+        src/widgets/KetComposer.h src/widgets/KetComposer.cpp
+        src/widgets/KetTranscript.h src/widgets/KetTranscript.cpp
+        src/widgets/KetActivityRow.h src/widgets/KetActivityRow.cpp
     )
     add_library(KetQt::Widgets ALIAS ketqt_widgets)
     target_include_directories(ketqt_widgets PUBLIC
@@ -124,14 +130,18 @@ if(KETQT_BUILD_QUICK)
                   src/quick/qml/KetKbd.qml src/quick/qml/KetSegmentedControl.qml
                   src/quick/qml/KetTabBar.qml src/quick/qml/KetTabButton.qml
                   src/quick/qml/KetProgressBar.qml src/quick/qml/KetActivityIndicator.qml
-                  src/quick/qml/KetEmptyState.qml
+                  src/quick/qml/KetEmptyState.qml src/quick/qml/KetConversationRow.qml
+                  src/quick/qml/KetComposer.qml src/quick/qml/KetReadingText.qml
+                  src/quick/qml/KetUserMessage.qml src/quick/qml/KetAssistantMessage.qml
+                  src/quick/qml/KetDayDivider.qml src/quick/qml/KetActivityRow.qml
         RESOURCE_PREFIX /qt/qml
     )
     foreach(file KetButton KetIconButton KetBadge KetTag KetIcon KetTextField KetSelect
                  KetToggleIndicator KetCheckbox KetRadio KetChoice KetFieldRow KetShadow
                  KetBanner KetToast KetDialog KetMenu KetMenuItem KetMenuSeparator KetToolTip
                  KetNavItem KetKbd KetSegmentedControl KetTabBar KetTabButton KetProgressBar
-                 KetActivityIndicator KetEmptyState)
+                 KetActivityIndicator KetEmptyState KetConversationRow KetComposer
+                 KetReadingText KetUserMessage KetAssistantMessage KetDayDivider KetActivityRow)
         set_source_files_properties(src/quick/qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
     endforeach()
     add_library(KetQt::Quick ALIAS ketqt_quick)
@@ -165,7 +175,7 @@ install(TARGETS ${ketqt_install_targets} EXPORT KetQtTargets
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt
 )
 install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRecipes.h
-              src/tokens/KetProfile.h
+              src/tokens/KetProfile.h src/tokens/KetConversationRecipes.h
               src/icons/KetIcons.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 if(KETQT_BUILD_WIDGETS)
@@ -175,7 +185,9 @@ if(KETQT_BUILD_WIDGETS)
                   src/widgets/KetFieldRow.h src/widgets/KetBanner.h src/widgets/KetToast.h
                   src/widgets/KetDialog.h src/widgets/KetNavItem.h
                   src/widgets/KetSegmentedControl.h src/widgets/KetActivityIndicator.h
-                  src/widgets/KetEmptyState.h
+                  src/widgets/KetEmptyState.h src/widgets/KetConversationRow.h
+                  src/widgets/KetComposer.h src/widgets/KetTranscript.h
+                  src/widgets/KetActivityRow.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 endif()
 install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)

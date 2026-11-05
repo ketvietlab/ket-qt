@@ -90,7 +90,7 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state | Conversation rows (two-line sidebar rows with tags), composer, transcript blocks |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row | Markdown and code blocks in the transcript, mention picker, usage ring |
 
 ### Overlays
 
@@ -109,6 +109,13 @@ Colours that are user data, such as tag colours, are parameters.
   An indeterminate bar sweeps a segment, which the mock does not define.
 - **The activity indicator** is the mock's `.working-bars`; `ket::activityBarFrame()` holds
   the keyframes, so both layers animate identically and screenshots can freeze a frame.
+- **Conversation blocks** follow the mock's `conversation-tags.css` and the
+  desktop-alignment overrides. Conversation rows show whole tags only and count the rest
+  in `+N`. The assistant avatar defaults to a Két Symbol `bot` tile: the mock's Két mark is
+  a trademark the kit does not license, so apps pass their own mark.
+- **Line heights are CSS line boxes**, font size × line height in whole pixels. Qt's
+  proportional line height scales the font's line spacing instead, so both layers use fixed
+  line boxes (`QTextBlockFormat::FixedHeight`, `Text.FixedHeight`).
 - **Shadows** are parsed from shadow tokens (`ket::shadowToken`) and drawn with concentric
   translucent layers (`KetShadow`), so neither layer needs a graphics effect or a shader.
 
