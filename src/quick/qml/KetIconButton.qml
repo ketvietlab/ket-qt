@@ -32,9 +32,10 @@ Basic.Button {
     icon.height: recipe.iconSize
     Accessible.name: text
 
-    Basic.ToolTip.visible: showToolTip && hovered && text !== ""
-    Basic.ToolTip.text: text
-    Basic.ToolTip.delay: 600
+    KetToolTip {
+        visible: control.showToolTip && control.hovered && control.text !== ""
+        text: control.text
+    }
 
     contentItem: Item {
         readonly property color color: control.recipe.text

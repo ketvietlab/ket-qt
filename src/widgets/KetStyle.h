@@ -5,6 +5,7 @@
 
 #include <QProxyStyle>
 
+class QAction;
 class QApplication;
 
 namespace ket {
@@ -17,13 +18,30 @@ class Style final : public QProxyStyle {
   public:
     Style();
 
+    // QAction properties read by the menu painter: a destructive command drawn in the
+    // danger colour, and a secondary line under the title (`.desktop-context-menu small`).
+    static constexpr char kDangerProperty[] = "ketDanger";
+    static constexpr char kDescriptionProperty[] = "ketDescription";
+    static void setDanger(QAction* action, bool danger = true);
+    static void setDescription(QAction* action, const QString& description);
+
     static void install(QApplication& application);
     [[nodiscard]] static QPalette paletteFor(Theme theme);
     // The design system's sans font at text-base, falling back to the platform font.
     [[nodiscard]] static QFont interfaceFont();
 
     void polish(QPalette& palette) override;
+    void polish(QWidget* widget) override;
+    void unpolish(QWidget* widget) override;
     using QProxyStyle::polish;
+    using QProxyStyle::unpolish;
+    int styleHint(StyleHint hint, const QStyleOption* option = nullptr,
+                  const QWidget* widget = nullptr,
+                  QStyleHintReturn* returnData = nullptr) const override;
+    QSize sizeFromContents(ContentsType type, const QStyleOption* option, const QSize& size,
+                           const QWidget* widget = nullptr) const override;
+    void drawControl(ControlElement element, const QStyleOption* option, QPainter* painter,
+                     const QWidget* widget = nullptr) const override;
     int pixelMetric(PixelMetric metric, const QStyleOption* option = nullptr,
                     const QWidget* widget = nullptr) const override;
     void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter,

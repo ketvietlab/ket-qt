@@ -90,7 +90,22 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row | Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, sidebar row, tabs, progress and spinner, empty state, kbd |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip | Sidebar row, tabs, progress and spinner, empty state, kbd |
+
+### Overlays
+
+- **Dialogs and toasts draw inside their window**, as the mock's `.modal-backdrop` and
+  `.toast` do, not as separate top-level windows. `ket::Dialog` covers its window, keeps
+  Tab inside the card and rejects on Escape, the close button or a backdrop click.
+  `KetDialog` is a modal `Dialog` in the window overlay.
+- **Menus are drawn by `ket::Style`**, so every `QMenu` and the `QComboBox` popup
+  (`SH_ComboBox_Popup`) look like `.desktop-context-menu`. `Style::setDanger()` and
+  `Style::setDescription()` mark a destructive command and add its secondary line. macOS
+  hides shortcuts in context menus (`Qt::AA_DontShowShortcutsInContextMenus`); `KetMenuItem`
+  shows its `shortcut` everywhere.
+- **Tooltips use the accent background**, like the native KetPlus `KetToolTip`.
+- **Shadows** are parsed from shadow tokens (`ket::shadowToken`) and drawn with concentric
+  translucent layers (`KetShadow`), so neither layer needs a graphics effect or a shader.
 
 ## Adding a component
 

@@ -58,6 +58,50 @@ struct Profile {
     qreal tagTint = 0;      // share of the tag colour in the chip background
     qreal tagHoverTint = 0; // the same for a hovered filter tag
 
+    // Banners (inline notices).
+    qreal bannerRadius = 0;
+    qreal bannerPaddingInline = 0; // including the border
+    qreal bannerPaddingBlock = 0;
+    qreal bannerGap = 0;
+    int bannerTitleWeight = 400;
+    qreal bannerMessageGap = 0;
+
+    // Toasts.
+    qreal toastPaddingInline = 0;
+    qreal toastPaddingBlock = 0;
+    qreal toastGap = 0;
+    int toastDurationMs = 0;
+
+    // Dialogs.
+    qreal dialogWidth = 0;
+    qreal dialogRadius = 0;
+    qreal dialogPaddingInline = 0;
+    qreal dialogHeaderPaddingBlock = 0;
+    qreal dialogFooterPaddingBlock = 0;
+    qreal dialogTitlePixels = 0;
+    qreal backdropOpacity = 0; // the modal backdrop over the window
+
+    // Menus (context menus, select popups).
+    qreal menuMinWidth = 0;
+    qreal menuMaxWidth = 0;
+    qreal menuPadding = 0;
+    qreal menuRadius = 0;
+    qreal menuItemHeight = 0;
+    qreal menuItemRadius = 0;
+    qreal menuItemPaddingStart = 0;
+    qreal menuItemPaddingEnd = 0;
+    qreal menuItemGap = 0;
+    qreal menuItemFontPixels = 0;
+    qreal menuCheckSize = 0;
+    qreal menuDescriptionGap = 0;
+    qreal menuDisabledOpacity = 0;
+
+    // Tooltips.
+    qreal tooltipPaddingInline = 0;
+    qreal tooltipPaddingBlock = 0;
+    qreal tooltipMaxWidth = 0;
+    int tooltipDelayMs = 0;
+
     [[nodiscard]] static Profile designSystem();
     [[nodiscard]] static Profile ketPlus();
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // KetQt kitchensink: every foundation and component of the kit, with the Qt Widgets and
 // Qt Quick versions side by side. Command-line options make review evidence repeatable:
-//   --page=<id> --dark --zoom=1.25 --screenshot=<file>   render one page and exit
+//   --page=<id> --dark|--light --zoom=1.25 --screenshot=<file>   render one page and exit
 //   --smoke                                               open every page; fail on QML errors
 #include "KetAppearance.h"
 #include "KetStyle.h"
@@ -46,6 +46,7 @@ int main(int argc, char** argv) {
         QStringLiteral("Open <id>: %1.").arg(kitchensink::KitchenSinkWindow::pageIds().join(u", ")),
         QStringLiteral("id"));
     const QCommandLineOption dark(QStringLiteral("dark"), QStringLiteral("Start in dark mode."));
+    const QCommandLineOption light(QStringLiteral("light"), QStringLiteral("Start in light mode."));
     const QCommandLineOption zoom(QStringLiteral("zoom"),
                                   QStringLiteral("Interface zoom, e.g. 1.25."),
                                   QStringLiteral("factor"), QStringLiteral("1"));
@@ -60,13 +61,15 @@ int main(int argc, char** argv) {
         QStringLiteral("WxH"), QStringLiteral("1280x860"));
     const QCommandLineOption full(
         QStringLiteral("full"), QStringLiteral("With --screenshot, save the whole scrolled page."));
-    parser.addOptions({page, dark, zoom, size, screenshot, full, smoke});
+    parser.addOptions({page, dark, light, zoom, size, screenshot, full, smoke});
     parser.process(application);
 
     if (parser.isSet(smoke))
         qInstallMessageHandler(countQmlProblems);
     if (parser.isSet(dark))
         Appearance::instance().setMode(Appearance::Mode::Dark);
+    else if (parser.isSet(light))
+        Appearance::instance().setMode(Appearance::Mode::Light);
     Appearance::instance().setZoom(parser.value(zoom).toDouble());
     Style::install(application);
 

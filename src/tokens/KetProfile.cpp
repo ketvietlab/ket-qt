@@ -47,6 +47,40 @@ Profile Profile::designSystem() {
     p.tagOverflowPadding = px(u"space-1-5");
     p.tagTint = 0.13;
     p.tagHoverTint = 0.22;
+    p.bannerRadius = px(u"radius-md");
+    p.bannerPaddingInline = px(u"space-4");
+    p.bannerPaddingBlock = px(u"space-3");
+    p.bannerGap = px(u"space-3");
+    p.bannerTitleWeight = qRound(Tokens::number(u"weight-semibold"));
+    p.bannerMessageGap = px(u"space-0-5");
+    p.toastPaddingInline = px(u"space-4");
+    p.toastPaddingBlock = px(u"space-3");
+    p.toastGap = px(u"space-2");
+    p.toastDurationMs = 4000;
+    p.dialogWidth = px(u"space-16") * 8;
+    p.dialogRadius = px(u"radius-xl");
+    p.dialogPaddingInline = px(u"space-6");
+    p.dialogHeaderPaddingBlock = px(u"space-4");
+    p.dialogFooterPaddingBlock = px(u"space-3");
+    p.dialogTitlePixels = px(u"text-lg");
+    p.backdropOpacity = 0.24;
+    p.menuMinWidth = px(u"space-16") * 3;
+    p.menuMaxWidth = px(u"space-16") * 5;
+    p.menuPadding = px(u"space-1");
+    p.menuRadius = px(u"radius-md");
+    p.menuItemHeight = px(u"control-height-md");
+    p.menuItemRadius = px(u"radius-sm");
+    p.menuItemPaddingStart = px(u"space-2");
+    p.menuItemPaddingEnd = px(u"space-3");
+    p.menuItemGap = px(u"space-2");
+    p.menuItemFontPixels = px(u"text-sm");
+    p.menuCheckSize = 16;
+    p.menuDescriptionGap = px(u"space-0-5");
+    p.menuDisabledOpacity = Tokens::number(u"opacity-pending");
+    p.tooltipPaddingInline = px(u"space-2");
+    p.tooltipPaddingBlock = px(u"space-1-5");
+    p.tooltipMaxWidth = px(u"space-16") * 5;
+    p.tooltipDelayMs = 600;
     return p;
 }
 
@@ -84,6 +118,40 @@ Profile Profile::ketPlus() {
     p.tagOverflowPadding = 5; // `.tag-more`
     p.tagTint = 0.13;         // color-mix(tag 13%, transparent)
     p.tagHoverTint = 0.22;
+    p.bannerRadius = 6;         // `.banner`
+    p.bannerPaddingInline = 17; // 16 px padding plus the 1 px border
+    p.bannerPaddingBlock = 14;  // 13 px
+    p.bannerGap = 12;
+    p.bannerTitleWeight = 550; // `.banner strong`
+    p.bannerMessageGap = 3;    // `.banner p`
+    p.toastPaddingInline = 18; // `.toast` 17 px plus the border
+    p.toastPaddingBlock = 12;  // 11 px
+    p.toastGap = 8;
+    p.toastDurationMs = 3600;   // K.toast
+    p.dialogWidth = 500;        // `.modal`
+    p.dialogRadius = 12;        // desktop alignment `.modal`
+    p.dialogPaddingInline = 22; // header, body and footer
+    p.dialogHeaderPaddingBlock = 18;
+    p.dialogFooterPaddingBlock = 14;
+    p.dialogTitlePixels = 18; // 16 px at the 15 px interface scale
+    p.backdropOpacity = 0.24; // `.modal-backdrop` rgb(18 22 30 / 24%)
+    p.menuMinWidth = 210;     // `.desktop-context-menu`
+    p.menuMaxWidth = 330;
+    p.menuPadding = 6; // 5 px plus the border
+    p.menuRadius = 7;
+    p.menuItemHeight = 32;
+    p.menuItemRadius = 4;
+    p.menuItemPaddingStart = 5;
+    p.menuItemPaddingEnd = 12;
+    p.menuItemGap = 5;
+    p.menuItemFontPixels = px(u"text-xs"); // 12 px
+    p.menuCheckSize = 14;                  // `.context-check`
+    p.menuDescriptionGap = 3;              // `.desktop-context-menu small`
+    p.menuDisabledOpacity = 0.65;
+    p.tooltipPaddingInline = 8; // the native KetToolTip
+    p.tooltipPaddingBlock = 6;
+    p.tooltipMaxWidth = 360;
+    p.tooltipDelayMs = 600;
     return p;
 }
 
