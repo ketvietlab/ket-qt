@@ -32,7 +32,7 @@ flowchart LR
 1. Copy `tokens.css` from the new `@ketvietlab/design-system` revision into
    `third_party/ket-design-system/`, and update `SOURCE.json` (version, revision, sha256).
 2. Run `python3 tools/generate_tokens.py` and review the diff of `tokens/ket-tokens.json`.
-3. Run the tests and compare the gallery in light and dark.
+3. Run the tests and compare the kitchensink pages in light and dark.
 
 ## Appearance and zoom
 
@@ -49,7 +49,9 @@ so bindings re-evaluate; recipes returned to QML are already scaled.
 1. Add a recipe (`KetRecipes.h`) built only from tokens, with a token test.
 2. Draw it in `src/widgets/` and `src/quick/qml/`; neither layer chooses colours itself.
 3. Add a Widgets test and a Quick test that compare against the same recipe.
-4. Show it in `examples/gallery` and check light, dark and 125% zoom.
+4. Add it to a kitchensink page (`examples/kitchensink`) in every variant, size and pinned
+   state, and check light, dark and 125% zoom
+   (`--page=<id> --dark --zoom=1.25 --screenshot=<file>`).
 
 Planned next, from the KetPlus and KétChat inventories: IconButton, TextField, Checkbox,
 Switch, Menu, Tooltip, Tag (label-only chip), ListRow (two-line sidebar row), Dialog.

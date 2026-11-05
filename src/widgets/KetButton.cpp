@@ -44,8 +44,14 @@ void Button::setControlSize(ControlSize size) {
     update();
 }
 
+void Button::setPreviewState(std::optional<InteractionState> state) {
+    preview_ = state;
+    update();
+}
+
 ButtonRecipe Button::recipe() const {
-    const InteractionState state{hovered_, isDown(), isEnabled(), hasFocus()};
+    const InteractionState state =
+        preview_.value_or(InteractionState{hovered_, isDown(), isEnabled(), hasFocus()});
     return buttonRecipe(variant_, size_, state, Appearance::instance().theme());
 }
 

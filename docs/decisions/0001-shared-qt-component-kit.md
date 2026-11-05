@@ -40,7 +40,7 @@ KétView is out of scope: its shells are SwiftUI and WinUI 3 (KétView decisions
 ## Consequences
 
 - A new component lands as a recipe first, then in both layers with tests that compare
-  them, and in the gallery.
+  them, and in the kitchensink.
 - Changing a design-system token means updating the pinned `tokens.css`, regenerating,
   and reviewing the JSON diff; a CTest check fails if the generated files are stale.
 - KetPlus and KétChat migrate screen by screen: first their palettes read
