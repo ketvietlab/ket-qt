@@ -11,6 +11,7 @@
 #include <QCommandLineParser>
 #include <QQuickItem>
 #include <QQuickWidget>
+#include <QScrollArea>
 #include <QTimer>
 #include <QtQml/qqmlextensionplugin.h>
 
@@ -54,7 +55,12 @@ int main(int argc, char** argv) {
     const QCommandLineOption smoke(
         QStringLiteral("smoke"),
         QStringLiteral("Open every page and exit non-zero on QML errors."));
-    parser.addOptions({page, dark, zoom, screenshot, smoke});
+    const QCommandLineOption size(
+        QStringLiteral("size"), QStringLiteral("Window size, e.g. 1280x2400 for a full-page shot."),
+        QStringLiteral("WxH"), QStringLiteral("1280x860"));
+    const QCommandLineOption full(
+        QStringLiteral("full"), QStringLiteral("With --screenshot, save the whole scrolled page."));
+    parser.addOptions({page, dark, zoom, size, screenshot, full, smoke});
     parser.process(application);
 
     if (parser.isSet(smoke))
@@ -65,7 +71,9 @@ int main(int argc, char** argv) {
     Style::install(application);
 
     kitchensink::KitchenSinkWindow window;
-    window.resize(1280, 860);
+    const QStringList dimensions = parser.value(size).split(u'x');
+    window.resize(dimensions.value(0).toInt() > 0 ? dimensions.value(0).toInt() : 1280,
+                  dimensions.value(1).toInt() > 0 ? dimensions.value(1).toInt() : 860);
     if (parser.isSet(page) && !window.showPage(parser.value(page))) {
         std::fprintf(stderr, "Unknown page %s\n", qPrintable(parser.value(page)));
         return 2;
@@ -101,8 +109,16 @@ int main(int argc, char** argv) {
         return failures == 0 ? 0 : 1;
     }
     if (const QString file = parser.value(screenshot); !file.isEmpty()) {
-        QTimer::singleShot(400, &window, [&window, file] {
-            if (!window.grab().save(file))
+        const bool wholePage = parser.isSet(full);
+        QTimer::singleShot(400, &window, [&window, file, wholePage] {
+            QWidget* target = &window;
+            if (wholePage) {
+                for (QScrollArea* area : window.findChildren<QScrollArea*>()) {
+                    if (area->isVisible() && area->widget() && area->widget()->isVisible())
+                        target = area->widget();
+                }
+            }
+            if (!target->grab().save(file))
                 QApplication::exit(1);
             else
                 QApplication::quit();

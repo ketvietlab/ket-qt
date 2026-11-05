@@ -2,6 +2,7 @@
 #include "KitchenSinkWindow.h"
 
 #include "ComponentPages.h"
+#include "FormPages.h"
 #include "FoundationPages.h"
 #include "KetAppearance.h"
 #include "KitchenSinkCommon.h"
@@ -35,6 +36,7 @@ const PageEntry kPages[] = {
     {"badge", "Components", "Badge", badgePage},
     {"tag", "Components", "Tag", tagPage},
     {"icons", "Components", "Icons", iconPage},
+    {"forms", "Components", "Forms", formPage},
 };
 
 Theme theme() { return Appearance::instance().theme(); }
