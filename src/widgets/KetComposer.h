@@ -2,8 +2,12 @@
 #pragma once
 
 #include "KetConversationRecipes.h"
+#include "KetMentionPicker.h"
 
+#include <QPointer>
 #include <QWidget>
+
+#include <optional>
 
 class QAbstractButton;
 class QHBoxLayout;
@@ -36,20 +40,35 @@ class Composer final : public QWidget {
 
     [[nodiscard]] ComposerRecipe recipe() const;
 
+    // `@agent/` completion: answer mentionQueryChanged() with setMentionItems(), which shows
+    // the picker over the composer (an empty list shows its empty message).
+    void setMentionItems(const QList<MentionItem>& items);
+    void closeMentions();
+    [[nodiscard]] MentionPicker* mentionPicker() const { return picker_; }
+    [[nodiscard]] bool isMentionOpen() const;
+
   signals:
     void submitted(const QString& text);
     void stopRequested();
+    void mentionQueryChanged(const QString& query);
+    void mentionClosed();
 
   public slots:
     void submit();
 
   protected:
     void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void moveEvent(QMoveEvent* event) override;
     bool eventFilter(QObject* watched, QEvent* event) override;
 
   private:
     void applyRecipe();
     void fitEditor();
+    void updateMention();
+    void applyMention(const MentionItem& item);
+    void placePicker();
+    bool handleMentionKey(QKeyEvent* event);
 
     QTextEdit* editor_;
     Button* send_;
@@ -59,6 +78,8 @@ class Composer final : public QWidget {
     QWidget* toolbar_;
     bool busy_ = false;
     bool focused_ = false;
+    QPointer<MentionPicker> picker_;
+    std::optional<QString> mentionQuery_;
 };
 
 } // namespace ket

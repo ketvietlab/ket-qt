@@ -297,6 +297,50 @@ class QuickTest final : public QObject {
         QCOMPARE(root->property("step").value<QQuickItem*>()->implicitHeight(), 32.0);
     }
 
+    void richTranscriptBlocksLoad() {
+        std::unique_ptr<QObject> root =
+            create(QByteArrayLiteral("import QtQuick\nimport Ket\n"
+                                     "Item { width: 800; height: 600\n"
+                                     "  property alias view: view; property alias ring: ring\n"
+                                     "  KetMarkdown { id: view; width: 600\n"
+                                     "    markdown: \"### Plan\\n\\nBody "
+                                     "**bold**.\\n\\n```sh\\nctest\\n```\\n\\n> Quote\" }\n"
+                                     "  KetUsageRing { id: ring; value: 0.9 }\n"
+                                     "}\n"));
+        QVERIFY(root);
+        auto* view = root->property("view").value<QQuickItem*>();
+        QVERIFY(view->implicitHeight() > 0);
+        QCOMPARE(view->property("markdown").toString().count(QLatin1Char('\n')), 8);
+        auto* ring = root->property("ring").value<QQuickItem*>();
+        QCOMPARE(ring->implicitWidth(), 19.0);
+        QCOMPARE(ring->property("recipe").toMap().value(QStringLiteral("arc")).value<QColor>(),
+                 Tokens::color(u"warning", Theme::Light));
+    }
+
+    void composerCompletesAgentMentions() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "Window { width: 800; height: 600; visible: true\n"
+            "  property alias composer: composer; property string lastQuery: \"-\"\n"
+            "  KetComposer { id: composer; y: 400; width: 600\n"
+            "    onMentionQuery: query => { lastQuery = query;\n"
+            "      mentionItems = [{number: \"4821\", title: \"Navigation\", place: \"ketplus\"}] "
+            "} }\n"
+            "}\n"));
+        QVERIFY(root);
+        auto* composer = root->property("composer").value<QQuickItem*>();
+        composer->setProperty("text", QStringLiteral("Ask @agent/48"));
+        auto* picker = composer->property("mentionPicker").value<QObject*>();
+        QVERIFY(picker);
+        composer->setProperty("cursorPosition", 13);
+        QCOMPARE(root->property("lastQuery").toString(), QStringLiteral("48"));
+        QVERIFY(picker->property("visible").toBool());
+        const QVariant option = QVariantMap{{QStringLiteral("number"), QStringLiteral("4821")}};
+        QMetaObject::invokeMethod(composer, "applyMention", Q_ARG(QVariant, option));
+        QCOMPARE(composer->property("text").toString(), QStringLiteral("Ask @agent/4821 "));
+        QVERIFY(!picker->property("visible").toBool());
+    }
+
   private:
     std::unique_ptr<QObject> create(const QByteArray& source) {
         QQmlComponent component(&engine_);

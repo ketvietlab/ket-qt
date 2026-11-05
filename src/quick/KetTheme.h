@@ -109,6 +109,18 @@ class QuickTheme final : public QObject {
     // Gives every block of a TextEdit's document a CSS line box of `pixels` (font size × line
     // height); Qt's proportional height would scale the font's line spacing instead.
     Q_INVOKABLE void applyLineHeight(QQuickTextDocument* document, qreal pixels) const;
+    Q_INVOKABLE QVariantMap markdownRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap codeBlockRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap mentionPickerRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap mentionOptionRecipe(bool dark, qreal zoom, bool highlighted) const;
+    Q_INVOKABLE QVariantMap usageRingRecipe(bool dark, qreal zoom, qreal used, bool hovered) const;
+    // [{ kind: "text" | "code", text, language }] in order (ket::splitMarkdown).
+    Q_INVOKABLE QVariantList markdownSegments(const QString& markdown) const;
+    // Styles a TextEdit holding Markdown, as ket::MarkdownText is styled.
+    Q_INVOKABLE void styleMarkdown(QQuickTextDocument* document, bool dark, qreal zoom) const;
+    // { start, end, query } for an `@agent/` mention at `cursor`, or null.
+    Q_INVOKABLE QVariant agentMention(const QString& text, int cursor) const;
+    Q_INVOKABLE QString agentMentionText(const QString& number) const;
     // Két Symbol (ket::Icons): the qrc URL of the master for a `box` (already zoomed), the
     // logical size the drawing occupies and its whole-device-pixel offset in the box.
     Q_INVOKABLE QString iconSource(const QString& code, qreal box, int weight) const;

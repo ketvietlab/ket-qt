@@ -66,9 +66,7 @@ each state. It takes the metrics a product decides from the current `ket::Profil
   windows.
 
 Focus is drawn inside a control's bounds (a 2 px `focus-border` border on fields, a ring
-around toggles), not as the mock's outside outline, which Qt Widgets cannot paint. The
-composer text area stays in the app; the select popup uses the platform list until the
-Menu component lands.
+around toggles), not as the mock's outside outline, which Qt Widgets cannot paint.
 
 Icons are Két Symbol 0.11.0 (`third_party/ket-symbol`, CC BY 4.0, separate files with
 their own notice), compiled into `KetQt::Icons` by `tools/generate_icons.py`:
@@ -90,7 +88,7 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row | Markdown and code blocks in the transcript, mention picker, usage ring |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring | Usage popover |
 
 ### Overlays
 
@@ -113,6 +111,16 @@ Colours that are user data, such as tag colours, are parameters.
   desktop-alignment overrides. Conversation rows show whole tags only and count the rest
   in `+N`. The assistant avatar defaults to a Két Symbol `bot` tile: the mock's Két mark is
   a trademark the kit does not license, so apps pass their own mark.
+- **Markdown answers** are split by `ket::splitMarkdown()` into prose, fenced code and
+  top-level quotes. Prose renders in a `QTextDocument` that `ket::styleMarkdown()` restyles
+  with the `.answer` metrics. Code blocks and quotes are separate surfaces, because a text
+  document cannot draw a rounded code surface, a copy button or the quote's accent bar.
+  Code blocks wrap long lines; inline code is monospace without a background.
+- **The `@agent/` mention picker** opens above the composer, overlapping its top edge. The
+  composer keeps focus and forwards Up, Down, Enter, Tab and Esc. `ket::agentMention()` ports
+  the mock's `K.conversationMention`, and the app answers `mentionQueryChanged` with items.
+- **The usage ring** turns warning at 80 % and danger at 95 %, which the mock leaves to the
+  app. The usage popover comes next.
 - **Line heights are CSS line boxes**, font size × line height in whole pixels. Qt's
   proportional line height scales the font's line spacing instead, so both layers use fixed
   line boxes (`QTextBlockFormat::FixedHeight`, `Text.FixedHeight`).

@@ -4,6 +4,7 @@
 #include "KetAppearance.h"
 #include "KetButton.h"
 #include "KetIcons.h"
+#include "KetMarkdown.h"
 #include "KetProfile.h"
 #include "KetShadow.h"
 
@@ -101,7 +102,9 @@ Composer::Composer(QWidget* parent)
     connect(editor_, &QTextEdit::textChanged, this, [this] {
         send_->setEnabled(!text().trimmed().isEmpty());
         fitEditor();
+        updateMention();
     });
+    connect(editor_, &QTextEdit::cursorPositionChanged, this, &Composer::updateMention);
     connect(send_, &QAbstractButton::clicked, this, &Composer::submit);
     connect(stop_, &QAbstractButton::clicked, this, &Composer::stopRequested);
     connect(&Appearance::instance(), &Appearance::themeChanged, this, &Composer::applyRecipe);
@@ -209,6 +212,110 @@ void Composer::paintEvent(QPaintEvent*) {
     painter.drawRoundedRect(card.adjusted(0.5, 0.5, -0.5, -0.5), radius, radius);
 }
 
+bool Composer::isMentionOpen() const { return picker_ && picker_->isVisible(); }
+
+void Composer::updateMention() {
+    const QTextCursor cursor = editor_->textCursor();
+    const std::optional<AgentMention> mention =
+        cursor.hasSelection() ? std::nullopt : agentMention(text(), cursor.position());
+    if (!mention) {
+        if (mentionQuery_) {
+            mentionQuery_.reset();
+            closeMentions();
+            emit mentionClosed();
+        }
+        return;
+    }
+    if (mentionQuery_ == mention->query)
+        return;
+    mentionQuery_ = mention->query;
+    emit mentionQueryChanged(mention->query);
+}
+
+void Composer::setMentionItems(const QList<MentionItem>& items) {
+    if (!picker_) {
+        picker_ = new MentionPicker(window());
+        connect(picker_, &MentionPicker::activated, this, &Composer::applyMention);
+    }
+    picker_->setItems(items);
+    picker_->setHighlightedIndex(0);
+    placePicker();
+    picker_->show();
+    picker_->raise();
+}
+
+void Composer::closeMentions() {
+    if (picker_)
+        picker_->hide();
+}
+
+void Composer::applyMention(const MentionItem& item) {
+    const std::optional<AgentMention> mention =
+        agentMention(text(), editor_->textCursor().position());
+    if (!mention)
+        return closeMentions();
+    QTextCursor cursor = editor_->textCursor();
+    cursor.setPosition(int(mention->start));
+    cursor.setPosition(int(mention->end), QTextCursor::KeepAnchor);
+    cursor.insertText(agentMentionText(item.number));
+    editor_->setTextCursor(cursor);
+    mentionQuery_.reset();
+    closeMentions();
+    editor_->setFocus();
+}
+
+void Composer::placePicker() {
+    if (!picker_)
+        return;
+    // Over the composer's top edge, overlapping it (`bottom: calc(100% - 4px)`).
+    const MentionPickerRecipe r = mentionPickerRecipe(Appearance::instance().theme());
+    const qreal ring = scaled(recipe().ringWidth);
+    const QRect card = rect().adjusted(qRound(ring), qRound(ring), -qRound(ring), -qRound(ring));
+    const QMargins m = picker_->shadowMargins();
+    const int width = qMin(qRound(scaled(r.maxWidth)), card.width());
+    const int height = picker_->sizeHint().height();
+    const QPoint topLeft = mapTo(window(), card.topLeft());
+    picker_->setGeometry(topLeft.x() - m.left(),
+                         topLeft.y() + qRound(scaled(r.overlap)) - height + m.bottom(),
+                         width + m.left() + m.right(), height);
+}
+
+void Composer::resizeEvent(QResizeEvent* event) {
+    QWidget::resizeEvent(event);
+    placePicker();
+}
+
+void Composer::moveEvent(QMoveEvent* event) {
+    QWidget::moveEvent(event);
+    placePicker();
+}
+
+bool Composer::handleMentionKey(QKeyEvent* key) {
+    if (!isMentionOpen())
+        return false;
+    switch (key->key()) {
+    case Qt::Key_Escape:
+        mentionQuery_.reset();
+        closeMentions();
+        emit mentionClosed();
+        return true;
+    case Qt::Key_Down:
+    case Qt::Key_Up:
+        picker_->moveHighlight(key->key() == Qt::Key_Down ? 1 : -1);
+        return !picker_->items().isEmpty();
+    case Qt::Key_Return:
+    case Qt::Key_Enter:
+    case Qt::Key_Tab:
+        // With no options the key keeps its usual meaning, as in the mock.
+        if (picker_->items().isEmpty() || picker_->highlightedIndex() < 0)
+            return false;
+        applyMention(picker_->items().at(picker_->highlightedIndex()));
+        return true;
+    default:
+        return false;
+    }
+}
+
 bool Composer::eventFilter(QObject* watched, QEvent* event) {
     if (watched == editor_) {
         if (event->type() == QEvent::FocusIn || event->type() == QEvent::FocusOut) {
@@ -216,6 +323,8 @@ bool Composer::eventFilter(QObject* watched, QEvent* event) {
             applyRecipe();
         } else if (event->type() == QEvent::KeyPress) {
             auto* key = static_cast<QKeyEvent*>(event);
+            if (handleMentionKey(key))
+                return true;
             const bool enter = key->key() == Qt::Key_Return || key->key() == Qt::Key_Enter;
             if (enter && !(key->modifiers() & Qt::ShiftModifier)) {
                 submit();
