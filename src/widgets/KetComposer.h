@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 #pragma once
 
+#include "KetAttachmentChip.h"
 #include "KetConversationRecipes.h"
 #include "KetMentionPicker.h"
 
@@ -47,11 +48,20 @@ class Composer final : public QWidget {
     [[nodiscard]] MentionPicker* mentionPicker() const { return picker_; }
     [[nodiscard]] bool isMentionOpen() const;
 
+    // Attachments (`.attachment-chips`) above the input; removing a chip emits
+    // attachmentRemoved() after it is gone.
+    AttachmentChip* addAttachment(const QString& name,
+                                  const QString& iconCode = QStringLiteral("file"));
+    [[nodiscard]] QStringList attachments() const;
+    void removeAttachment(int index);
+    void clearAttachments();
+
   signals:
     void submitted(const QString& text);
     void stopRequested();
     void mentionQueryChanged(const QString& query);
     void mentionClosed();
+    void attachmentRemoved(int index, const QString& name);
 
   public slots:
     void submit();
@@ -75,6 +85,10 @@ class Composer final : public QWidget {
     QAbstractButton* stop_;
     QHBoxLayout* leading_;
     QHBoxLayout* trailing_;
+    QHBoxLayout* input_;
+    QWidget* chips_;
+    QHBoxLayout* chipRow_;
+    QList<AttachmentChip*> attachments_;
     QWidget* toolbar_;
     bool busy_ = false;
     bool focused_ = false;

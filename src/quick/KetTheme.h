@@ -131,6 +131,17 @@ class QuickTheme final : public QObject {
     // A token length at `zoom` in whole pixels: KetTheme.px(KetTheme.t.space4, KetTheme.zoom).
     Q_INVOKABLE qreal px(qreal logicalPixels, qreal zoom) const;
 
+    // Chat extras (KetChatRecipes).
+    Q_INVOKABLE QVariantMap popoverRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap meterRecipe(bool dark, qreal zoom, bool compact, qreal fraction) const;
+    Q_INVOKABLE QVariantMap attachmentChipRecipe(bool dark, qreal zoom, bool removeHovered) const;
+    Q_INVOKABLE QVariantMap suggestionRecipe(bool dark, qreal zoom, bool hovered, bool pressed,
+                                             bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap questionCardRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap activityGroupRecipe(bool dark, qreal zoom, bool hovered, bool pressed,
+                                                bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap galleryRecipe(bool dark, qreal zoom, bool hovered) const;
+
   signals:
     void themeChanged();
     void zoomChanged();

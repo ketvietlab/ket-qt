@@ -341,6 +341,64 @@ class QuickTest final : public QObject {
         QVERIFY(!picker->property("visible").toBool());
     }
 
+    void chatExtrasLoadAndBehave() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "Window { width: 900; height: 700; visible: true\n"
+            "  property alias composer: composer; property alias gallery: gallery\n"
+            "  property alias group: group; property alias popover: popover\n"
+            "  property alias anchor: anchor; property int removed: -1\n"
+            "  KetComposer { id: composer; y: 500; width: 600\n"
+            "    attachments: [{ name: \"a.md\" }, { name: \"b.png\", icon: \"image\" }]\n"
+            "    onAttachmentRemoved: (index, name) => removed = index }\n"
+            "  KetActivityGroup { id: group; width: 600; text: \"Explored\"\n"
+            "    KetActivityRow { width: 500; text: \"Read\"; iconName: \"file\" }\n"
+            "    KetGallery { id: gallery; width: 500; maxVisible: 2\n"
+            "      images: [{ caption: \"1\" }, { caption: \"2\" }, { caption: \"3\" }] } }\n"
+            "  KetSuggestion { y: 200; width: 400; text: \"Review\"; caption: \"Risky first\"; "
+            "iconName: \"branch\" }\n"
+            "  KetQuestionCard { y: 260; width: 400; question: \"Which?\"; step: \"1 / 2\"\n"
+            "    footer: [KetButton { text: \"Next\" }]\n"
+            "    KetChoice { width: 300; text: \"One\"; kind: KetTheme.ToggleKind.Radio } }\n"
+            "  KetMeter { y: 420; width: 300; label: \"Weekly\"; valueText: \"32%\"; fraction: "
+            "0.32; compact: true }\n"
+            "  KetAttachmentChip { y: 460; name: \"loose.txt\" }\n"
+            "  Rectangle { id: anchor; x: 700; y: 600; width: 30; height: 30 }\n"
+            "  KetPopover { id: popover; title: \"Context & limits\"\n"
+            "    footer: [KetButton { text: \"Compact session\" }]\n"
+            "    KetPopoverText { text: \"Claude · Opus\" }\n"
+            "    KetPopoverDivider {}\n"
+            "    KetMeter { width: parent.width; label: \"5-hour usage\"; valueText: \"18%\" } }\n"
+            "}\n"));
+        QVERIFY(root);
+        auto* composer = root->property("composer").value<QQuickItem*>();
+        QMetaObject::invokeMethod(composer, "removeAttachment", Q_ARG(QVariant, 1));
+        QCOMPARE(root->property("removed").toInt(), 1);
+        QCOMPARE(composer->property("attachments").toList().size(), 1);
+
+        auto* gallery = root->property("gallery").value<QQuickItem*>();
+        QCOMPARE(gallery->property("shown").toList().size(), 2);
+        QVERIFY(gallery->property("limited").toBool());
+        gallery->setProperty("expanded", true);
+        QCOMPARE(gallery->property("shown").toList().size(), 3);
+
+        auto* group = root->property("group").value<QQuickItem*>();
+        const qreal closed = group->implicitHeight();
+        QCOMPARE(closed, 36.0);
+        group->setProperty("expanded", true);
+        QTRY_VERIFY(group->implicitHeight() > closed); // Column lays out on polish
+
+        QObject* popover = root->property("popover").value<QObject*>();
+        auto* anchor = root->property("anchor").value<QQuickItem*>();
+        QMetaObject::invokeMethod(popover, "openAbove",
+                                  Q_ARG(QVariant, QVariant::fromValue(anchor)));
+        QVERIFY(popover->property("opened").toBool() || popover->property("visible").toBool());
+        QCOMPARE(popover->property("width").toReal(), 340.0);
+        QCOMPARE(popover->property("x").toReal() + 340.0, 730.0);
+        QCOMPARE(popover->property("y").toReal() + popover->property("height").toReal() + 12,
+                 600.0);
+    }
+
   private:
     std::unique_ptr<QObject> create(const QByteArray& source) {
         QQmlComponent component(&engine_);

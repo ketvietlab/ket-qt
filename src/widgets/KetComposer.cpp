@@ -66,7 +66,8 @@ class PaddedEdit final : public QTextEdit {
 Composer::Composer(QWidget* parent)
     : QWidget(parent), editor_(new PaddedEdit(this)),
       send_(new Button({}, ButtonVariant::Secondary, this)), stop_(new StopButton(this)),
-      leading_(new QHBoxLayout), trailing_(new QHBoxLayout), toolbar_(new QWidget(this)) {
+      leading_(new QHBoxLayout), trailing_(new QHBoxLayout), input_(new QHBoxLayout),
+      chips_(new QWidget(this)), chipRow_(new QHBoxLayout(chips_)), toolbar_(new QWidget(this)) {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     editor_->setAcceptRichText(false);
     editor_->setFrameShape(QFrame::NoFrame);
@@ -82,11 +83,12 @@ Composer::Composer(QWidget* parent)
     send_->setEnabled(false);
     stop_->hide();
 
-    auto* input = new QHBoxLayout;
-    input->setContentsMargins(0, 0, 0, 0);
-    input->addWidget(editor_, 1);
-    input->addWidget(stop_, 0, Qt::AlignBottom);
-    input->addWidget(send_, 0, Qt::AlignBottom);
+    input_->setContentsMargins(0, 0, 0, 0);
+    input_->addWidget(editor_, 1);
+    input_->addWidget(stop_, 0, Qt::AlignBottom);
+    input_->addWidget(send_, 0, Qt::AlignBottom);
+    chipRow_->addStretch(1);
+    chips_->hide();
 
     auto* tools = new QHBoxLayout(toolbar_);
     tools->setContentsMargins(0, 0, 0, 0);
@@ -96,7 +98,8 @@ Composer::Composer(QWidget* parent)
 
     auto* column = new QVBoxLayout(this);
     column->setSpacing(0);
-    column->addLayout(input);
+    column->addWidget(chips_);
+    column->addLayout(input_);
     column->addWidget(toolbar_);
 
     connect(editor_, &QTextEdit::textChanged, this, [this] {
@@ -110,6 +113,42 @@ Composer::Composer(QWidget* parent)
     connect(&Appearance::instance(), &Appearance::themeChanged, this, &Composer::applyRecipe);
     connect(&Appearance::instance(), &Appearance::zoomChanged, this, &Composer::applyRecipe);
     applyRecipe();
+}
+
+AttachmentChip* Composer::addAttachment(const QString& name, const QString& iconCode) {
+    auto* chip = new AttachmentChip(name, iconCode, chips_);
+    chipRow_->insertWidget(chipRow_->count() - 1, chip);
+    attachments_.append(chip);
+    connect(chip, &AttachmentChip::removeRequested, this,
+            [this, chip] { removeAttachment(int(attachments_.indexOf(chip))); });
+    chips_->show();
+    return chip;
+}
+
+QStringList Composer::attachments() const {
+    QStringList names;
+    for (const AttachmentChip* chip : attachments_)
+        names.append(chip->name());
+    return names;
+}
+
+void Composer::removeAttachment(int index) {
+    if (index < 0 || index >= attachments_.size())
+        return;
+    AttachmentChip* chip = attachments_.takeAt(index);
+    const QString name = chip->name();
+    const bool focused = chip->hasFocus();
+    chip->deleteLater();
+    chip->hide();
+    chips_->setVisible(!attachments_.isEmpty());
+    if (focused)
+        editor_->setFocus();
+    emit attachmentRemoved(index, name);
+}
+
+void Composer::clearAttachments() {
+    while (!attachments_.isEmpty())
+        removeAttachment(int(attachments_.size()) - 1);
 }
 
 QString Composer::text() const { return editor_->toPlainText(); }
@@ -148,11 +187,12 @@ void Composer::applyRecipe() {
     const int send = qRound(scaled(r.sendSize));
     send_->setFixedSize(send, send);
     stop_->setFixedSize(send, send);
-    static_cast<QHBoxLayout*>(column->itemAt(0)->layout())
-        ->setSpacing(qRound(scaled(Tokens::px(u"space-1"))));
+    input_->setSpacing(qRound(scaled(Tokens::px(u"space-1"))));
     // The send button sits centred on the input's first line box.
-    static_cast<QHBoxLayout*>(column->itemAt(0)->layout())
-        ->setContentsMargins(0, 0, 0, qMax(0, qRound((scaled(r.minInputHeight) - send) / 2)));
+    input_->setContentsMargins(0, 0, 0, qMax(0, qRound((scaled(r.minInputHeight) - send) / 2)));
+    const AttachmentChipRecipe chip = attachmentChipRecipe(false, Appearance::instance().theme());
+    chipRow_->setSpacing(qRound(scaled(chip.rowGap)));
+    chipRow_->setContentsMargins(0, 0, 0, qRound(scaled(chip.rowPaddingTop)));
     toolbar_->setFixedHeight(qRound(scaled(r.toolbarHeight)));
     leading_->setSpacing(qRound(scaled(r.toolbarGap)));
     trailing_->setSpacing(qRound(scaled(r.toolbarGap)));
