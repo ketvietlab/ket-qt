@@ -1,0 +1,9 @@
+{
+  "package": "@ketvietlab/design-system",
+  "version": "0.1.44",
+  "repository": "https://github.com/ketvietlab/ketsuite",
+  "path": "ketsuite/packages/design-system/src/foundations/tokens.css",
+  "revision": "e8adee2da3bfeea66c01f46f110fdc5243fb23c0",
+  "license": "MIT",
+  "sha256": "f920ee68488887e67430b0c71690e608068e0a691b7978f2a8b67cbe92c41d7f"
+}
