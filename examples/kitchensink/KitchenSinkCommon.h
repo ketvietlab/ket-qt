@@ -3,6 +3,7 @@
 
 #include <QLabel>
 #include <QString>
+#include <QVariantMap>
 
 class QQuickWidget;
 class QVBoxLayout;
@@ -35,6 +36,7 @@ PageFrame makePage(const QString& title, const QString& description);
 QWidget* sectionTitle(const QString& text, QWidget* parent);
 
 // A Qt Quick view of `<type>.qml` in the KetKitchenSink module that sizes to its content.
-QQuickWidget* quickView(const QString& type, QWidget* parent);
+// `properties` are set before the root is created (page variants such as `small`).
+QQuickWidget* quickView(const QString& type, QWidget* parent, const QVariantMap& properties = {});
 
 } // namespace ket::kitchensink

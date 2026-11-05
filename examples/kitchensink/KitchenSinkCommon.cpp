@@ -56,21 +56,23 @@ QWidget* sectionTitle(const QString& text, QWidget* parent) {
     return label;
 }
 
-QQuickWidget* quickView(const QString& type, QWidget* parent) {
+QQuickWidget* quickView(const QString& type, QWidget* parent, const QVariantMap& properties) {
     auto* view = new QQuickWidget(parent);
-    view->setResizeMode(QQuickWidget::SizeViewToRootObject);
+    // The widget owns the size and the root follows it, so a content size change (zoom)
+    // resizes the widget and its render target together instead of stretching the texture.
+    view->setResizeMode(QQuickWidget::SizeRootObjectToView);
     view->setClearColor(Qt::transparent);
     view->setAttribute(Qt::WA_AlwaysStackOnTop);
+    view->setInitialProperties(properties);
     view->loadFromModule(QStringLiteral("KetKitchenSink"), type);
     if (QQuickItem* root = view->rootObject()) {
-        // The root follows its implicit size, so a property that changes it after loading
-        // (a page variant) resizes the view instead of stretching its texture.
         const auto fit = [view, root] {
-            root->setSize(QSizeF(root->implicitWidth(), root->implicitHeight()));
-            view->setMinimumSize(qCeil(root->implicitWidth()), qCeil(root->implicitHeight()));
+            view->setFixedSize(qCeil(root->implicitWidth()), qCeil(root->implicitHeight()));
         };
-        QObject::connect(root, &QQuickItem::implicitWidthChanged, view, fit);
-        QObject::connect(root, &QQuickItem::implicitHeightChanged, view, fit);
+        // Queued: the implicit size changes while the scene polishes, and resizing the widget
+        // there would start a frame inside the current one.
+        QObject::connect(root, &QQuickItem::implicitWidthChanged, view, fit, Qt::QueuedConnection);
+        QObject::connect(root, &QQuickItem::implicitHeightChanged, view, fit, Qt::QueuedConnection);
         fit();
     }
     return view;
