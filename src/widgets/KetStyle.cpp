@@ -5,6 +5,7 @@
 #include "KetBarPainter.h"
 #include "KetMenuPainter.h"
 #include "KetRecipes.h"
+#include "KetSliderPainter.h"
 
 #include <QAbstractItemView>
 #include <QAction>
@@ -100,6 +101,8 @@ bool isRoundedPopup(const QWidget* widget) {
 
 void Style::polish(QWidget* widget) {
     QProxyStyle::polish(widget);
+    if (widget->inherits("QSlider"))
+        widget->setAttribute(Qt::WA_Hover);
     if (isRoundedPopup(widget)) {
         widget->setAttribute(Qt::WA_TranslucentBackground);
         widget->setAttribute(Qt::WA_NoSystemBackground);
@@ -190,9 +193,52 @@ void Style::drawControl(ControlElement element, const QStyleOption* option, QPai
     QProxyStyle::drawControl(element, option, painter, widget);
 }
 
+void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex* option,
+                               QPainter* painter, const QWidget* widget) const {
+    if (control == CC_Slider && detail::isHorizontalSlider(option)) {
+        detail::drawSlider(qstyleoption_cast<const QStyleOptionSlider*>(option), painter, widget);
+        return;
+    }
+    QProxyStyle::drawComplexControl(control, option, painter, widget);
+}
+
+QRect Style::subControlRect(ComplexControl control, const QStyleOptionComplex* option,
+                            SubControl subControl, const QWidget* widget) const {
+    if (control == CC_Slider && detail::isHorizontalSlider(option))
+        return detail::sliderSubControlRect(qstyleoption_cast<const QStyleOptionSlider*>(option),
+                                            subControl);
+    return QProxyStyle::subControlRect(control, option, subControl, widget);
+}
+
+QStyle::SubControl Style::hitTestComplexControl(ComplexControl control,
+                                                const QStyleOptionComplex* option,
+                                                const QPoint& position,
+                                                const QWidget* widget) const {
+    if (control == CC_Slider && detail::isHorizontalSlider(option)) {
+        const auto* slider = qstyleoption_cast<const QStyleOptionSlider*>(option);
+        if (detail::sliderSubControlRect(slider, SC_SliderHandle).contains(position))
+            return SC_SliderHandle;
+        if (detail::sliderSubControlRect(slider, SC_SliderGroove).contains(position))
+            return SC_SliderGroove;
+        return SC_None;
+    }
+    return QProxyStyle::hitTestComplexControl(control, option, position, widget);
+}
+
 int Style::pixelMetric(PixelMetric metric, const QStyleOption* option,
                        const QWidget* widget) const {
     switch (metric) {
+    case PM_SliderThickness:
+    case PM_SliderControlThickness:
+        if (const auto* slider = qstyleoption_cast<const QStyleOptionSlider*>(option);
+            !slider || slider->orientation == Qt::Horizontal)
+            return detail::sliderThickness();
+        break;
+    case PM_SliderLength:
+        if (const auto* slider = qstyleoption_cast<const QStyleOptionSlider*>(option);
+            !slider || slider->orientation == Qt::Horizontal)
+            return detail::sliderHandleLength();
+        break;
     case PM_LayoutHorizontalSpacing:
     case PM_LayoutVerticalSpacing:
         return qRound(Tokens::px(u"space-2"));
@@ -227,8 +273,9 @@ int Style::pixelMetric(PixelMetric metric, const QStyleOption* option,
         return qRound(Appearance::instance().scaled(r.paddingBlock)) - 1;
     }
     default:
-        return QProxyStyle::pixelMetric(metric, option, widget);
+        break;
     }
+    return QProxyStyle::pixelMetric(metric, option, widget);
 }
 
 void Style::drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter,

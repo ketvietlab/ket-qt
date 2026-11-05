@@ -142,6 +142,20 @@ class QuickTheme final : public QObject {
                                                 bool enabled, bool focused) const;
     Q_INVOKABLE QVariantMap galleryRecipe(bool dark, qreal zoom, bool hovered) const;
 
+    // Controls and chrome (KetControlRecipes).
+    Q_INVOKABLE QVariantMap sliderRecipe(bool dark, qreal zoom, bool hovered, bool pressed,
+                                         bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap avatarRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap treeItemRecipe(bool dark, qreal zoom, bool selected, bool hovered,
+                                           bool pressed, bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap groupHeaderRecipe(bool dark, qreal zoom, bool selected, bool hovered,
+                                              bool pressed, bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap routeTabRecipe(bool dark, qreal zoom, bool active, bool hovered,
+                                           bool pressed, bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap statusBarRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap breadcrumbRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap paneHeaderRecipe(bool dark, qreal zoom) const;
+
   signals:
     void themeChanged();
     void zoomChanged();

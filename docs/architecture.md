@@ -88,7 +88,7 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery | Slider, Avatar, Tree item and repository group, Pill/route/context tabs, Search field, Status bar, Breadcrumb |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery, Slider and step slider, Avatar, Tree item, Group header, Route tabs, Pane header, Breadcrumb, Status bar (pill tabs are the Segmented control; the search field is a TextField with a leading icon) | Command palette, File explorer rows, Changed files and diff lines, Background tasks, Update card and pill, Theme card and accent swatch |
 
 ### Overlays
 
@@ -125,6 +125,11 @@ Colours that are user data, such as tag colours, are parameters.
   the anchor's window and closes on Esc, the close button or a press outside. They use the
   `shadow-md` token; the mock's `.usage-popover` literal (`0 12px 36px` at 15 %) is close to
   it and colours stay tokens.
+- **Sliders are drawn by `ket::Style`** for every horizontal `QSlider`, like tab strips and
+  progress bars; the mock uses the native range input, so the track and handle follow the
+  accent tokens rather than a mock literal.
+- **Group headers** keep their action's place while it is hidden, so the name never moves
+  when the header is hovered or focused.
 - **Activity groups** hold any rows, including a `ket::Gallery` of screenshots; the gallery
   emits `activated(index)` and the app opens its own preview.
 - **Line heights are CSS line boxes**, font size × line height in whole pixels. Qt's
