@@ -1,0 +1,475 @@
+{
+  "version": "0.11.0",
+  "rows": [
+    {
+      "lucide": "archive",
+      "code": "archive",
+      "status": "exact"
+    },
+    {
+      "lucide": "archive-restore",
+      "code": "archive-extract",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "arrow-down",
+      "code": "arrow-down",
+      "status": "exact"
+    },
+    {
+      "lucide": "arrow-left",
+      "code": "arrow-left",
+      "status": "exact"
+    },
+    {
+      "lucide": "arrow-right",
+      "code": "arrow-right",
+      "status": "exact"
+    },
+    {
+      "lucide": "arrow-up",
+      "code": "arrow-up",
+      "status": "exact"
+    },
+    {
+      "lucide": "arrow-up-right",
+      "code": "arrow-up-right",
+      "status": "exact"
+    },
+    {
+      "lucide": "bot",
+      "code": "bot",
+      "status": "exact"
+    },
+    {
+      "lucide": "check",
+      "code": "check",
+      "status": "exact"
+    },
+    {
+      "lucide": "check-check",
+      "code": "check-all",
+      "status": "exact"
+    },
+    {
+      "lucide": "chevron-down",
+      "code": "chevron-down",
+      "status": "exact"
+    },
+    {
+      "lucide": "chevron-left",
+      "code": "chevron-left",
+      "status": "exact"
+    },
+    {
+      "lucide": "chevron-right",
+      "code": "chevron-right",
+      "status": "exact"
+    },
+    {
+      "lucide": "chevron-up",
+      "code": "chevron-up",
+      "status": "exact"
+    },
+    {
+      "lucide": "chevrons-up-down",
+      "code": "chevron-up-down",
+      "status": "exact"
+    },
+    {
+      "lucide": "circle",
+      "code": "circle",
+      "status": "exact"
+    },
+    {
+      "lucide": "circle-check",
+      "code": "success",
+      "status": "exact"
+    },
+    {
+      "lucide": "circle-help",
+      "code": "help",
+      "status": "exact"
+    },
+    {
+      "lucide": "circle-stop",
+      "code": "stop-circle",
+      "status": "exact"
+    },
+    {
+      "lucide": "circle-x",
+      "code": "error",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "clock",
+      "code": "clock",
+      "status": "exact"
+    },
+    {
+      "lucide": "code-xml",
+      "code": "code",
+      "status": "exact"
+    },
+    {
+      "lucide": "command",
+      "code": "command",
+      "status": "exact"
+    },
+    {
+      "lucide": "copy",
+      "code": "copy",
+      "status": "exact"
+    },
+    {
+      "lucide": "corner-down-left",
+      "code": "enter",
+      "status": "exact"
+    },
+    {
+      "lucide": "dot",
+      "code": "dot",
+      "status": "exact"
+    },
+    {
+      "lucide": "download",
+      "code": "download",
+      "status": "exact"
+    },
+    {
+      "lucide": "ellipsis",
+      "code": "more",
+      "status": "exact"
+    },
+    {
+      "lucide": "external-link",
+      "code": "open",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "eye",
+      "code": "eye",
+      "status": "exact"
+    },
+    {
+      "lucide": "file",
+      "code": "file",
+      "status": "exact"
+    },
+    {
+      "lucide": "file-code",
+      "code": "file-code",
+      "status": "exact"
+    },
+    {
+      "lucide": "file-text",
+      "code": "file-text",
+      "status": "exact"
+    },
+    {
+      "lucide": "folder",
+      "code": "folder",
+      "status": "exact"
+    },
+    {
+      "lucide": "folder-open",
+      "code": "folder-open",
+      "status": "exact"
+    },
+    {
+      "lucide": "git-branch",
+      "code": "branch",
+      "status": "exact"
+    },
+    {
+      "lucide": "git-compare-arrows",
+      "code": "compare",
+      "status": "exact"
+    },
+    {
+      "lucide": "git-pull-request",
+      "code": "pull-request",
+      "status": "exact"
+    },
+    {
+      "lucide": "globe",
+      "code": "globe",
+      "status": "exact"
+    },
+    {
+      "lucide": "image",
+      "code": "image",
+      "status": "exact"
+    },
+    {
+      "lucide": "info",
+      "code": "info",
+      "status": "exact"
+    },
+    {
+      "lucide": "keyboard",
+      "code": "keyboard",
+      "status": "exact"
+    },
+    {
+      "lucide": "layers",
+      "code": "layers",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "layout-grid",
+      "code": "apps",
+      "status": "exact"
+    },
+    {
+      "lucide": "link",
+      "code": "link",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "list",
+      "code": "view-list",
+      "status": "exact"
+    },
+    {
+      "lucide": "list-filter",
+      "code": "filter",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "loader-circle",
+      "code": "loading",
+      "status": "exact"
+    },
+    {
+      "lucide": "lock",
+      "code": "lock",
+      "status": "exact"
+    },
+    {
+      "lucide": "log-in",
+      "code": "log-in",
+      "status": "exact"
+    },
+    {
+      "lucide": "log-out",
+      "code": "log-out",
+      "status": "exact"
+    },
+    {
+      "lucide": "map",
+      "code": "map",
+      "status": "exact"
+    },
+    {
+      "lucide": "maximize",
+      "code": "fullscreen",
+      "status": "exact"
+    },
+    {
+      "lucide": "message-square",
+      "code": "chat",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "messages-square",
+      "code": "chats",
+      "status": "exact"
+    },
+    {
+      "lucide": "monitor",
+      "code": "display",
+      "status": "exact"
+    },
+    {
+      "lucide": "moon",
+      "code": "moon",
+      "status": "exact"
+    },
+    {
+      "lucide": "network",
+      "code": "network",
+      "status": "exact"
+    },
+    {
+      "lucide": "package",
+      "code": "package",
+      "status": "exact"
+    },
+    {
+      "lucide": "palette",
+      "code": "palette",
+      "status": "exact"
+    },
+    {
+      "lucide": "panel-left",
+      "code": "panel-left",
+      "status": "exact"
+    },
+    {
+      "lucide": "panel-right",
+      "code": "panel-right",
+      "status": "exact"
+    },
+    {
+      "lucide": "panel-right-close",
+      "code": "panel-right-close",
+      "status": "exact"
+    },
+    {
+      "lucide": "panels-top-left",
+      "code": "panels-top-left",
+      "status": "exact"
+    },
+    {
+      "lucide": "paperclip",
+      "code": "attachment",
+      "status": "exact"
+    },
+    {
+      "lucide": "pause-circle",
+      "code": "pause-circle",
+      "status": "exact"
+    },
+    {
+      "lucide": "pencil",
+      "code": "edit",
+      "status": "exact"
+    },
+    {
+      "lucide": "play",
+      "code": "resume",
+      "status": "exact"
+    },
+    {
+      "lucide": "plus",
+      "code": "plus",
+      "status": "exact"
+    },
+    {
+      "lucide": "refresh-cw",
+      "code": "refresh",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "rotate-ccw",
+      "code": "restore",
+      "status": "exact"
+    },
+    {
+      "lucide": "search",
+      "code": "search",
+      "status": "exact"
+    },
+    {
+      "lucide": "send",
+      "code": "send",
+      "status": "exact"
+    },
+    {
+      "lucide": "settings",
+      "code": "settings",
+      "status": "exact"
+    },
+    {
+      "lucide": "shield",
+      "code": "shield",
+      "status": "exact"
+    },
+    {
+      "lucide": "slash",
+      "code": "slash",
+      "status": "exact"
+    },
+    {
+      "lucide": "sliders-horizontal",
+      "code": "sliders",
+      "status": "exact"
+    },
+    {
+      "lucide": "smartphone",
+      "code": "smartphone",
+      "status": "exact"
+    },
+    {
+      "lucide": "sparkles",
+      "code": "sparkles",
+      "status": "exact"
+    },
+    {
+      "lucide": "square",
+      "code": "stop",
+      "status": "exact"
+    },
+    {
+      "lucide": "square-pen",
+      "code": "compose",
+      "status": "exact"
+    },
+    {
+      "lucide": "square-terminal",
+      "code": "terminal",
+      "status": "exact"
+    },
+    {
+      "lucide": "sun",
+      "code": "sun",
+      "status": "exact"
+    },
+    {
+      "lucide": "tag",
+      "code": "tag",
+      "status": "exact"
+    },
+    {
+      "lucide": "terminal",
+      "code": "terminal",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "trash-2",
+      "code": "trash",
+      "status": "exact"
+    },
+    {
+      "lucide": "triangle-alert",
+      "code": "warning",
+      "status": "exact"
+    },
+    {
+      "lucide": "type",
+      "code": "text-size",
+      "status": "equivalent"
+    },
+    {
+      "lucide": "unplug",
+      "code": "disconnect",
+      "status": "exact"
+    },
+    {
+      "lucide": "wifi-off",
+      "code": "wifi-off",
+      "status": "exact"
+    },
+    {
+      "lucide": "x",
+      "code": "close",
+      "status": "exact"
+    },
+    {
+      "lucide": "zap",
+      "code": "power-performance",
+      "status": "exact"
+    },
+    {
+      "lucide": "zoom-in",
+      "code": "zoom-in",
+      "status": "exact"
+    },
+    {
+      "lucide": "zoom-out",
+      "code": "zoom-out",
+      "status": "exact"
+    }
+  ]
+}
