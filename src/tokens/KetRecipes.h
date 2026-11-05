@@ -109,6 +109,7 @@ struct ChoiceRecipe {
     qreal titlePixels = 0;
     int titleWeight = 400;
     qreal descriptionPixels = 0;
+    qreal descriptionGap = 0;
     qreal opacity = 1.0;
 };
 
@@ -124,6 +125,114 @@ struct FieldRowRecipe {
     qreal helpPixels = 0;
     qreal helpGap = 0;
     qreal rowGap = 0;
+};
+
+// One parsed shadow token layer ("x y blur colour"; spread is ignored).
+struct Shadow {
+    qreal x = 0;
+    qreal y = 0;
+    qreal blur = 0;
+    QColor color;
+};
+
+[[nodiscard]] Shadow shadowToken(QStringView name, Theme theme);
+
+enum class BannerTone { Info, Warning, Danger };
+
+// An inline notice with an icon, a title, a message and an optional action (`.banner`).
+struct BannerRecipe {
+    QColor background;
+    QColor border;
+    QColor text;  // title, message and icon
+    QString icon; // Két Symbol code
+    qreal radius = 0;
+    qreal paddingInline = 0;
+    qreal paddingBlock = 0;
+    qreal spacing = 0;
+    qreal iconSize = 0;
+    qreal titlePixels = 0;
+    int titleWeight = 400;
+    qreal messagePixels = 0;
+    qreal messageGap = 0;
+};
+
+// A transient confirmation at the bottom of the window (`.toast`).
+struct ToastRecipe {
+    QColor background;
+    QColor border;
+    QColor text;
+    QColor icon;
+    Shadow shadow;
+    qreal radius = 0;
+    qreal paddingInline = 0;
+    qreal paddingBlock = 0;
+    qreal spacing = 0;
+    qreal iconSize = 0;
+    qreal fontPixels = 0;
+    qreal bottomOffset = 0;
+    int durationMs = 0;
+};
+
+// A modal dialog over the window (`.modal`, `.modal-backdrop`).
+struct DialogRecipe {
+    QColor backdrop;
+    QColor background;
+    QColor border;
+    QColor divider;
+    QColor footer;
+    QColor title;
+    Shadow shadow;
+    qreal width = 0;
+    qreal radius = 0;
+    qreal paddingInline = 0;
+    qreal headerPaddingBlock = 0;
+    qreal bodyPadding = 0;
+    qreal footerPaddingBlock = 0;
+    qreal footerGap = 0;
+    qreal titlePixels = 0;
+    int titleWeight = 400;
+    qreal margin = 0; // minimum space around the dialog inside the window
+};
+
+// Context menus and select popups (`.desktop-context-menu`); one recipe per item state.
+struct MenuRecipe {
+    QColor background;
+    QColor border;
+    QColor separator;
+    Shadow shadow;
+    qreal minWidth = 0;
+    qreal maxWidth = 0;
+    qreal padding = 0;
+    qreal radius = 0;
+    qreal separatorMargin = 0;
+};
+
+struct MenuItemRecipe {
+    QColor background; // transparent unless highlighted
+    QColor text;
+    QColor description;
+    qreal height = 0;
+    qreal radius = 0;
+    qreal paddingStart = 0;
+    qreal paddingEnd = 0;
+    qreal spacing = 0;
+    qreal checkSize = 0; // the check or radio column
+    qreal iconSize = 0;
+    qreal fontPixels = 0;
+    qreal descriptionPixels = 0;
+    qreal descriptionGap = 0;
+    qreal opacity = 1.0;
+};
+
+struct TooltipRecipe {
+    QColor background;
+    QColor text;
+    qreal radius = 0;
+    qreal paddingInline = 0;
+    qreal paddingBlock = 0;
+    qreal maxWidth = 0;
+    qreal fontPixels = 0;
+    int delayMs = 0;
 };
 
 [[nodiscard]] ButtonRecipe buttonRecipe(ButtonVariant variant, ControlSize size,
@@ -142,6 +251,14 @@ struct FieldRowRecipe {
                                         const InteractionState& state, Theme theme);
 [[nodiscard]] ChoiceRecipe choiceRecipe(bool checked, const InteractionState& state, Theme theme);
 [[nodiscard]] FieldRowRecipe fieldRowRecipe(Theme theme);
+[[nodiscard]] BannerRecipe bannerRecipe(BannerTone tone, Theme theme);
+[[nodiscard]] ToastRecipe toastRecipe(Theme theme);
+[[nodiscard]] DialogRecipe dialogRecipe(Theme theme);
+[[nodiscard]] MenuRecipe menuRecipe(Theme theme);
+// `highlighted` is hover or keyboard selection; `danger` is a destructive command.
+[[nodiscard]] MenuItemRecipe menuItemRecipe(bool highlighted, bool enabled, bool danger,
+                                            Theme theme);
+[[nodiscard]] TooltipRecipe tooltipRecipe(Theme theme);
 
 // camelCase maps of the recipes, for QML.
 [[nodiscard]] QVariantMap toVariantMap(const ButtonRecipe& recipe);
@@ -151,5 +268,11 @@ struct FieldRowRecipe {
 [[nodiscard]] QVariantMap toVariantMap(const ToggleRecipe& recipe);
 [[nodiscard]] QVariantMap toVariantMap(const ChoiceRecipe& recipe);
 [[nodiscard]] QVariantMap toVariantMap(const FieldRowRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const BannerRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const ToastRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const DialogRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const MenuRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const MenuItemRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const TooltipRecipe& recipe);
 
 } // namespace ket

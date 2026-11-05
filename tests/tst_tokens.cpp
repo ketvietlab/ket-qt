@@ -232,6 +232,54 @@ class TokensTest final : public QObject {
         QCOMPARE(more.text, Tokens::color(u"text-muted", Theme::Dark));
     }
 
+    void shadowTokensParse() {
+        const Shadow shadow = shadowToken(u"shadow-md", Theme::Light);
+        QCOMPARE(shadow.x, 0.0);
+        QCOMPARE(shadow.y, 8.0);
+        QCOMPARE(shadow.blur, 20.0);
+        QVERIFY(shadow.color.isValid() && shadow.color.alpha() > 0);
+        QVERIFY(!shadowToken(u"no-such-shadow", Theme::Light).color.isValid());
+    }
+
+    void overlayRecipesFollowTheKetPlusMock() {
+        const BannerRecipe danger = bannerRecipe(BannerTone::Danger, Theme::Light);
+        QCOMPARE(danger.background, Tokens::color(u"danger-bg", Theme::Light));
+        QCOMPARE(danger.icon, QStringLiteral("warning"));
+        QCOMPARE(danger.radius, 6.0);
+        QCOMPARE(danger.titleWeight, 550);
+        QCOMPARE(bannerRecipe(BannerTone::Info, Theme::Dark).text,
+                 Tokens::color(u"accent-text", Theme::Dark));
+
+        const ToastRecipe toast = toastRecipe(Theme::Light);
+        QCOMPARE(toast.border, Tokens::color(u"positive-border", Theme::Light));
+        QCOMPARE(toast.durationMs, 3600);
+
+        const DialogRecipe dialog = dialogRecipe(Theme::Dark);
+        QCOMPARE(dialog.width, 500.0);
+        QCOMPARE(dialog.radius, 12.0);
+        QCOMPARE(dialog.backdrop.alpha(), qRound(0.24 * 255));
+        QCOMPARE(dialog.footer, Tokens::color(u"surface-raised", Theme::Dark));
+
+        const MenuRecipe menu = menuRecipe(Theme::Light);
+        QCOMPARE(menu.minWidth, 210.0);
+        QCOMPARE(menu.border, Tokens::color(u"border-strong", Theme::Light));
+        const MenuItemRecipe idle = menuItemRecipe(false, true, false, Theme::Light);
+        QCOMPARE(idle.background.alpha(), 0);
+        QCOMPARE(idle.height, 32.0);
+        const MenuItemRecipe hot = menuItemRecipe(true, true, false, Theme::Light);
+        QCOMPARE(hot.background, Tokens::color(u"accent-subtle", Theme::Light));
+        QCOMPARE(hot.text, Tokens::color(u"accent-text", Theme::Light));
+        QCOMPARE(menuItemRecipe(true, true, true, Theme::Light).text,
+                 Tokens::color(u"danger", Theme::Light));
+        const MenuItemRecipe off = menuItemRecipe(true, false, false, Theme::Light);
+        QCOMPARE(off.background.alpha(), 0);
+        QCOMPARE(off.opacity, 0.65);
+
+        const TooltipRecipe tip = tooltipRecipe(Theme::Light);
+        QCOMPARE(tip.background, Tokens::color(u"accent", Theme::Light));
+        QCOMPARE(tip.maxWidth, 360.0);
+    }
+
     void appearanceZoomRoundsToWholePixels() {
         Appearance& appearance = Appearance::instance();
         appearance.setZoom(1.25);

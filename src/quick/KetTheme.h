@@ -39,6 +39,8 @@ class QuickTheme final : public QObject {
     Q_ENUM(IconWeight)
     enum class ToggleKind { Checkbox, Radio };
     Q_ENUM(ToggleKind)
+    enum class BannerTone { Info, Warning, Danger };
+    Q_ENUM(BannerTone)
 
     explicit QuickTheme(QObject* parent = nullptr);
     static QuickTheme* create(QQmlEngine*, QJSEngine*);
@@ -68,6 +70,13 @@ class QuickTheme final : public QObject {
     Q_INVOKABLE QVariantMap choiceRecipe(bool dark, qreal zoom, bool checked, bool hovered,
                                          bool pressed, bool enabled, bool focused) const;
     Q_INVOKABLE QVariantMap fieldRowRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap bannerRecipe(bool dark, qreal zoom, int tone) const;
+    Q_INVOKABLE QVariantMap toastRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap dialogRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap menuRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap menuItemRecipe(bool dark, qreal zoom, bool highlighted, bool enabled,
+                                           bool danger) const;
+    Q_INVOKABLE QVariantMap tooltipRecipe(bool dark, qreal zoom) const;
     // Két Symbol (ket::Icons): the qrc URL of the master for a `box` (already zoomed), the
     // logical size the drawing occupies and its whole-device-pixel offset in the box.
     Q_INVOKABLE QString iconSource(const QString& code, qreal box, int weight) const;

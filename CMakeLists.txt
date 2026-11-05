@@ -40,6 +40,7 @@ add_library(ketqt_tokens STATIC
     src/tokens/KetTokens.h src/tokens/KetTokens.cpp
     src/tokens/KetAppearance.h src/tokens/KetAppearance.cpp
     src/tokens/KetRecipes.h src/tokens/KetRecipes.cpp
+    src/tokens/KetOverlayRecipes.cpp
     src/tokens/KetProfile.h src/tokens/KetProfile.cpp
 )
 add_library(KetQt::Tokens ALIAS ketqt_tokens)
@@ -77,6 +78,11 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetToggle.h src/widgets/KetToggle.cpp
         src/widgets/KetChoice.h src/widgets/KetChoice.cpp
         src/widgets/KetFieldRow.h src/widgets/KetFieldRow.cpp
+        src/widgets/KetBanner.h src/widgets/KetBanner.cpp
+        src/widgets/KetToast.h src/widgets/KetToast.cpp
+        src/widgets/KetDialog.h src/widgets/KetDialog.cpp
+        src/widgets/KetMenuPainter.h src/widgets/KetMenuPainter.cpp
+        src/widgets/KetShadow.h
     )
     add_library(KetQt::Widgets ALIAS ketqt_widgets)
     target_include_directories(ketqt_widgets PUBLIC
@@ -104,11 +110,16 @@ if(KETQT_BUILD_QUICK)
                   src/quick/qml/KetTextField.qml src/quick/qml/KetSelect.qml
                   src/quick/qml/KetToggleIndicator.qml src/quick/qml/KetCheckbox.qml
                   src/quick/qml/KetRadio.qml src/quick/qml/KetChoice.qml
-                  src/quick/qml/KetFieldRow.qml
+                  src/quick/qml/KetFieldRow.qml src/quick/qml/KetShadow.qml
+                  src/quick/qml/KetBanner.qml src/quick/qml/KetToast.qml
+                  src/quick/qml/KetDialog.qml src/quick/qml/KetMenu.qml
+                  src/quick/qml/KetMenuItem.qml src/quick/qml/KetMenuSeparator.qml
+                  src/quick/qml/KetToolTip.qml
         RESOURCE_PREFIX /qt/qml
     )
     foreach(file KetButton KetIconButton KetBadge KetTag KetIcon KetTextField KetSelect
-                 KetToggleIndicator KetCheckbox KetRadio KetChoice KetFieldRow)
+                 KetToggleIndicator KetCheckbox KetRadio KetChoice KetFieldRow KetShadow
+                 KetBanner KetToast KetDialog KetMenu KetMenuItem KetMenuSeparator KetToolTip)
         set_source_files_properties(src/quick/qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
     endforeach()
     add_library(KetQt::Quick ALIAS ketqt_quick)
@@ -149,7 +160,8 @@ if(KETQT_BUILD_WIDGETS)
     install(FILES src/widgets/KetStyle.h src/widgets/KetButton.h src/widgets/KetBadge.h
                   src/widgets/KetTag.h src/widgets/KetIcon.h src/widgets/KetTextField.h
                   src/widgets/KetSelect.h src/widgets/KetToggle.h src/widgets/KetChoice.h
-                  src/widgets/KetFieldRow.h
+                  src/widgets/KetFieldRow.h src/widgets/KetBanner.h src/widgets/KetToast.h
+                  src/widgets/KetDialog.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 endif()
 install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)

@@ -165,6 +165,49 @@ class QuickTest final : public QObject {
     }
 
   private:
+    void overlaysLoadAndDrawTheirRecipes() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "Item { width: 900; height: 700\n"
+            "  property alias banner: banner; property alias toast: toast\n"
+            "  property alias dialog: dialog; property alias menu: menu; property alias tip: tip\n"
+            "  KetBanner { id: banner; width: 400; tone: KetTheme.BannerTone.Danger;"
+            "              title: \"Sync failed\"; actionText: \"Retry\" }\n"
+            "  KetToast { id: toast; text: \"Saved\" }\n"
+            "  KetDialog { id: dialog; title: \"Rename\"\n"
+            "    KetTextField {}\n"
+            "    actions: [ KetButton { text: \"Save\" } ] }\n"
+            "  KetMenu { id: menu\n"
+            "    KetMenuItem { text: \"Open\" }\n"
+            "    KetMenuItem { text: \"Delete\"; danger: true }\n"
+            "    KetMenuSeparator {}\n"
+            "    KetMenuItem { text: \"Pin\"; checkable: true; description: \"Keep it on top.\" } "
+            "}\n"
+            "  KetToolTip { id: tip; text: \"Copy\" }\n"
+            "}\n"));
+        QVERIFY(root);
+        auto* banner = root->property("banner").value<QQuickItem*>();
+        QCOMPARE(banner->property("color").value<QColor>(),
+                 Tokens::color(u"danger-bg", Theme::Light));
+        QCOMPARE(banner->property("radius").toReal(), 6.0);
+
+        QObject* dialog = root->property("dialog").value<QObject*>();
+        QCOMPARE(dialog->property("width").toReal(), 500.0);
+        QCOMPARE(dialog->property("modal").toBool(), true);
+
+        QObject* menu = root->property("menu").value<QObject*>();
+        QVERIFY(menu->property("implicitWidth").toReal() >= 210);
+        QCOMPARE(menu->property("hasCheckableItems").toBool(), true);
+
+        QObject* tip = root->property("tip").value<QObject*>();
+        auto* tipBackground = tip->property("background").value<QQuickItem*>();
+        QCOMPARE(tipBackground->property("color").value<QColor>(),
+                 Tokens::color(u"accent", Theme::Light));
+
+        Appearance::instance().setZoom(1.25);
+        QCOMPARE(dialog->property("width").toReal(), 625.0);
+    }
+
     std::unique_ptr<QObject> create(const QByteArray& source) {
         QQmlComponent component(&engine_);
         component.setData(source, QUrl()); // a local URL loads imports synchronously

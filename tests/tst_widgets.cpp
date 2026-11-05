@@ -1,19 +1,29 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetAppearance.h"
 #include "KetBadge.h"
+#include "KetBanner.h"
 #include "KetButton.h"
 #include "KetChoice.h"
+#include "KetDialog.h"
 #include "KetFieldRow.h"
 #include "KetIcon.h"
 #include "KetIcons.h"
+#include "KetMenuPainter.h"
 #include "KetSelect.h"
 #include "KetStyle.h"
 #include "KetTag.h"
 #include "KetTextField.h"
+#include "KetToast.h"
 #include "KetToggle.h"
 
+#include <QAction>
 #include <QApplication>
+#include <QLabel>
+#include <QMenu>
+#include <QSignalSpy>
+#include <QStyleOptionMenuItem>
 #include <QTest>
+#include <QToolTip>
 
 using namespace ket;
 
@@ -176,6 +186,106 @@ class WidgetsTest final : public QObject {
         QVERIFY(field->isInvalid());
         row.setError({});
         QVERIFY(!field->isInvalid());
+    }
+
+    void bannersWrapAndTakeAnAction() {
+        Banner banner(BannerTone::Warning, QStringLiteral("Router unavailable"),
+                      QStringLiteral("Requests use the direct connection until it returns."));
+        QCOMPARE(banner.recipe().background, Tokens::color(u"warning-bg", Theme::Light));
+        QVERIFY(!banner.action());
+        Button* retry = banner.setAction(QStringLiteral("Retry"), QStringLiteral("refresh"));
+        QVERIFY(retry && banner.action() == retry);
+        QVERIFY(banner.heightForWidth(260) > banner.heightForWidth(700));
+        banner.resize(500, banner.heightForWidth(500));
+        QVERIFY(!banner.grab().isNull());
+    }
+
+    void toastsSitAtTheBottomAndExpire() {
+        QWidget window;
+        window.resize(800, 600);
+        Toast* toast = Toast::showMessage(&window, QStringLiteral("Saved"));
+        QCOMPARE(toast->parentWidget(), &window);
+        QVERIFY(toast->isVisibleTo(&window));
+        QCOMPARE(toast->geometry().center().x(), window.rect().center().x());
+        QVERIFY(toast->geometry().bottom() < window.height() - 30);
+        QPointer<Toast> first = toast;
+        Toast* second = Toast::showMessage(&window, QStringLiteral("Saved again"));
+        QVERIFY(second != first);
+        QTRY_VERIFY(first.isNull()); // the earlier toast is replaced
+    }
+
+    void dialogsCoverTheWindowAndTrapFocus() {
+        QWidget window;
+        window.resize(900, 700);
+        auto* outside = new QLineEdit(&window);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        outside->setFocus();
+
+        Dialog dialog(QStringLiteral("Rename"), &window);
+        auto* name = new TextField;
+        dialog.setBody(name);
+        Button* cancel = dialog.addButton(QStringLiteral("Cancel"));
+        Button* save = dialog.addButton(QStringLiteral("Save"), ButtonVariant::Primary);
+        QSignalSpy accepted(&dialog, &Dialog::accepted);
+        QSignalSpy rejected(&dialog, &Dialog::rejected);
+        connect(save, &QAbstractButton::clicked, &dialog, &Dialog::accept);
+
+        dialog.open();
+        QCOMPARE(dialog.geometry(), window.rect());
+        QCOMPARE(dialog.card()->width(), 500);
+        QCOMPARE(dialog.card()->geometry().center(), window.rect().center());
+        QTRY_COMPARE(QApplication::focusWidget(), name);
+        for (int i = 0; i < 6; ++i) {
+            QTest::keyClick(QApplication::focusWidget(), Qt::Key_Tab);
+            QVERIFY(dialog.card()->isAncestorOf(QApplication::focusWidget()));
+        }
+        QTest::keyClick(QApplication::focusWidget(), Qt::Key_Escape);
+        QCOMPARE(rejected.count(), 1);
+        QVERIFY(!dialog.isOpen());
+        QCOMPARE(QApplication::focusWidget(), outside);
+
+        dialog.open();
+        save->click();
+        QCOMPARE(accepted.count(), 1);
+        dialog.open();
+        QTest::mouseClick(&dialog, Qt::LeftButton, {}, QPoint(5, 5));
+        QCOMPARE(rejected.count(), 2);
+        Q_UNUSED(cancel);
+    }
+
+    void menusUseTheMenuRecipe() {
+        QMenu menu;
+        menu.addAction(QStringLiteral("Open"));
+        QAction* remove = menu.addAction(QStringLiteral("Delete"));
+        Style::setDanger(remove);
+        QAction* pin = menu.addAction(QStringLiteral("Pin to sidebar"));
+        pin->setCheckable(true);
+        Style::setDescription(pin, QStringLiteral("Keep it above recent conversations."));
+        menu.addSeparator();
+        menu.ensurePolished();
+        QVERIFY(menu.testAttribute(Qt::WA_TranslucentBackground));
+        QVERIFY(menu.sizeHint().width() >= 210);
+        QVERIFY(menu.sizeHint().width() <= 330);
+
+        QStyleOptionMenuItem option;
+        option.initFrom(&menu);
+        option.menuItemType = QStyleOptionMenuItem::Normal;
+        option.text = QStringLiteral("Open");
+        option.menuHasCheckableItems = true;
+        QCOMPARE(detail::menuItemSize(&option, &menu).height(), 32);
+        option.text = QStringLiteral("Pin to sidebar");
+        QVERIFY(detail::menuItemSize(&option, &menu).height() > 32);
+        option.menuItemType = QStyleOptionMenuItem::Separator;
+        QCOMPARE(detail::menuItemSize(&option, &menu).height(), 11);
+        QVERIFY(!menu.grab().isNull());
+    }
+
+    void tooltipsUseTheAccent() {
+        QCOMPARE(QToolTip::palette().color(QPalette::ToolTipBase),
+                 Tokens::color(u"accent", Theme::Light));
+        QCOMPARE(QApplication::style()->styleHint(QStyle::SH_ToolTip_WakeUpDelay), 600);
+        QVERIFY(QApplication::style()->styleHint(QStyle::SH_ComboBox_Popup));
     }
 
     void tagElidesAtTheRecipeWidth() {

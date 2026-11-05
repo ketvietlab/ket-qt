@@ -25,6 +25,10 @@ static_assert(int(QuickTheme::ControlSize::Medium) == int(ControlSize::Medium));
 static_assert(int(QuickTheme::BadgeTone::Danger) == int(BadgeTone::Danger));
 static_assert(int(QuickTheme::IconWeight::Regular) == int(ket::IconWeight::Regular));
 static_assert(int(QuickTheme::ToggleKind::Radio) == int(ket::ToggleKind::Radio));
+static_assert(int(QuickTheme::BannerTone::Danger) == int(ket::BannerTone::Danger));
+
+constexpr std::initializer_list<QStringView> kShadowLengths = {u"shadowX", u"shadowY",
+                                                               u"shadowBlur"};
 
 } // namespace
 
@@ -131,6 +135,57 @@ QVariantMap QuickTheme::fieldRowRecipe(bool dark, qreal zoom) const {
     scaleLengths(
         recipe, zoom,
         {u"labelWidth", u"gap", u"labelTop", u"labelPixels", u"helpPixels", u"helpGap", u"rowGap"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::bannerRecipe(bool dark, qreal zoom, int tone) const {
+    QVariantMap recipe = toVariantMap(ket::bannerRecipe(ket::BannerTone(tone), themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"radius", u"paddingInline", u"paddingBlock", u"spacing", u"iconSize",
+                  u"titlePixels", u"messagePixels", u"messageGap"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::toastRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::toastRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"radius", u"paddingInline", u"paddingBlock", u"spacing", u"iconSize",
+                  u"fontPixels", u"bottomOffset"});
+    scaleLengths(recipe, zoom, kShadowLengths);
+    return recipe;
+}
+
+QVariantMap QuickTheme::dialogRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::dialogRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"width", u"radius", u"paddingInline", u"headerPaddingBlock", u"bodyPadding",
+                  u"footerPaddingBlock", u"footerGap", u"titlePixels", u"margin"});
+    scaleLengths(recipe, zoom, kShadowLengths);
+    return recipe;
+}
+
+QVariantMap QuickTheme::menuRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::menuRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"minWidth", u"maxWidth", u"padding", u"radius", u"separatorMargin"});
+    scaleLengths(recipe, zoom, kShadowLengths);
+    return recipe;
+}
+
+QVariantMap QuickTheme::menuItemRecipe(bool dark, qreal zoom, bool highlighted, bool enabled,
+                                       bool danger) const {
+    QVariantMap recipe =
+        toVariantMap(ket::menuItemRecipe(highlighted, enabled, danger, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"height", u"radius", u"paddingStart", u"paddingEnd", u"spacing", u"checkSize",
+                  u"iconSize", u"fontPixels", u"descriptionPixels", u"descriptionGap"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::tooltipRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::tooltipRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"radius", u"paddingInline", u"paddingBlock", u"maxWidth", u"fontPixels"});
     return recipe;
 }
 
