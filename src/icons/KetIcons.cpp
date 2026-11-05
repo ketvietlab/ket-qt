@@ -18,6 +18,12 @@ struct LucideRow {
     const char* code;
 };
 
+constexpr int kSizes[] = {
+#define KET_SYMBOL_SIZE(px) px,
+#include "generated/KetSymbolNames.inc"
+#undef KET_SYMBOL_SIZE
+};
+
 constexpr const char* kCodes[] = {
 #define KET_SYMBOL_CODE(identifier, code) code,
 #include "generated/KetSymbolNames.inc"
@@ -121,12 +127,15 @@ QStringList Icons::codes() {
 
 QString Icons::codeForLucide(QStringView lucide) { return lucideIndex().value(lucide.toString()); }
 
+// The nearest drawn master, the smaller one on a tie: with 14/16/20/24 px masters a 17 or
+// 18 px box draws 16, 19-22 px draws 20 and 23 px or more draws 24.
 int Icons::masterSize(qreal box) {
-    if (box <= 18)
-        return 16;
-    if (box <= 22)
-        return 20;
-    return 24;
+    int best = kSizes[0];
+    for (const int size : kSizes) {
+        if (qAbs(size - box) < qAbs(best - box))
+            best = size;
+    }
+    return best;
 }
 
 qreal Icons::drawSize(qreal box) { return qMin<qreal>(box, masterSize(box)); }

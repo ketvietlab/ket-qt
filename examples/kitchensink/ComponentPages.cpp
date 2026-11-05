@@ -250,10 +250,9 @@ QWidget* iconGrid(QWidget* parent) {
 QWidget* iconPage() {
     PageFrame frame = makePage(
         QStringLiteral("Icons"),
-        QStringLiteral("Két Symbol 0.11.0 (CC BY 4.0) through ket::Icons, ket::Icon and KetIcon. "
-                       "A box up to 18 px draws the 16 px master, 19-22 px the 20 px master and "
-                       "23 px or more the 24 px master, at its own size on whole device pixels. "
-                       "Light is the default; Regular is for emphasis."));
+        QStringLiteral("Két Symbol (CC BY 4.0) through ket::Icons, ket::Icon and KetIcon. A box "
+                       "draws the nearest master (14, 16, 20 or 24 px), at its own size on whole "
+                       "device pixels. Light is the default; Regular is for emphasis."));
     frame.body->addWidget(sectionTitle(QStringLiteral("Sizes and weights"), frame.page));
     frame.body->addWidget(toolkits(
         iconSizes(frame.page), quickView(QStringLiteral("IconGallery"), frame.page), frame.page));

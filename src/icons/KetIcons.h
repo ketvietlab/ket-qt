@@ -15,10 +15,11 @@ enum class IconWeight { Light, Regular };
 // Két Symbol icons (CC BY 4.0, third_party/ket-symbol) compiled into KetQt::Icons.
 // Icons are named by Két code; KetPlus' Lucide names map through codeForLucide().
 //
-// Sizes follow the drawn masters: a box up to 18 px uses the 16 px master, 19-22 px the
-// 20 px master and 23 px or more the 24 px master. A master is drawn at its own size and
-// centred on whole device pixels (a 17 px box holds the 16 px drawing); only a box smaller
-// than its master, such as the 14 px compact size, scales the master down.
+// Sizes follow the drawn masters (14, 16, 20 and 24 px): a box uses the nearest master, the
+// smaller one on a tie, so 14 px compact icons use their own drawing, 17-18 px boxes the
+// 16 px master, 19-22 px the 20 px master and 23 px or more the 24 px master. A master is
+// drawn at its own size and centred on whole device pixels (a 17 px box holds the 16 px
+// drawing); only a box smaller than its master scales it down.
 class Icons final {
   public:
     [[nodiscard]] static bool contains(QStringView code);

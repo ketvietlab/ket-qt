@@ -16,7 +16,7 @@ class IconsTest final : public QObject {
         // Touch the resources once; the qrc is registered on first use.
         (void)Icons::pixmap(codes.first(), 16, 1, Qt::black);
         for (const QString& code : codes) {
-            for (const qreal box : {16.0, 20.0, 24.0}) {
+            for (const qreal box : {14.0, 16.0, 20.0, 24.0}) {
                 for (const IconWeight weight : {IconWeight::Light, IconWeight::Regular})
                     QVERIFY2(QFile::exists(Icons::resourcePath(code, box, weight)),
                              qPrintable(Icons::resourcePath(code, box, weight)));
@@ -34,14 +34,18 @@ class IconsTest final : public QObject {
     }
 
     void boxesPickTheDrawnMaster() {
-        QCOMPARE(Icons::masterSize(14), 16);
+        QCOMPARE(Icons::masterSize(14), 14);
+        QCOMPARE(Icons::masterSize(15), 14);
+        QCOMPARE(Icons::masterSize(13), 14);
         QCOMPARE(Icons::masterSize(17), 16);
         QCOMPARE(Icons::masterSize(18), 16);
         QCOMPARE(Icons::masterSize(19), 20);
         QCOMPARE(Icons::masterSize(22), 20);
         QCOMPARE(Icons::masterSize(23), 24);
         QCOMPARE(Icons::drawSize(17), 16.0); // never stretched
-        QCOMPARE(Icons::drawSize(14), 14.0); // compact scales down
+        QCOMPARE(Icons::drawSize(14), 14.0); // the compact master at its own size
+        QCOMPARE(Icons::drawSize(12), 12.0); // smaller boxes scale the 14 px master down
+        QVERIFY(Icons::resourcePath(u"close", 14).endsWith(QStringLiteral("/light/14/close.svg")));
         QCOMPARE(Icons::offset(17, 1), 0.0);
         QCOMPARE(Icons::offset(17, 2), 0.5); // one device pixel at 2x
         QCOMPARE(Icons::offset(16, 2), 0.0);
