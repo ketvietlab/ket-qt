@@ -42,6 +42,15 @@ class Style final : public QProxyStyle {
                            const QWidget* widget = nullptr) const override;
     void drawControl(ControlElement element, const QStyleOption* option, QPainter* painter,
                      const QWidget* widget = nullptr) const override;
+    void drawComplexControl(ComplexControl control, const QStyleOptionComplex* option,
+                            QPainter* painter, const QWidget* widget = nullptr) const override;
+    [[nodiscard]] QRect subControlRect(ComplexControl control, const QStyleOptionComplex* option,
+                                       SubControl subControl,
+                                       const QWidget* widget = nullptr) const override;
+    [[nodiscard]] SubControl hitTestComplexControl(ComplexControl control,
+                                                   const QStyleOptionComplex* option,
+                                                   const QPoint& position,
+                                                   const QWidget* widget = nullptr) const override;
     int pixelMetric(PixelMetric metric, const QStyleOption* option = nullptr,
                     const QWidget* widget = nullptr) const override;
     void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter,

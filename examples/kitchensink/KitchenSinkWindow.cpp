@@ -3,6 +3,7 @@
 
 #include "ChatPages.h"
 #include "ComponentPages.h"
+#include "ControlPages.h"
 #include "ConversationPages.h"
 #include "FormPages.h"
 #include "FoundationPages.h"
@@ -47,6 +48,7 @@ const PageEntry kPages[] = {
     {"conversation", "Components", "Conversation", conversationPage},
     {"rich", "Components", "Rich transcript", richPage},
     {"chat", "Components", "Chat extras", chatPage},
+    {"controls", "Components", "Controls and chrome", controlPage},
 };
 
 Theme theme() { return Appearance::instance().theme(); }

@@ -328,6 +328,64 @@ struct Profile {
     qreal galleryCaptionPixels = 0;
     qreal galleryCaptionGap = 0;
 
+    // Controls and chrome: slider, avatar, tree items, group headers, route tabs,
+    // status bar, breadcrumb and pane header.
+    qreal sliderHeight = 0;
+    qreal sliderTrackHeight = 0;
+    qreal sliderHandleSize = 0;
+    qreal sliderHandleBorder = 0;
+    qreal sliderLabelPixels = 0;
+    int sliderLabelWeight = 0;
+    qreal sliderRangePixels = 0;
+    qreal sliderHeaderGap = 0;
+    qreal sliderLabelsGap = 0;
+    qreal avatarDiameter = 0;
+    qreal avatarPixels = 0;
+    int avatarWeight = 0;
+    qreal treeItemPaddingBlock = 0;
+    qreal treeItemPaddingInline = 0;
+    qreal treeItemGap = 0;
+    qreal treeItemRadius = 0;
+    qreal treeItemIconOffset = 0;
+    qreal treeItemTitlePixels = 0;
+    int treeItemTitleWeight = 0;
+    qreal treeItemDetailPixels = 0;
+    qreal treeItemActivityPixels = 0;
+    qreal treeItemActivityIconSize = 0;
+    qreal treeItemActivityGap = 0;
+    qreal treeItemActivityOffset = 0;
+    qreal groupHeaderHeight = 0;
+    qreal groupHeaderPaddingStart = 0;
+    qreal groupHeaderPaddingEnd = 0;
+    qreal groupHeaderGap = 0;
+    qreal groupHeaderNameGap = 0;
+    qreal groupHeaderIconSize = 0;
+    qreal groupHeaderPixels = 0;
+    int groupHeaderWeight = 0;
+    qreal groupHeaderActionSize = 0;
+    qreal routeTabPixels = 0;
+    qreal routeTabPaddingTop = 0;
+    qreal routeTabPaddingBottom = 0;
+    qreal routeTabIndicator = 0;
+    qreal routeTabGap = 0;
+    qreal statusBarHeight = 0;
+    qreal statusBarPaddingInline = 0;
+    qreal statusBarPixels = 0;
+    qreal statusBarIconSize = 0;
+    qreal statusBarItemGap = 0;
+    qreal statusBarGroupGap = 0;
+    qreal breadcrumbHeight = 0;
+    qreal breadcrumbPaddingInline = 0;
+    qreal breadcrumbGap = 0;
+    qreal breadcrumbPixels = 0;
+    qreal breadcrumbIconSize = 0;
+    qreal paneHeaderHeight = 0;
+    qreal paneHeaderPaddingStart = 0;
+    qreal paneHeaderPaddingEnd = 0;
+    qreal paneHeaderGap = 0;
+    qreal paneHeaderPixels = 0;
+    qreal paneHeaderIconSize = 0;
+
     [[nodiscard]] static Profile designSystem();
     [[nodiscard]] static Profile ketPlus();
 
