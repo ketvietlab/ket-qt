@@ -2,11 +2,15 @@
 #include "KetTheme.h"
 
 #include "KetAppearance.h"
+#include "KetConversationRecipes.h"
 #include "KetIcons.h"
 #include "KetRecipes.h"
 
 #include <QFontDatabase>
 #include <QGuiApplication>
+#include <QQuickTextDocument>
+#include <QTextCursor>
+#include <QTextDocument>
 
 namespace ket {
 namespace {
@@ -26,6 +30,8 @@ static_assert(int(QuickTheme::BadgeTone::Danger) == int(BadgeTone::Danger));
 static_assert(int(QuickTheme::IconWeight::Regular) == int(ket::IconWeight::Regular));
 static_assert(int(QuickTheme::ToggleKind::Radio) == int(ket::ToggleKind::Radio));
 static_assert(int(QuickTheme::BannerTone::Danger) == int(ket::BannerTone::Danger));
+static_assert(int(QuickTheme::ConversationStatus::Stopped) ==
+              int(ket::ConversationStatus::Stopped));
 
 constexpr std::initializer_list<QStringView> kShadowLengths = {u"shadowX", u"shadowY",
                                                                u"shadowBlur"};
@@ -269,6 +275,77 @@ QVariantMap QuickTheme::emptyStateRecipe(bool dark, qreal zoom) const {
     scaleLengths(recipe, zoom,
                  {u"iconSize", u"spacing", u"titlePixels", u"messagePixels", u"messageMaxWidth"});
     return recipe;
+}
+
+QVariantMap QuickTheme::conversationRowRecipe(bool dark, qreal zoom, bool selected, bool hovered,
+                                              bool enabled, bool focused) const {
+    const InteractionState state{hovered, false, enabled, focused};
+    QVariantMap recipe = toVariantMap(ket::conversationRowRecipe(selected, state, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"height", u"paddingInline", u"paddingBlock", u"radius", u"spacing", u"lineGap",
+                  u"titlePixels", u"titleLineHeight", u"numberPixels", u"metaPixels", u"metaHeight",
+                  u"metaGap", u"tagGap", u"tagMaxWidth", u"indicatorSize", u"indicatorTop"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::conversationStatusRecipe(bool dark, int status) const {
+    return toVariantMap(
+        ket::conversationStatusRecipe(ket::ConversationStatus(status), themeOf(dark)));
+}
+
+QString QuickTheme::conversationStatusLabel(int status) const {
+    return ket::conversationStatusLabel(ket::ConversationStatus(status));
+}
+
+QVariantMap QuickTheme::composerRecipe(bool dark, qreal zoom, bool focused) const {
+    QVariantMap recipe = toVariantMap(ket::composerRecipe(focused, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"radius", u"padding", u"textPixels", u"textPaddingInline", u"textPaddingBlock",
+                  u"minInputHeight", u"sendSize", u"stopIconSize", u"toolbarHeight",
+                  u"toolbarGap"});
+    scaleLengths(recipe, zoom, kShadowLengths);
+    return recipe;
+}
+
+QVariantMap QuickTheme::userMessageRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::userMessageRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"radius", u"paddingInline", u"paddingBlock", u"fontPixels", u"spacingAfter"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::assistantMessageRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::assistantMessageRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"avatarSize", u"avatarRadius", u"avatarIconSize", u"spacing", u"namePixels",
+                  u"timePixels", u"metaGap", u"metaBottom", u"bodyPixels", u"spacingAfter"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::dayDividerRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::dayDividerRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom, {u"fontPixels", u"spacing", u"marginTop", u"marginBottom"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::activityRowRecipe(bool dark, qreal zoom, bool hovered, bool enabled,
+                                          bool focused) const {
+    const InteractionState state{hovered, false, enabled, focused};
+    QVariantMap recipe = toVariantMap(ket::activityRowRecipe(state, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"height", u"paddingInline", u"spacing", u"radius", u"fontPixels",
+                  u"detailPixels", u"iconSize", u"chevronSize"});
+    return recipe;
+}
+
+void QuickTheme::applyLineHeight(QQuickTextDocument* document, qreal pixels) const {
+    if (!document || !document->textDocument())
+        return;
+    QTextBlockFormat format;
+    format.setLineHeight(pixels, QTextBlockFormat::FixedHeight);
+    QTextCursor cursor(document->textDocument());
+    cursor.select(QTextCursor::Document);
+    cursor.mergeBlockFormat(format);
 }
 
 QString QuickTheme::iconSource(const QString& code, qreal box, int weight) const {

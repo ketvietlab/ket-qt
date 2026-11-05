@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetAppearance.h"
+#include "KetConversationRecipes.h"
 #include "KetProfile.h"
 #include "KetRecipes.h"
 #include "KetTokens.h"
@@ -322,6 +323,44 @@ class TokensTest final : public QObject {
         QCOMPARE(activityBarFrame(r, 1, r.durationMs / 2 - 1).first,
                  activityBarFrame(r, 0, r.durationMs / 2 - 1 - r.staggerMs).first);
         QCOMPARE(activityBarFrame(r, 2, 100).first, 10.0);
+    }
+
+    void conversationRecipesFollowTheKetPlusMock() {
+        const ConversationRowRecipe row = conversationRowRecipe(false, {}, Theme::Light);
+        QCOMPARE(row.height, 48.0);
+        QCOMPARE(row.background.alpha(), 0);
+        QCOMPARE(row.titleWeight, 400);
+        const ConversationRowRecipe selected = conversationRowRecipe(true, {}, Theme::Light);
+        QCOMPARE(selected.background, Tokens::color(u"surface-hover", Theme::Light));
+        QCOMPARE(selected.titleWeight, 500);
+        QCOMPARE(row.tagMaxWidth, 84.0);
+
+        const ConversationStatusRecipe working =
+            conversationStatusRecipe(ConversationStatus::Working, Theme::Light);
+        QVERIFY(working.spinning);
+        QCOMPARE(working.iconColor, Tokens::color(u"text-main", Theme::Light));
+        QCOMPARE(conversationStatusRecipe(ConversationStatus::NeedsInput, Theme::Light).labelColor,
+                 Tokens::color(u"warning", Theme::Light));
+        QCOMPARE(conversationStatusLabel(ConversationStatus::Error),
+                 QStringLiteral("Reply failed"));
+
+        QCOMPARE(composerRecipe(false, Theme::Light).border,
+                 Tokens::color(u"border-default", Theme::Light));
+        const ComposerRecipe focused = composerRecipe(true, Theme::Light);
+        QCOMPARE(focused.border, Tokens::color(u"accent-border", Theme::Light));
+        QCOMPARE(focused.ring, Tokens::color(u"accent-subtle", Theme::Light));
+        QCOMPARE(focused.radius, 12.0);
+
+        // color-mix(in srgb, accent 74%, black)
+        const QColor accent = Tokens::color(u"accent", Theme::Light);
+        const QColor bubble = userMessageRecipe(Theme::Light).background;
+        QCOMPARE(bubble.red(), qRound(accent.red() * 0.74));
+        QCOMPARE(bubble.blue(), qRound(accent.blue() * 0.74));
+        QCOMPARE(userMessageRecipe(Theme::Light).fontPixels, 15.0);
+        QCOMPARE(assistantMessageRecipe(Theme::Light).avatarSize, 25.0);
+        QCOMPARE(dayDividerRecipe(Theme::Light).marginBottom, 22.0);
+        QCOMPARE(activityRowRecipe({true, false, true, false}, Theme::Light).background,
+                 Tokens::color(u"surface-hover", Theme::Light));
     }
 
     void appearanceZoomRoundsToWholePixels() {

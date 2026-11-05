@@ -11,13 +11,17 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
   `ket::Badge`, `ket::Tag`, `ket::Icon`, `ket::TextField`, `ket::Select`, `ket::Checkbox`,
   `ket::Radio`, `ket::Choice`, `ket::FieldRow`, `ket::Banner`, `ket::Toast`, `ket::Dialog`,
   `ket::NavItem`, `ket::Kbd`, `ket::SegmentedControl`, `ket::ActivityIndicator`,
-  `ket::EmptyState`; `ket::Style` also draws every `QMenu`, the select popup, `QToolTip`, top
+  `ket::EmptyState`, `ket::ConversationRow`, `ket::Composer`, `ket::UserMessage`,
+  `ket::AssistantMessage`, `ket::ReadingText`, `ket::DayDivider`, `ket::ActivityRow`;
+  `ket::Style` also draws every `QMenu`, the select popup, `QToolTip`, top
   `QTabBar`s and horizontal `QProgressBar`s.
 - `KetQt::Quick`: the QML module `Ket` with `KetTheme`, `KetButton`, `KetIconButton`,
   `KetBadge`, `KetTag`, `KetIcon`, `KetTextField`, `KetSelect`, `KetCheckbox`, `KetRadio`,
   `KetChoice`, `KetFieldRow`, `KetBanner`, `KetToast`, `KetDialog`, `KetMenu`, `KetMenuItem`,
   `KetMenuSeparator`, `KetToolTip`, `KetNavItem`, `KetKbd`, `KetSegmentedControl`, `KetTabBar`,
-  `KetTabButton`, `KetProgressBar`, `KetActivityIndicator`, `KetEmptyState`.
+  `KetTabButton`, `KetProgressBar`, `KetActivityIndicator`, `KetEmptyState`,
+  `KetConversationRow`, `KetComposer`, `KetUserMessage`, `KetAssistantMessage`, `KetReadingText`,
+  `KetDayDivider`, `KetActivityRow`.
 
 Components follow the new KetPlus desktop mock and are added in the order KetPlus uses
 them; see [docs/architecture.md](docs/architecture.md#component-scope-and-source).

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetAppearance.h"
+#include "KetConversationRecipes.h"
 #include "KetRecipes.h"
 
 #include <QGuiApplication>
@@ -13,9 +14,31 @@ Q_IMPORT_QML_PLUGIN(KetPlugin)
 
 using namespace ket;
 
+namespace {
+
+// QML warnings fail the test that caused them (cleanup() checks the count).
+int qmlWarnings = 0;
+QtMessageHandler previousHandler = nullptr;
+
+void countQmlWarnings(QtMsgType type, const QMessageLogContext& context, const QString& message) {
+    if (type != QtDebugMsg && type != QtInfoMsg &&
+        (message.contains(QLatin1String("qrc:/")) || message.contains(QLatin1String(".qml:"))))
+        ++qmlWarnings;
+    previousHandler(type, context, message);
+}
+
+} // namespace
+
 class QuickTest final : public QObject {
     Q_OBJECT
   private slots:
+    void initTestCase() { previousHandler = qInstallMessageHandler(countQmlWarnings); }
+
+    void cleanup() {
+        const int warnings = std::exchange(qmlWarnings, 0);
+        QCOMPARE(warnings, 0);
+    }
+
     void init() {
         Appearance::instance().setMode(Appearance::Mode::Light);
         Appearance::instance().setZoom(1.0);
@@ -164,7 +187,6 @@ class QuickTest final : public QObject {
         QCOMPARE(root->property("page").value<QColor>(), Tokens::color(u"page-bg", Theme::Dark));
     }
 
-  private:
     void overlaysLoadAndDrawTheirRecipes() {
         std::unique_ptr<QObject> root = create(QByteArrayLiteral(
             "import QtQuick\nimport Ket\n"
@@ -243,6 +265,39 @@ class QuickTest final : public QObject {
         QVERIFY(root->property("empty").value<QQuickItem*>()->implicitHeight() > 35);
     }
 
+    void conversationBlocksLoad() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "Item { width: 800; height: 600\n"
+            "  property alias row: row; property alias composer: composer\n"
+            "  property alias user: user; property alias step: step\n"
+            "  KetConversationRow { id: row; width: 320; text: \"Navigation\"; number: \"4821\"\n"
+            "    status: KetTheme.ConversationStatus.Working\n"
+            "    tags: [{label: \"ui\", color: \"#2f6fde\"}, {label: \"review\", color: "
+            "\"#23875a\"}] }\n"
+            "  KetComposer { id: composer; width: 600 }\n"
+            "  KetUserMessage { id: user; width: 700; text: \"Two lines please.\" }\n"
+            "  KetAssistantMessage { width: 600; name: \"Claude\"; time: \"10:42\";"
+            "                        text: \"Done.\" }\n"
+            "  KetDayDivider { width: 600; text: \"Today\" }\n"
+            "  KetActivityRow { id: step; text: \"Read 3 files\"; iconName: \"file\";"
+            "                   expandable: true }\n"
+            "}\n"));
+        QVERIFY(root);
+        auto* row = root->property("row").value<QQuickItem*>();
+        QCOMPARE(row->implicitHeight(), 48.0);
+        QCOMPARE(row->property("visibleTagCount").toInt(), 2);
+        auto* user = root->property("user").value<QQuickItem*>();
+        auto* bubble = user->property("bubble").value<QQuickItem*>();
+        QCOMPARE(bubble->property("color").value<QColor>(),
+                 userMessageRecipe(Theme::Light).background);
+        QVERIFY(bubble->x() > 0);
+        auto* composer = root->property("composer").value<QQuickItem*>();
+        QVERIFY(composer->implicitHeight() >= 48 + 40);
+        QCOMPARE(root->property("step").value<QQuickItem*>()->implicitHeight(), 32.0);
+    }
+
+  private:
     std::unique_ptr<QObject> create(const QByteArray& source) {
         QQmlComponent component(&engine_);
         component.setData(source, QUrl()); // a local URL loads imports synchronously
