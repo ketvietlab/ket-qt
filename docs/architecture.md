@@ -55,8 +55,14 @@ to its source rule in `KetRecipes.cpp`; when the design system adds a token, the
 is replaced by it. Font sizes are the mock's at its default 15 px interface size.
 
 Icons are monochrome glyphs drawn in the component's text colour (the mock's
-`currentColor`), in Widgets as a mask and in QML with `IconImage`. Apps supply the icons;
-the kit ships none. Colours that are user data, such as tag colours, are parameters.
+`currentColor`), in Widgets as a mask (rendered at size × device pixel ratio, filled with
+`SourceIn`, alpha kept) and in QML with `IconImage`. Apps supply the icons as a `QIcon` or
+URL; the kit ships none. KetPlus uses Két Symbol (fill-based SVGs with 16, 20 and 24 px
+masters, named by Két code, with a Lucide map in its manifest). Its licence is not decided,
+so no Két Symbol file is committed here; a later build-time generator may write a `.qrc`
+and name constants from a dist folder the app provides. Icons render at the 16 px master
+size, never at fractional scales. Colours that are user data, such as tag colours, are
+parameters.
 
 | Done | Next, from the mock |
 |---|---|

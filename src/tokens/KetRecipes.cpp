@@ -11,8 +11,11 @@ QColor transparent() { return QColor(Qt::transparent); }
 // Mock literals without a design-system token.
 constexpr qreal kDisabledOpacity = 0.48; // `button:disabled`
 constexpr qreal kButtonGap = 7;          // `.btn` gap
-constexpr qreal kIconSize = 17;          // `.icon`
-constexpr qreal kSmallIconSize = 14;     // compact header icons
+// Két Symbol draws 16, 20 and 24 px masters. The mock's 17 px `.icon` box is drawn with the
+// 16 px master at whole pixels (no fractional scaling); 14 px compact icons are pending a
+// 14 px master or a decision to use 16.
+constexpr qreal kIconSize = 16;
+constexpr qreal kSmallIconSize = 14; // compact header icons
 constexpr qreal kIconButtonSize = 30;    // `.icon-btn`
 constexpr qreal kTagHeight = 18;         // `.conversation-tag`
 constexpr qreal kTagRadius = 4;
