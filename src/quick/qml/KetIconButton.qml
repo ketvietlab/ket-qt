@@ -12,6 +12,9 @@ Basic.Button {
     property int controlSize: KetTheme.ControlSize.Medium
     property bool showToolTip: true
     property var previewState: null
+    // A Két Symbol code drawn by KetIcon; icon.source still takes any other monochrome icon.
+    property string iconName
+    property int iconWeight: KetTheme.IconWeight.Light
     readonly property var recipe: previewState
         ? KetTheme.iconButtonRecipe(KetTheme.dark, KetTheme.zoom, controlSize,
                                     !!previewState.hovered, !!previewState.pressed,
@@ -33,12 +36,27 @@ Basic.Button {
     Basic.ToolTip.text: text
     Basic.ToolTip.delay: 600
 
-    contentItem: Impl.IconImage {
-        source: control.icon.source
-        sourceSize.width: control.icon.width
-        sourceSize.height: control.icon.height
-        fillMode: Image.Pad
-        color: control.recipe.text
+    contentItem: Item {
+        readonly property color color: control.recipe.text
+
+        KetIcon {
+            anchors.centerIn: parent
+            visible: control.iconName !== ""
+            name: control.iconName
+            weight: control.iconWeight
+            box: control.recipe.iconSize
+            color: control.recipe.text
+        }
+
+        Impl.IconImage {
+            anchors.fill: parent
+            visible: control.iconName === ""
+            source: control.icon.source
+            sourceSize.width: control.icon.width
+            sourceSize.height: control.icon.height
+            fillMode: Image.Pad
+            color: control.recipe.text
+        }
     }
 
     background: Rectangle {

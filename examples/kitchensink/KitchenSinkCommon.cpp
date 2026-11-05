@@ -63,7 +63,10 @@ QQuickWidget* quickView(const QString& type, QWidget* parent) {
     view->setAttribute(Qt::WA_AlwaysStackOnTop);
     view->loadFromModule(QStringLiteral("KetKitchenSink"), type);
     if (QQuickItem* root = view->rootObject()) {
+        // The root follows its implicit size, so a property that changes it after loading
+        // (a page variant) resizes the view instead of stretching its texture.
         const auto fit = [view, root] {
+            root->setSize(QSizeF(root->implicitWidth(), root->implicitHeight()));
             view->setMinimumSize(qCeil(root->implicitWidth()), qCeil(root->implicitHeight()));
         };
         QObject::connect(root, &QQuickItem::implicitWidthChanged, view, fit);

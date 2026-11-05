@@ -11,5 +11,6 @@ QWidget* buttonPage();
 QWidget* iconButtonPage();
 QWidget* badgePage();
 QWidget* tagPage();
+QWidget* iconPage();
 
 } // namespace ket::kitchensink

@@ -6,18 +6,18 @@ import Ket
 Row {
     spacing: KetTheme.px(KetTheme.t.space1, KetTheme.zoom)
 
-    KetIconButton { text: "New conversation"; icon.source: "qrc:/qt/qml/KetKitchenSink/icons/plus.svg" }
-    KetIconButton { text: "More actions"; icon.source: "qrc:/qt/qml/KetKitchenSink/icons/more.svg" }
-    KetIconButton { text: "Close"; icon.source: "qrc:/qt/qml/KetKitchenSink/icons/close.svg" }
+    KetIconButton { text: "New conversation"; iconName: "plus" }
+    KetIconButton { text: "More actions"; iconName: "more" }
+    KetIconButton { text: "Close"; iconName: "close" }
     Item { width: KetTheme.px(KetTheme.t.space3, KetTheme.zoom); height: 1 }
     KetButton {
         text: "Save changes"
         variant: KetTheme.ButtonVariant.Primary
-        icon.source: "qrc:/qt/qml/KetKitchenSink/icons/check.svg"
+        iconName: "check"
     }
     KetButton {
         text: "Tag this flow"
         variant: KetTheme.ButtonVariant.Ghost
-        icon.source: "qrc:/qt/qml/KetKitchenSink/icons/plus.svg"
+        iconName: "plus"
     }
 }

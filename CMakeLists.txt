@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Qt 6.8 is the oldest Qt a consumer ships (KétChat); KetPlus uses 6.11.
-set(ketqt_qt_components Core Gui)
+set(ketqt_qt_components Core Gui Svg)
 if(KETQT_BUILD_WIDGETS)
     list(APPEND ketqt_qt_components Widgets)
 endif()
@@ -50,19 +50,34 @@ target_link_libraries(ketqt_tokens PUBLIC Qt6::Core Qt6::Gui)
 set_target_properties(ketqt_tokens PROPERTIES EXPORT_NAME Tokens)
 ketqt_warnings(ketqt_tokens)
 
+# Icons: Két Symbol SVGs (CC BY 4.0) compiled in, with the size and weight rules.
+qt_add_resources(ketqt_icon_resources src/icons/generated/ket-symbol.qrc)
+add_library(ketqt_icons STATIC
+    src/icons/KetIcons.h src/icons/KetIcons.cpp ${ketqt_icon_resources}
+)
+add_library(KetQt::Icons ALIAS ketqt_icons)
+target_include_directories(ketqt_icons PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/icons>"
+    "$<INSTALL_INTERFACE:include/KetQt>"
+)
+target_link_libraries(ketqt_icons PUBLIC Qt6::Gui PRIVATE Qt6::Svg)
+set_target_properties(ketqt_icons PROPERTIES EXPORT_NAME Icons)
+ketqt_warnings(ketqt_icons)
+
 if(KETQT_BUILD_WIDGETS)
     add_library(ketqt_widgets STATIC
         src/widgets/KetStyle.h src/widgets/KetStyle.cpp
         src/widgets/KetButton.h src/widgets/KetButton.cpp
         src/widgets/KetBadge.h src/widgets/KetBadge.cpp
         src/widgets/KetTag.h src/widgets/KetTag.cpp
+        src/widgets/KetIcon.h src/widgets/KetIcon.cpp
     )
     add_library(KetQt::Widgets ALIAS ketqt_widgets)
     target_include_directories(ketqt_widgets PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/widgets>"
         "$<INSTALL_INTERFACE:include/KetQt>"
     )
-    target_link_libraries(ketqt_widgets PUBLIC KetQt::Tokens Qt6::Widgets)
+    target_link_libraries(ketqt_widgets PUBLIC KetQt::Tokens KetQt::Icons Qt6::Widgets)
     set_target_properties(ketqt_widgets PROPERTIES EXPORT_NAME Widgets)
     ketqt_warnings(ketqt_widgets)
 endif()
@@ -79,10 +94,10 @@ if(KETQT_BUILD_QUICK)
         CLASS_NAME KetPlugin
         SOURCES src/quick/KetTheme.h src/quick/KetTheme.cpp
         QML_FILES src/quick/qml/KetButton.qml src/quick/qml/KetIconButton.qml
-                  src/quick/qml/KetBadge.qml src/quick/qml/KetTag.qml
+                  src/quick/qml/KetBadge.qml src/quick/qml/KetTag.qml src/quick/qml/KetIcon.qml
         RESOURCE_PREFIX /qt/qml
     )
-    foreach(file KetButton KetIconButton KetBadge KetTag)
+    foreach(file KetButton KetIconButton KetBadge KetTag KetIcon)
         set_source_files_properties(src/quick/qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
     endforeach()
     add_library(KetQt::Quick ALIAS ketqt_quick)
@@ -90,7 +105,7 @@ if(KETQT_BUILD_QUICK)
     target_include_directories(ketqt_quick PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/quick>"
     )
-    target_link_libraries(ketqt_quick PUBLIC KetQt::Tokens Qt6::Qml Qt6::Quick Qt6::QuickControls2)
+    target_link_libraries(ketqt_quick PUBLIC KetQt::Tokens KetQt::Icons Qt6::Qml Qt6::Quick Qt6::QuickControls2)
     ketqt_warnings(ketqt_quick)
 endif()
 
@@ -107,7 +122,7 @@ endif()
 # add_subdirectory for now (docs/architecture.md, "Consuming KetQt").
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
-set(ketqt_install_targets ketqt_tokens)
+set(ketqt_install_targets ketqt_tokens ketqt_icons)
 if(KETQT_BUILD_WIDGETS)
     list(APPEND ketqt_install_targets ketqt_widgets)
 endif()
@@ -116,10 +131,11 @@ install(TARGETS ${ketqt_install_targets} EXPORT KetQtTargets
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt
 )
 install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRecipes.h
+              src/icons/KetIcons.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 if(KETQT_BUILD_WIDGETS)
     install(FILES src/widgets/KetStyle.h src/widgets/KetButton.h src/widgets/KetBadge.h
-                  src/widgets/KetTag.h
+                  src/widgets/KetTag.h src/widgets/KetIcon.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 endif()
 install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)
@@ -134,3 +150,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/KetQtConfig.cmake"
 install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt)
 install(FILES third_party/ket-design-system/LICENSE
     DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt RENAME LICENSE.ket-design-system)
+install(FILES third_party/ket-symbol/NOTICE
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt RENAME NOTICE.ket-symbol)
+install(FILES third_party/ket-symbol/LICENSES/CC-BY-4.0.txt
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt RENAME LICENSE.ket-symbol)

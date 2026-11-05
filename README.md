@@ -6,10 +6,11 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
 
 - `KetQt::Tokens`: design-system tokens generated from the pinned Két DS `tokens.css`,
   the shared theme state (`ket::Appearance`) and component recipes.
+- `KetQt::Icons`: Két Symbol icons with their size and weight rules (`ket::Icons`).
 - `KetQt::Widgets`: `ket::Style` (Fusion-based), `ket::Button`, `ket::IconButton`,
-  `ket::Badge`, `ket::Tag`.
+  `ket::Badge`, `ket::Tag`, `ket::Icon`.
 - `KetQt::Quick`: the QML module `Ket` with `KetTheme`, `KetButton`, `KetIconButton`,
-  `KetBadge`, `KetTag`.
+  `KetBadge`, `KetTag`, `KetIcon`.
 
 Components follow the new KetPlus desktop mock and are added in the order KetPlus uses
 them; see [docs/architecture.md](docs/architecture.md#component-scope-and-source).

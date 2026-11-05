@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <QObject>
+#include <QStringList>
 #include <QVariantMap>
 #include <QtQml/qqmlregistration.h>
 
@@ -25,6 +26,7 @@ class QuickTheme final : public QObject {
     Q_PROPERTY(QString fontFamily READ fontFamily CONSTANT)
     Q_PROPERTY(QString monoFontFamily READ monoFontFamily CONSTANT)
     Q_PROPERTY(QString source READ source CONSTANT)
+    Q_PROPERTY(QStringList iconCodes READ iconCodes CONSTANT)
   public:
     // Same order as ket::ButtonVariant, ket::ControlSize and ket::BadgeTone.
     enum class ButtonVariant { Primary, Secondary, Ghost, Danger, GhostDanger };
@@ -33,6 +35,8 @@ class QuickTheme final : public QObject {
     Q_ENUM(ControlSize)
     enum class BadgeTone { Neutral, Accent, Info, Success, Warning, Danger };
     Q_ENUM(BadgeTone)
+    enum class IconWeight { Light, Regular };
+    Q_ENUM(IconWeight)
 
     explicit QuickTheme(QObject* parent = nullptr);
     static QuickTheme* create(QQmlEngine*, QJSEngine*);
@@ -43,6 +47,7 @@ class QuickTheme final : public QObject {
     [[nodiscard]] QString fontFamily() const;
     [[nodiscard]] QString monoFontFamily() const;
     [[nodiscard]] QString source() const;
+    [[nodiscard]] QStringList iconCodes() const;
 
     // Pass KetTheme.dark and KetTheme.zoom so a binding re-evaluates when either changes.
     // Lengths in the returned recipes are already scaled to the zoom.
@@ -53,6 +58,13 @@ class QuickTheme final : public QObject {
     Q_INVOKABLE QVariantMap badgeRecipe(bool dark, qreal zoom, int tone) const;
     Q_INVOKABLE QVariantMap tagRecipe(bool dark, qreal zoom, const QColor& color, bool overflow,
                                       bool hovered) const;
+    // Két Symbol (ket::Icons): the qrc URL of the master for a `box` (already zoomed), the
+    // logical size the drawing occupies and its whole-device-pixel offset in the box.
+    Q_INVOKABLE QString iconSource(const QString& code, qreal box, int weight) const;
+    Q_INVOKABLE qreal iconDrawSize(qreal box) const;
+    Q_INVOKABLE qreal iconOffset(qreal box, qreal devicePixelRatio) const;
+    // The Két code for a KetPlus Lucide name, or "".
+    Q_INVOKABLE QString iconForLucide(const QString& lucide) const;
     // A token length at `zoom` in whole pixels: KetTheme.px(KetTheme.t.space4, KetTheme.zoom).
     Q_INVOKABLE qreal px(qreal logicalPixels, qreal zoom) const;
 

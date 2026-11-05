@@ -14,6 +14,10 @@ Basic.Button {
     // A fixed state such as { hovered: true } for documentation pages and screenshot tests;
     // null follows the live interaction state.
     property var previewState: null
+    // A Két Symbol code drawn by KetIcon; icon.source still takes any other monochrome icon.
+    property string iconName
+    property int iconWeight: KetTheme.IconWeight.Light
+    readonly property bool hasIcon: iconName !== "" || icon.source.toString() !== ""
     readonly property var recipe: previewState
         ? KetTheme.buttonRecipe(KetTheme.dark, KetTheme.zoom, variant, controlSize,
                                 !!previewState.hovered, !!previewState.pressed,
@@ -37,11 +41,20 @@ Basic.Button {
     icon.height: recipe.iconSize
 
     contentItem: Row {
-        spacing: control.icon.source.toString() !== "" && control.text !== "" ? control.spacing : 0
+        spacing: control.hasIcon && control.text !== "" ? control.spacing : 0
+
+        KetIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: control.iconName !== ""
+            name: control.iconName
+            weight: control.iconWeight
+            box: control.recipe.iconSize
+            color: control.recipe.text
+        }
 
         Impl.IconImage {
             anchors.verticalCenter: parent.verticalCenter
-            visible: control.icon.source.toString() !== ""
+            visible: control.iconName === "" && control.icon.source.toString() !== ""
             source: control.icon.source
             sourceSize.width: control.icon.width
             sourceSize.height: control.icon.height

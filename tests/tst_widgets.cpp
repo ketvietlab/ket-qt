@@ -2,6 +2,8 @@
 #include "KetAppearance.h"
 #include "KetBadge.h"
 #include "KetButton.h"
+#include "KetIcon.h"
+#include "KetIcons.h"
 #include "KetStyle.h"
 #include "KetTag.h"
 
@@ -83,6 +85,33 @@ class WidgetsTest final : public QObject {
                  Tokens::color(u"text-secondary", Theme::Light).rgb());
         Appearance::instance().setZoom(1.25);
         QCOMPARE(button.sizeHint(), QSize(38, 38)); // round(30 * 1.25)
+    }
+
+    void ketSymbolIconsFollowTheButtonRecipe() {
+        IconButton button(Icons::icon(u"close"), QStringLiteral("Close"));
+        button.resize(button.sizeHint());
+        const QImage image = button.grab().toImage();
+        const QColor secondary = Tokens::color(u"text-secondary", Theme::Light);
+        // A light 1 px stroke has no fully opaque pixel at 1x; its core is within a few levels.
+        const auto near = [&secondary](const QColor& pixel) {
+            return qAbs(pixel.red() - secondary.red()) <= 12 &&
+                   qAbs(pixel.green() - secondary.green()) <= 12 &&
+                   qAbs(pixel.blue() - secondary.blue()) <= 12;
+        };
+        bool tinted = false;
+        for (int y = 0; y < image.height() && !tinted; ++y) {
+            for (int x = 0; x < image.width() && !tinted; ++x)
+                tinted = near(image.pixelColor(x, y));
+        }
+        QVERIFY(tinted);
+
+        Icon icon(QStringLiteral("folder"), 17);
+        QCOMPARE(icon.sizeHint(), QSize(17, 17));
+        QCOMPARE(icon.color(), Tokens::color(u"text-main", Theme::Light));
+        Appearance::instance().setMode(Appearance::Mode::Dark);
+        QCOMPARE(icon.color(), Tokens::color(u"text-main", Theme::Dark));
+        icon.setColor(QColor(Qt::red));
+        QCOMPARE(icon.color(), QColor(Qt::red));
     }
 
     void tagElidesAtTheRecipeWidth() {
