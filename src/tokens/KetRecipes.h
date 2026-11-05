@@ -5,6 +5,8 @@
 
 #include <QVariantMap>
 
+#include <utility>
+
 namespace ket {
 
 // Component specifications resolved from tokens. The Widgets and Qt Quick layers draw
@@ -235,6 +237,114 @@ struct TooltipRecipe {
     int delayMs = 0;
 };
 
+// A sidebar navigation row (`.nav-item`) with an optional count (`.nav-count`) or kbd.
+struct NavItemRecipe {
+    QColor background;
+    QColor text; // label and icon
+    QColor focusRing;
+    QColor countBorder;
+    QColor countText;
+    QColor kbdText;
+    int fontWeight = 400;
+    qreal height = 0;
+    qreal radius = 0;
+    qreal paddingInline = 0;
+    qreal spacing = 0;
+    qreal iconSize = 0;
+    qreal fontPixels = 0;
+    qreal countHeight = 0;
+    qreal countPadding = 0;
+    qreal countRadius = 0;
+    qreal countFontPixels = 0;
+    qreal kbdFontPixels = 0;
+    qreal opacity = 1.0;
+};
+
+// A keyboard shortcut label (`kbd`).
+struct KbdRecipe {
+    QColor text;
+    qreal fontPixels = 0;
+};
+
+// The segmented control's track (`.pill-tabs`) and one segment in a given state.
+struct SegmentedRecipe {
+    QColor background;
+    QColor border;
+    qreal padding = 0; // including the border
+    qreal radius = 0;
+    qreal spacing = 0;
+};
+
+struct SegmentRecipe {
+    QColor background;
+    QColor text;
+    QColor focusRing;
+    Shadow shadow;
+    qreal radius = 0;
+    qreal paddingInline = 0;
+    qreal paddingBlock = 0;
+    qreal fontPixels = 0;
+    qreal opacity = 1.0;
+};
+
+// The underlined tab strip (`.file-tabs`) and one tab in a given state.
+struct TabBarRecipe {
+    QColor background;
+    QColor border; // the strip's bottom edge and each tab's right edge
+    qreal height = 0;
+};
+
+struct TabRecipe {
+    QColor background;
+    QColor text;
+    QColor indicator; // the bottom border; transparent unless selected
+    QColor focusRing;
+    qreal height = 0;
+    qreal paddingInline = 0;
+    qreal spacing = 0;
+    qreal iconSize = 0;
+    qreal indicatorHeight = 0;
+    qreal fontPixels = 0;
+    qreal opacity = 1.0;
+};
+
+struct ProgressRecipe {
+    QColor track;
+    QColor fill;
+    qreal height = 0;
+    qreal radius = 0;
+    qreal busyFraction = 0; // the moving segment of an indeterminate bar
+    int busyDurationMs = 0;
+};
+
+// The animated working indicator (`.working-bars`): bars that shrink and fade in turn.
+struct ActivityRecipe {
+    QColor color;
+    qreal barWidth = 0;
+    qreal barHeight = 0;
+    qreal minBarHeight = 0;
+    qreal spacing = 0;
+    qreal radius = 0;
+    qreal minOpacity = 1.0;
+    int durationMs = 0;
+    int staggerMs = 0;
+    int bars = 3;
+};
+
+// A centred placeholder for an empty view (`.empty-state`).
+struct EmptyStateRecipe {
+    QColor icon;
+    QColor title;
+    QColor message;
+    qreal iconSize = 0;
+    qreal spacing = 0;
+    qreal titlePixels = 0;
+    int titleWeight = 400;
+    qreal messagePixels = 0;
+    qreal messageMaxWidth = 0;
+    qreal lineHeight = 1.0;
+};
+
 [[nodiscard]] ButtonRecipe buttonRecipe(ButtonVariant variant, ControlSize size,
                                         const InteractionState& state, Theme theme);
 // The square, borderless icon-only button (`.icon-btn`). Small is the compact header size.
@@ -261,6 +371,22 @@ struct TooltipRecipe {
 [[nodiscard]] TooltipRecipe tooltipRecipe(Theme theme);
 
 // camelCase maps of the recipes, for QML.
+[[nodiscard]] NavItemRecipe navItemRecipe(bool selected, const InteractionState& state,
+                                          Theme theme);
+[[nodiscard]] KbdRecipe kbdRecipe(Theme theme);
+[[nodiscard]] SegmentedRecipe segmentedRecipe(Theme theme);
+[[nodiscard]] SegmentRecipe segmentRecipe(bool selected, const InteractionState& state,
+                                          Theme theme);
+[[nodiscard]] TabBarRecipe tabBarRecipe(Theme theme);
+[[nodiscard]] TabRecipe tabRecipe(bool selected, const InteractionState& state, Theme theme);
+[[nodiscard]] ProgressRecipe progressRecipe(Theme theme);
+// `color` overrides the default success colour (an invalid colour keeps it).
+[[nodiscard]] ActivityRecipe activityRecipe(Theme theme, const QColor& color = {});
+// The bar's height and opacity `elapsedMs` into the animation (CSS `working` keyframes).
+[[nodiscard]] std::pair<qreal, qreal> activityBarFrame(const ActivityRecipe& recipe, int bar,
+                                                       qint64 elapsedMs);
+[[nodiscard]] EmptyStateRecipe emptyStateRecipe(Theme theme);
+
 [[nodiscard]] QVariantMap toVariantMap(const ButtonRecipe& recipe);
 [[nodiscard]] QVariantMap toVariantMap(const BadgeRecipe& recipe);
 [[nodiscard]] QVariantMap toVariantMap(const TagRecipe& recipe);
@@ -274,5 +400,14 @@ struct TooltipRecipe {
 [[nodiscard]] QVariantMap toVariantMap(const MenuRecipe& recipe);
 [[nodiscard]] QVariantMap toVariantMap(const MenuItemRecipe& recipe);
 [[nodiscard]] QVariantMap toVariantMap(const TooltipRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const NavItemRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const KbdRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const SegmentedRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const SegmentRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const TabBarRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const TabRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const ProgressRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const ActivityRecipe& recipe);
+[[nodiscard]] QVariantMap toVariantMap(const EmptyStateRecipe& recipe);
 
 } // namespace ket

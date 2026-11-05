@@ -2,6 +2,7 @@
 #include "KetStyle.h"
 
 #include "KetAppearance.h"
+#include "KetBarPainter.h"
 #include "KetMenuPainter.h"
 #include "KetRecipes.h"
 
@@ -151,6 +152,12 @@ int Style::styleHint(StyleHint hint, const QStyleOption* option, const QWidget* 
 
 QSize Style::sizeFromContents(ContentsType type, const QStyleOption* option, const QSize& size,
                               const QWidget* widget) const {
+    if (type == CT_TabBarTab && detail::isTopTab(option))
+        return detail::tabSize(qstyleoption_cast<const QStyleOptionTab*>(option), size, widget);
+    if (type == CT_ProgressBar)
+        if (const auto* bar = qstyleoption_cast<const QStyleOptionProgressBar*>(option);
+            bar && (bar->state & State_Horizontal))
+            return {size.width(), detail::progressHeight()};
     if (type == CT_MenuItem)
         if (const auto* item = qstyleoption_cast<const QStyleOptionMenuItem*>(option))
             return detail::menuItemSize(item, widget);
@@ -159,6 +166,20 @@ QSize Style::sizeFromContents(ContentsType type, const QStyleOption* option, con
 
 void Style::drawControl(ControlElement element, const QStyleOption* option, QPainter* painter,
                         const QWidget* widget) const {
+    if (element == CE_TabBarTabShape && detail::isTopTab(option)) {
+        detail::drawTab(qstyleoption_cast<const QStyleOptionTab*>(option), painter, widget);
+        return;
+    }
+    if (element == CE_TabBarTabLabel && detail::isTopTab(option)) {
+        detail::drawTabLabel(qstyleoption_cast<const QStyleOptionTab*>(option), painter, widget);
+        return;
+    }
+    if (element == CE_ProgressBar)
+        if (const auto* bar = qstyleoption_cast<const QStyleOptionProgressBar*>(option);
+            bar && (bar->state & State_Horizontal)) {
+            detail::drawProgressBar(bar, painter, widget);
+            return;
+        }
     if (element == CE_MenuItem || element == CE_MenuEmptyArea) {
         if (const auto* item = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             if (element == CE_MenuItem)
@@ -185,6 +206,14 @@ int Style::pixelMetric(PixelMetric metric, const QStyleOption* option,
     case PM_SmallIconSize:
     case PM_ButtonIconSize:
         return 16;
+    case PM_TabBarBaseOverlap:
+    case PM_TabBarTabShiftHorizontal:
+    case PM_TabBarTabShiftVertical:
+    case PM_TabBarTabOverlap:
+        return 0;
+    case PM_TabCloseIndicatorWidth:
+    case PM_TabCloseIndicatorHeight:
+        return qRound(Appearance::instance().scaled(Tokens::px(u"space-5")));
     case PM_MenuPanelWidth:
         return 1;
     case PM_MenuHMargin:
@@ -210,6 +239,19 @@ void Style::drawPrimitive(PrimitiveElement element, const QStyleOption* option, 
     }
     if (element == PE_FrameMenu)
         return; // drawn with the panel
+    if (element == PE_FrameTabBarBase && detail::isTopTab(option)) {
+        detail::drawTabBarBase(option, painter);
+        return;
+    }
+    if (element == PE_IndicatorTabClose) {
+        detail::drawTabClose(option, painter, widget);
+        return;
+    }
+    if (element == PE_FrameTabWidget) {
+        // The pane is the panel surface; the tab strip draws the only edge.
+        painter->fillRect(option->rect, Tokens::color(u"panel-bg", Appearance::instance().theme()));
+        return;
+    }
     if (element == PE_PanelTipLabel) {
         detail::drawTooltipPanel(option, painter, widget);
         return;

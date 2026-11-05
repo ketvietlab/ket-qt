@@ -102,6 +102,53 @@ struct Profile {
     qreal tooltipMaxWidth = 0;
     int tooltipDelayMs = 0;
 
+    // Sidebar navigation rows and their trailing count.
+    qreal navItemHeight = 0;
+    qreal navItemPadding = 0;
+    qreal navItemGap = 0;
+    qreal navItemRadius = 0;
+    qreal navItemFontPixels = 0;
+    int navItemActiveWeight = 400;
+    qreal navCountHeight = 0;
+    qreal navCountPadding = 0;
+    qreal navCountRadius = 0;
+    qreal kbdFontPixels = 0;
+
+    // Segmented control (pill tabs).
+    qreal segmentedPadding = 0;
+    qreal segmentedRadius = 0;
+    qreal segmentRadius = 0;
+    qreal segmentPaddingInline = 0;
+    qreal segmentPaddingBlock = 0;
+    qreal segmentFontPixels = 0;
+
+    // Underlined tab strip (file tabs; every QTabBar).
+    qreal tabHeight = 0;
+    qreal tabPaddingInline = 0;
+    qreal tabGap = 0;
+    qreal tabIconSize = 0;
+    qreal tabIndicator = 0;
+    qreal tabFontPixels = 0;
+
+    // Progress and activity.
+    qreal progressHeight = 0;
+    int progressBusyDurationMs = 0; // one sweep of an indeterminate bar
+    qreal activityBarWidth = 0;
+    qreal activityBarHeight = 0;
+    qreal activityBarMinHeight = 0;
+    qreal activityGap = 0;
+    int activityDurationMs = 0;
+    int activityStaggerMs = 0;
+    qreal activityMinOpacity = 1.0;
+
+    // Empty states.
+    qreal emptyIconSize = 0;
+    qreal emptyGap = 0;
+    qreal emptyTitlePixels = 0;
+    qreal emptyMessagePixels = 0;
+    qreal emptyMessageMaxWidth = 0;
+    qreal emptyLineHeight = 1.0;
+
     [[nodiscard]] static Profile designSystem();
     [[nodiscard]] static Profile ketPlus();
 

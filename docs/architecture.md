@@ -90,7 +90,7 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip | Sidebar row, tabs, progress and spinner, empty state, kbd |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state | Conversation rows (two-line sidebar rows with tags), composer, transcript blocks |
 
 ### Overlays
 
@@ -104,6 +104,11 @@ Colours that are user data, such as tag colours, are parameters.
   hides shortcuts in context menus (`Qt::AA_DontShowShortcutsInContextMenus`); `KetMenuItem`
   shows its `shortcut` everywhere.
 - **Tooltips use the accent background**, like the native KetPlus `KetToolTip`.
+- **Tab strips and progress bars are drawn by `ket::Style`** for every top `QTabBar`
+  (`.file-tabs`) and horizontal `QProgressBar` (`progress`); other orientations stay Fusion.
+  An indeterminate bar sweeps a segment, which the mock does not define.
+- **The activity indicator** is the mock's `.working-bars`; `ket::activityBarFrame()` holds
+  the keyframes, so both layers animate identically and screenshots can freeze a frame.
 - **Shadows** are parsed from shadow tokens (`ket::shadowToken`) and drawn with concentric
   translucent layers (`KetShadow`), so neither layer needs a graphics effect or a shader.
 

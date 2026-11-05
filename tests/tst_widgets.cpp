@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: MPL-2.0
+#include "KetActivityIndicator.h"
 #include "KetAppearance.h"
 #include "KetBadge.h"
 #include "KetBanner.h"
 #include "KetButton.h"
 #include "KetChoice.h"
 #include "KetDialog.h"
+#include "KetEmptyState.h"
 #include "KetFieldRow.h"
 #include "KetIcon.h"
 #include "KetIcons.h"
 #include "KetMenuPainter.h"
+#include "KetNavItem.h"
+#include "KetSegmentedControl.h"
 #include "KetSelect.h"
 #include "KetStyle.h"
 #include "KetTag.h"
@@ -18,10 +22,13 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QButtonGroup>
 #include <QLabel>
 #include <QMenu>
+#include <QProgressBar>
 #include <QSignalSpy>
 #include <QStyleOptionMenuItem>
+#include <QTabBar>
 #include <QTest>
 #include <QToolTip>
 
@@ -286,6 +293,85 @@ class WidgetsTest final : public QObject {
                  Tokens::color(u"accent", Theme::Light));
         QCOMPARE(QApplication::style()->styleHint(QStyle::SH_ToolTip_WakeUpDelay), 600);
         QVERIFY(QApplication::style()->styleHint(QStyle::SH_ComboBox_Popup));
+    }
+
+    void navItemsSelectAndShowTrailingText() {
+        QButtonGroup group;
+        NavItem chat(QStringLiteral("Conversations"), QStringLiteral("chat"));
+        NavItem files(QStringLiteral("Files"), QStringLiteral("folder"));
+        group.addButton(&chat);
+        group.addButton(&files);
+        chat.setChecked(true);
+        QCOMPARE(chat.recipe().background, Tokens::color(u"accent-subtle", Theme::Light));
+        QCOMPARE(files.recipe().background.alpha(), 0);
+        files.click();
+        QVERIFY(!chat.isChecked());
+        QCOMPARE(chat.sizeHint().height(), 34);
+        const int plain = files.sizeHint().width();
+        files.setCount(12);
+        QVERIFY(files.sizeHint().width() > plain);
+        files.setCount(std::nullopt);
+        files.setShortcutText(QStringLiteral("⌘K"));
+        QVERIFY(files.sizeHint().width() > plain);
+        files.resize(240, 34);
+        QVERIFY(!files.grab().isNull());
+        Kbd kbd(QStringLiteral("⌘⇧P"));
+        QVERIFY(kbd.sizeHint().width() > 0);
+    }
+
+    void segmentedControlsMoveWithKeys() {
+        SegmentedControl control(
+            {QStringLiteral("Claude"), QStringLiteral("Codex"), QStringLiteral("Cursor")});
+        QSignalSpy changed(&control, &SegmentedControl::currentChanged);
+        control.resize(control.sizeHint());
+        QCOMPARE(control.currentIndex(), 0);
+        QTest::keyClick(&control, Qt::Key_Right);
+        QCOMPARE(control.currentIndex(), 1);
+        QTest::keyClick(&control, Qt::Key_End);
+        QCOMPARE(control.currentIndex(), 2);
+        QTest::keyClick(&control, Qt::Key_Right);
+        QCOMPARE(control.currentIndex(), 2);
+        QTest::mouseClick(&control, Qt::LeftButton, {}, control.segmentRect(0).center());
+        QCOMPARE(control.currentIndex(), 0);
+        QCOMPARE(changed.count(), 3);
+        QVERIFY(control.segmentRect(1).left() > control.segmentRect(0).right());
+    }
+
+    void tabBarsAndProgressBarsUseTheStyle() {
+        QTabBar bar;
+        bar.addTab(QStringLiteral("NavigationRail.qml"));
+        bar.addTab(Icons::icon(u"file"), QStringLiteral("README.md"));
+        bar.setTabsClosable(true);
+        QCOMPARE(bar.sizeHint().height(), 41);
+        QVERIFY(!bar.grab().isNull());
+
+        QProgressBar progress;
+        progress.setRange(0, 100);
+        progress.setValue(40);
+        QCOMPARE(progress.sizeHint().height(), 6);
+        progress.resize(200, 6);
+        const QImage image = progress.grab().toImage();
+        const QColor fill = image.pixelColor(image.width() / 8, image.height() / 2);
+        QCOMPARE(fill, Tokens::color(u"accent", Theme::Light));
+        const QColor track = image.pixelColor(image.width() * 7 / 8, image.height() / 2);
+        QCOMPARE(track, Tokens::color(u"border-default", Theme::Light));
+    }
+
+    void activityAndEmptyStates() {
+        ActivityIndicator activity;
+        QCOMPARE(activity.sizeHint(), QSize(15, 10));
+        activity.setPreviewTime(0);
+        QVERIFY(!activity.grab().isNull());
+
+        EmptyState empty(QStringLiteral("success"), QStringLiteral("Your worktree is clean."),
+                         QStringLiteral("There are no uncommitted changes in this snapshot."));
+        QCOMPARE(empty.message(),
+                 QStringLiteral("There are no uncommitted changes in this snapshot."));
+        QVERIFY(!empty.action());
+        empty.setAction(QStringLiteral("Back to editor"), QStringLiteral("arrow-left"));
+        QVERIFY(empty.action());
+        empty.resize(600, 400);
+        QVERIFY(!empty.grab().isNull());
     }
 
     void tagElidesAtTheRecipeWidth() {

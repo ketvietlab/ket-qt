@@ -6,6 +6,7 @@
 #include "FoundationPages.h"
 #include "KetAppearance.h"
 #include "KitchenSinkCommon.h"
+#include "NavigationPages.h"
 #include "OverlayPages.h"
 
 #include <QComboBox>
@@ -39,6 +40,7 @@ const PageEntry kPages[] = {
     {"icons", "Components", "Icons", iconPage},
     {"forms", "Components", "Forms", formPage},
     {"overlays", "Components", "Overlays", overlayPage},
+    {"navigation", "Components", "Navigation", navigationPage},
 };
 
 Theme theme() { return Appearance::instance().theme(); }

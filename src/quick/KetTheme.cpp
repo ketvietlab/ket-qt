@@ -189,6 +189,88 @@ QVariantMap QuickTheme::tooltipRecipe(bool dark, qreal zoom) const {
     return recipe;
 }
 
+QVariantMap QuickTheme::navItemRecipe(bool dark, qreal zoom, bool selected, bool hovered,
+                                      bool pressed, bool enabled, bool focused) const {
+    const InteractionState state{hovered, pressed, enabled, focused};
+    QVariantMap recipe = toVariantMap(ket::navItemRecipe(selected, state, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"height", u"radius", u"paddingInline", u"spacing", u"iconSize", u"fontPixels",
+                  u"countHeight", u"countPadding", u"countRadius", u"countFontPixels",
+                  u"kbdFontPixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::kbdRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::kbdRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom, {u"fontPixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::segmentedRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::segmentedRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom, {u"padding", u"radius", u"spacing"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::segmentRecipe(bool dark, qreal zoom, bool selected, bool hovered,
+                                      bool enabled, bool focused) const {
+    const InteractionState state{hovered, false, enabled, focused};
+    QVariantMap recipe = toVariantMap(ket::segmentRecipe(selected, state, themeOf(dark)));
+    scaleLengths(recipe, zoom, {u"radius", u"paddingInline", u"paddingBlock", u"fontPixels"});
+    scaleLengths(recipe, zoom, kShadowLengths);
+    return recipe;
+}
+
+QVariantMap QuickTheme::tabBarRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::tabBarRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom, {u"height"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::tabRecipe(bool dark, qreal zoom, bool selected, bool hovered, bool enabled,
+                                  bool focused) const {
+    const InteractionState state{hovered, false, enabled, focused};
+    QVariantMap recipe = toVariantMap(ket::tabRecipe(selected, state, themeOf(dark)));
+    scaleLengths(
+        recipe, zoom,
+        {u"height", u"paddingInline", u"spacing", u"iconSize", u"indicatorHeight", u"fontPixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::progressRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::progressRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom, {u"height"});
+    recipe.insert(QStringLiteral("radius"), recipe.value(QStringLiteral("height")).toReal() / 2);
+    return recipe;
+}
+
+QVariantMap QuickTheme::activityRecipe(bool dark, qreal zoom, const QColor& color) const {
+    // A transparent colour (the QML default) keeps the recipe's success colour.
+    QVariantMap recipe =
+        toVariantMap(ket::activityRecipe(themeOf(dark), color.alpha() > 0 ? color : QColor()));
+    scaleLengths(recipe, zoom, {u"barWidth", u"barHeight", u"minBarHeight", u"spacing"});
+    recipe.insert(QStringLiteral("radius"), recipe.value(QStringLiteral("barWidth")).toReal() / 2);
+    return recipe;
+}
+
+QVariantList QuickTheme::activityBarFrame(const QVariantMap& map, int bar, qreal elapsedMs) const {
+    ActivityRecipe recipe;
+    recipe.barHeight = map.value(QStringLiteral("barHeight")).toReal();
+    recipe.minBarHeight = map.value(QStringLiteral("minBarHeight")).toReal();
+    recipe.minOpacity = map.value(QStringLiteral("minOpacity")).toReal();
+    recipe.durationMs = map.value(QStringLiteral("durationMs")).toInt();
+    recipe.staggerMs = map.value(QStringLiteral("staggerMs")).toInt();
+    const auto [height, opacity] = ket::activityBarFrame(recipe, bar, qint64(elapsedMs));
+    return {height, opacity};
+}
+
+QVariantMap QuickTheme::emptyStateRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::emptyStateRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"iconSize", u"spacing", u"titlePixels", u"messagePixels", u"messageMaxWidth"});
+    return recipe;
+}
+
 QString QuickTheme::iconSource(const QString& code, qreal box, int weight) const {
     if (code.isEmpty())
         return {};
