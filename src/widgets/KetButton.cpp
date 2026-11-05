@@ -5,6 +5,8 @@
 
 #include <QEnterEvent>
 #include <QPainter>
+#include <QPixmap>
+#include <QtMath>
 
 namespace ket {
 namespace {
@@ -14,6 +16,15 @@ QFont recipeFont(const QFont& base, const ButtonRecipe& recipe) {
     font.setPixelSize(qRound(Appearance::instance().scaled(recipe.fontPixels)));
     font.setWeight(QFont::Weight(recipe.fontWeight));
     return font;
+}
+
+// The icon's alpha filled with `color`; icons are monochrome glyphs (Lucide in KetPlus).
+QPixmap tinted(const QIcon& icon, int size, qreal dpr, const QColor& color) {
+    QPixmap pixmap = icon.pixmap(QSize(size, size), dpr);
+    QPainter painter(&pixmap);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(pixmap.rect(), color);
+    return pixmap;
 }
 
 } // namespace
@@ -49,17 +60,20 @@ void Button::setPreviewState(std::optional<InteractionState> state) {
     update();
 }
 
+InteractionState Button::interactionState() const {
+    return preview_.value_or(InteractionState{hovered_, isDown(), isEnabled(),
+                                              hasFocus() && focusPolicy() != Qt::NoFocus});
+}
+
 ButtonRecipe Button::recipe() const {
-    const InteractionState state =
-        preview_.value_or(InteractionState{hovered_, isDown(), isEnabled(), hasFocus()});
-    return buttonRecipe(variant_, size_, state, Appearance::instance().theme());
+    return buttonRecipe(variant_, size_, interactionState(), Appearance::instance().theme());
 }
 
 QSize Button::sizeHint() const {
     const ButtonRecipe r = recipe();
     const Appearance& appearance = Appearance::instance();
-    const QFontMetrics metrics(recipeFont(font(), r));
-    qreal width = 2 * appearance.scaled(r.paddingInline) + metrics.horizontalAdvance(text());
+    const QFontMetricsF metrics(recipeFont(font(), r));
+    qreal width = 2 * appearance.scaled(r.paddingInline) + qCeil(metrics.horizontalAdvance(text()));
     if (!icon().isNull())
         width +=
             appearance.scaled(r.iconSize) + (text().isEmpty() ? 0 : appearance.scaled(r.spacing));
@@ -91,15 +105,34 @@ void Button::paintEvent(QPaintEvent*) {
     const qreal contentWidth = iconSize + gap + metrics.horizontalAdvance(text());
     qreal x = (width() - contentWidth) / 2.0;
     if (iconSize > 0) {
-        const QRect iconRect(qRound(x), qRound((height() - iconSize) / 2.0), qRound(iconSize),
-                             qRound(iconSize));
-        icon().paint(&painter, iconRect, Qt::AlignCenter,
-                     isEnabled() ? QIcon::Normal : QIcon::Disabled);
+        const int side = qRound(iconSize);
+        painter.drawPixmap(QRect(qRound(x), qRound((height() - iconSize) / 2.0), side, side),
+                           tinted(icon(), side, devicePixelRatioF(), r.text));
         x += iconSize + gap;
     }
     painter.setFont(textFont);
     painter.setPen(r.text);
     painter.drawText(QRectF(x, 0, width() - x, height()), Qt::AlignLeft | Qt::AlignVCenter, text());
+}
+
+IconButton::IconButton(const QIcon& icon, const QString& label, QWidget* parent)
+    : Button({}, ButtonVariant::Ghost, parent) {
+    setIcon(icon);
+    setLabel(label);
+}
+
+void IconButton::setLabel(const QString& label) {
+    setAccessibleName(label);
+    setToolTip(label);
+}
+
+ButtonRecipe IconButton::recipe() const {
+    return iconButtonRecipe(controlSize(), interactionState(), Appearance::instance().theme());
+}
+
+QSize IconButton::sizeHint() const {
+    const int side = qRound(Appearance::instance().scaled(recipe().height));
+    return {side, side};
 }
 
 void Button::enterEvent(QEnterEvent* event) {

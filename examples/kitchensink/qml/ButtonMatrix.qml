@@ -19,7 +19,8 @@ GridLayout {
         { label: "Primary", value: KetTheme.ButtonVariant.Primary },
         { label: "Secondary", value: KetTheme.ButtonVariant.Secondary },
         { label: "Ghost", value: KetTheme.ButtonVariant.Ghost },
-        { label: "Danger", value: KetTheme.ButtonVariant.Danger }
+        { label: "Danger", value: KetTheme.ButtonVariant.Danger },
+        { label: "Ghost danger", value: KetTheme.ButtonVariant.GhostDanger }
     ]
 
     columns: states.length + 1

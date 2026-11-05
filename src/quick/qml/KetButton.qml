@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 import QtQuick
 import QtQuick.Controls.Basic as Basic
+import QtQuick.Controls.impl as Impl
 import Ket
 
 // Design-system button for Qt Quick; it draws ket::buttonRecipe, as ket::Button does.
+// Icons are tinted with the text colour, like the mock's `currentColor` icons.
 Basic.Button {
     id: control
 
@@ -37,7 +39,7 @@ Basic.Button {
     contentItem: Row {
         spacing: control.icon.source.toString() !== "" && control.text !== "" ? control.spacing : 0
 
-        Image {
+        Impl.IconImage {
             anchors.verticalCenter: parent.verticalCenter
             visible: control.icon.source.toString() !== ""
             source: control.icon.source
@@ -45,10 +47,12 @@ Basic.Button {
             sourceSize.height: control.icon.height
             width: visible ? control.icon.width : 0
             height: control.icon.height
+            color: control.recipe.text
         }
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
+            visible: control.text !== ""
             text: control.text
             font: control.font
             color: control.recipe.text

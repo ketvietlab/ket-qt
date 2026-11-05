@@ -4,7 +4,7 @@
 flowchart LR
   DS["Két DS tokens.css<br/>(pinned copy)"] --> GEN["generate_tokens.py"]
   GEN --> TOK["KetQt::Tokens<br/>table · Appearance · recipes"]
-  TOK --> WID["KetQt::Widgets<br/>ket::Style · Button · Badge"]
+  TOK --> WID["KetQt::Widgets<br/>ket::Style · components"]
   TOK --> QK["KetQt::Quick<br/>module Ket · KetTheme"]
   WID --> APPS["KetPlus · KétChat"]
   QK --> APPS
@@ -15,8 +15,8 @@ flowchart LR
 | Target | Contents | Qt modules |
 |---|---|---|
 | `KetQt::Tokens` | `ket::Tokens` (generated table), `ket::Appearance`, `ket::*Recipe` | Core, Gui |
-| `KetQt::Widgets` | `ket::Style`, `ket::Button`, `ket::Badge` | Widgets |
-| `KetQt::Quick` + `KetQt::QuickPlugin` | QML module `Ket`: `KetTheme`, `KetButton`, `KetBadge` | Qml, Quick, QuickControls2 |
+| `KetQt::Widgets` | `ket::Style`, `ket::Button`, `ket::IconButton`, `ket::Badge`, `ket::Tag` | Widgets |
+| `KetQt::Quick` + `KetQt::QuickPlugin` | QML module `Ket`: `KetTheme`, `KetButton`, `KetIconButton`, `KetBadge`, `KetTag` | Qml, Quick, QuickControls2 |
 
 ## Tokens
 
@@ -44,17 +44,32 @@ have an appearance setting forward it here instead of keeping a second theme.
 In QML, pass `KetTheme.dark` and `KetTheme.zoom` to recipe functions and `KetTheme.px()`
 so bindings re-evaluate; recipes returned to QML are already scaled.
 
+## Component scope and source
+
+Components are added in the order the new KetPlus desktop mock uses them
+(`ketplus.ketatlas` in `ketvietlab/ketplus`, built on the same Két DS release). A recipe
+follows the mock's composition: which tokens fill, border and colour each state. Where the
+mock uses a literal with no token (for example the 7 px `.btn` gap, the 30 px `.icon-btn`,
+the 0.48 disabled opacity or the 18 px tag), the recipe keeps it as a named constant next
+to its source rule in `KetRecipes.cpp`; when the design system adds a token, the constant
+is replaced by it. Font sizes are the mock's at its default 15 px interface size.
+
+Icons are monochrome glyphs drawn in the component's text colour (the mock's
+`currentColor`), in Widgets as a mask and in QML with `IconImage`. Apps supply the icons;
+the kit ships none. Colours that are user data, such as tag colours, are parameters.
+
+| Done | Next, from the mock |
+|---|---|
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag | TextField and search field, Select, Checkbox and Choice card, Field row, Banner, Toast, Dialog, Context menu, Tooltip, sidebar row, tabs, progress and spinner, empty state, kbd |
+
 ## Adding a component
 
-1. Add a recipe (`KetRecipes.h`) built only from tokens, with a token test.
+1. Add a recipe (`KetRecipes.h`) built from tokens, with a token test.
 2. Draw it in `src/widgets/` and `src/quick/qml/`; neither layer chooses colours itself.
 3. Add a Widgets test and a Quick test that compare against the same recipe.
 4. Add it to a kitchensink page (`examples/kitchensink`) in every variant, size and pinned
    state, and check light, dark and 125% zoom
    (`--page=<id> --dark --zoom=1.25 --screenshot=<file>`).
-
-Planned next, from the KetPlus and KétChat inventories: IconButton, TextField, Checkbox,
-Switch, Menu, Tooltip, Tag (label-only chip), ListRow (two-line sidebar row), Dialog.
 
 ## Consuming KetQt
 

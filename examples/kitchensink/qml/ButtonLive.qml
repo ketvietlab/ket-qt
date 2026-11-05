@@ -10,4 +10,5 @@ Row {
     KetButton { text: "Secondary" }
     KetButton { text: "Ghost"; variant: KetTheme.ButtonVariant.Ghost }
     KetButton { text: "Danger"; variant: KetTheme.ButtonVariant.Danger }
+    KetButton { text: "Ghost danger"; variant: KetTheme.ButtonVariant.GhostDanger }
 }

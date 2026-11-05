@@ -59,7 +59,38 @@ class QuickTest final : public QObject {
         QVERIFY(badge);
         QCOMPARE(badge->property("color").value<QColor>(),
                  Tokens::color(u"danger-bg", Theme::Light));
-        QCOMPARE(badge->implicitHeight(), Tokens::px(u"line-sm"));
+        QCOMPARE(badge->implicitHeight(), Tokens::px(u"line-sm") + 2);
+    }
+
+    void iconButtonMatchesTheWidgetsRecipe() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "KetIconButton { text: \"Close\"; previewState: ({ hovered: true }) }\n"));
+        auto* button = qobject_cast<QQuickItem*>(root.get());
+        QVERIFY(button);
+        const ButtonRecipe recipe =
+            iconButtonRecipe(ControlSize::Medium, {true, false, true, false}, Theme::Light);
+        QCOMPARE(button->implicitWidth(), recipe.height);
+        QCOMPARE(button->implicitHeight(), recipe.height);
+        auto* background = button->property("background").value<QQuickItem*>();
+        QCOMPARE(background->property("color").value<QColor>(), recipe.background);
+        auto* icon = button->property("contentItem").value<QQuickItem*>();
+        QCOMPARE(icon->property("color").value<QColor>(), recipe.text);
+    }
+
+    void tagMatchesTheWidgetsRecipe() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "KetTag { text: \"A very long tag label that overflows\"; tagColor: \"#2f6fde\" }\n"));
+        auto* tag = qobject_cast<QQuickItem*>(root.get());
+        QVERIFY(tag);
+        const TagRecipe recipe = tagRecipe(QColor(0x2f6fde), false, false, Theme::Light);
+        QCOMPARE(tag->implicitHeight(), recipe.height);
+        QCOMPARE(tag->implicitWidth(), recipe.maxWidth);
+        QCOMPARE(tag->property("color").value<QColor>(), recipe.background);
+        tag->setProperty("previewHovered", true);
+        QCOMPARE(tag->property("color").value<QColor>(),
+                 tagRecipe(QColor(0x2f6fde), false, true, Theme::Light).background);
     }
 
     void themeExposesTokenMap() {

@@ -19,7 +19,7 @@ void scaleLengths(QVariantMap& recipe, qreal zoom, std::initializer_list<QString
     }
 }
 
-static_assert(int(QuickTheme::ButtonVariant::Danger) == int(ButtonVariant::Danger));
+static_assert(int(QuickTheme::ButtonVariant::GhostDanger) == int(ButtonVariant::GhostDanger));
 static_assert(int(QuickTheme::ControlSize::Medium) == int(ControlSize::Medium));
 static_assert(int(QuickTheme::BadgeTone::Danger) == int(BadgeTone::Danger));
 
@@ -65,9 +65,27 @@ QVariantMap QuickTheme::buttonRecipe(bool dark, qreal zoom, int variant, int siz
     return recipe;
 }
 
+QVariantMap QuickTheme::iconButtonRecipe(bool dark, qreal zoom, int size, bool hovered,
+                                         bool pressed, bool enabled, bool focused) const {
+    const InteractionState state{hovered, pressed, enabled, focused};
+    QVariantMap recipe =
+        toVariantMap(ket::iconButtonRecipe(ket::ControlSize(size), state, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"height", u"radius", u"paddingInline", u"iconSize", u"spacing", u"fontPixels"});
+    return recipe;
+}
+
 QVariantMap QuickTheme::badgeRecipe(bool dark, qreal zoom, int tone) const {
     QVariantMap recipe = toVariantMap(ket::badgeRecipe(ket::BadgeTone(tone), themeOf(dark)));
     scaleLengths(recipe, zoom, {u"height", u"radius", u"paddingInline", u"fontPixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::tagRecipe(bool dark, qreal zoom, const QColor& color, bool overflow,
+                                  bool hovered) const {
+    QVariantMap recipe = toVariantMap(ket::tagRecipe(color, overflow, hovered, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"height", u"radius", u"paddingInline", u"maxWidth", u"fontPixels"});
     return recipe;
 }
 

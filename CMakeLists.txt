@@ -55,6 +55,7 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetStyle.h src/widgets/KetStyle.cpp
         src/widgets/KetButton.h src/widgets/KetButton.cpp
         src/widgets/KetBadge.h src/widgets/KetBadge.cpp
+        src/widgets/KetTag.h src/widgets/KetTag.cpp
     )
     add_library(KetQt::Widgets ALIAS ketqt_widgets)
     target_include_directories(ketqt_widgets PUBLIC
@@ -74,12 +75,14 @@ if(KETQT_BUILD_QUICK)
         URI Ket
         VERSION 1.0
         PLUGIN_TARGET ketqt_quickplugin
+        OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/qml/Ket
         CLASS_NAME KetPlugin
         SOURCES src/quick/KetTheme.h src/quick/KetTheme.cpp
-        QML_FILES src/quick/qml/KetButton.qml src/quick/qml/KetBadge.qml
+        QML_FILES src/quick/qml/KetButton.qml src/quick/qml/KetIconButton.qml
+                  src/quick/qml/KetBadge.qml src/quick/qml/KetTag.qml
         RESOURCE_PREFIX /qt/qml
     )
-    foreach(file KetButton KetBadge)
+    foreach(file KetButton KetIconButton KetBadge KetTag)
         set_source_files_properties(src/quick/qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
     endforeach()
     add_library(KetQt::Quick ALIAS ketqt_quick)
@@ -116,6 +119,7 @@ install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRe
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 if(KETQT_BUILD_WIDGETS)
     install(FILES src/widgets/KetStyle.h src/widgets/KetButton.h src/widgets/KetBadge.h
+                  src/widgets/KetTag.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 endif()
 install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)

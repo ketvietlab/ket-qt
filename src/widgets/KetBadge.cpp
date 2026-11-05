@@ -4,6 +4,7 @@
 #include "KetAppearance.h"
 
 #include <QPainter>
+#include <QtMath>
 
 namespace ket {
 
@@ -43,7 +44,7 @@ QFont Badge::badgeFont() const {
 QSize Badge::sizeHint() const {
     const BadgeRecipe r = recipe();
     const Appearance& appearance = Appearance::instance();
-    const int width = QFontMetrics(badgeFont()).horizontalAdvance(text_) +
+    const int width = qCeil(QFontMetricsF(badgeFont()).horizontalAdvance(text_)) +
                       2 * qRound(appearance.scaled(r.paddingInline));
     return {width, qRound(appearance.scaled(r.height))};
 }
