@@ -12,7 +12,7 @@ QColor transparent() { return QColor(Qt::transparent); }
 constexpr qreal kDisabledOpacity = 0.48; // `button:disabled`
 constexpr qreal kButtonGap = 7;          // `.btn` gap
 // Icon boxes: the mock's `.icon` (17 px) and compact header icons (14 px). ket::Icons draws
-// the 16 px Két Symbol master centred in the 17 px box and scales it down only for 14 px.
+// the 16 px Két Symbol master centred in the 17 px box and the 14 px master for compact.
 constexpr qreal kIconSize = 17;
 constexpr qreal kSmallIconSize = 14;
 constexpr qreal kIconButtonSize = 30; // `.icon-btn`

@@ -62,9 +62,10 @@ Icons are Két Symbol 0.11.0 (`third_party/ket-symbol`, CC BY 4.0, separate file
 their own notice), compiled into `KetQt::Icons` by `tools/generate_icons.py`:
 
 - `ket::Icons` names icons by Két code; `codeForLucide()` maps KetPlus' Lucide names.
-- A box up to 18 px draws the 16 px master, 19-22 px the 20 px master and 23 px or more the
-  24 px master, at its own size and centred on whole device pixels (`offset()`). Only a box
-  smaller than its master, such as the 14 px compact size, scales it down.
+- A box draws the nearest master (14, 16, 20 or 24 px; the smaller on a tie): 14 px compact
+  icons their own drawing, 17-18 px the 16 px master, 19-22 px the 20 px master and 23 px or
+  more the 24 px master. The master is drawn at its own size and centred on whole device
+  pixels (`offset()`); only a box smaller than its master scales it down.
 - Light is the default weight; Regular is for emphasis. A filled variant never marks
   selection.
 - `ket::Icons::icon()` is a `QIcon` with those rules; `ket::Icon` and `KetIcon` draw a
