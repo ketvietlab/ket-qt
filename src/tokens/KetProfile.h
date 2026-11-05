@@ -212,6 +212,48 @@ struct Profile {
     qreal activityRowIconSize = 0;
     qreal activityRowChevronSize = 0;
 
+    // Markdown in the transcript (`.answer`) and code blocks.
+    qreal markdownHeading1Pixels = 0;
+    qreal markdownHeading2Pixels = 0;
+    qreal markdownHeading3Pixels = 0;
+    qreal markdownHeadingLineHeight = 1.0;
+    qreal markdownHeadingSpacingAfter = 0;
+    qreal markdownParagraphSpacing = 0;
+    qreal markdownListIndent = 0;
+    qreal markdownListItemGap = 0;
+    int markdownStrongWeight = 700;
+    qreal markdownQuotePadding = 0;
+    qreal markdownQuoteBorder = 0;
+    qreal codePixels = 0;
+    qreal codeLineHeight = 1.0;
+    qreal codePadding = 0;
+    qreal codeRadius = 0;
+    qreal codeMargin = 0;
+
+    // Mention picker (`.mention-menu`).
+    qreal mentionMaxWidth = 0;
+    qreal mentionPadding = 0; // including the border
+    qreal mentionRadius = 0;
+    qreal mentionOverlap = 0; // how far the menu overlaps the composer's top edge
+    qreal mentionTitlePixels = 0;
+    int mentionTitleWeight = 400;
+    qreal mentionTitlePaddingInline = 0;
+    qreal mentionTitlePaddingTop = 0;
+    qreal mentionTitlePaddingBottom = 0;
+    qreal mentionOptionHeight = 0;
+    qreal mentionOptionPadding = 0;
+    qreal mentionOptionRadius = 0;
+    qreal mentionOptionGap = 0;
+    qreal mentionOptionPixels = 0;
+    qreal mentionPlacePixels = 0;
+    int mentionMaxItems = 0;
+
+    // Usage ring in the composer toolbar.
+    qreal usageRingSize = 0;
+    qreal usageRingStroke = 0;
+    qreal usageWarningAt = 1.0;
+    qreal usageDangerAt = 1.0;
+
     [[nodiscard]] static Profile designSystem();
     [[nodiscard]] static Profile ketPlus();
 

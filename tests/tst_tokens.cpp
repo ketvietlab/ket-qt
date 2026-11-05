@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetAppearance.h"
 #include "KetConversationRecipes.h"
+#include "KetMarkdown.h"
 #include "KetProfile.h"
 #include "KetRecipes.h"
 #include "KetTokens.h"
 
 #include <QGuiApplication>
 #include <QTest>
+#include <QTextBlock>
+#include <QTextDocument>
 
 using namespace ket;
 
@@ -361,6 +364,99 @@ class TokensTest final : public QObject {
         QCOMPARE(dayDividerRecipe(Theme::Light).marginBottom, 22.0);
         QCOMPARE(activityRowRecipe({true, false, true, false}, Theme::Light).background,
                  Tokens::color(u"surface-hover", Theme::Light));
+    }
+
+    void markdownSplitsProseAndFences() {
+        const QList<MarkdownSegment> segments =
+            splitMarkdown(u"Intro **bold**\n\n```cpp\nint x = 1;\n```\nAfter\n~~~\nunclosed");
+        const QList<MarkdownSegment> quoted = splitMarkdown(u"Lead\n> One\n>two\n\nTail");
+        QCOMPARE(quoted.size(), 3);
+        QCOMPARE(quoted.at(1).kind, MarkdownSegment::Kind::Quote);
+        QCOMPARE(quoted.at(1).text, QStringLiteral("One\ntwo"));
+        QCOMPARE(quoted.at(2).text, QStringLiteral("Tail"));
+        QCOMPARE(segments.size(), 4);
+        QCOMPARE(segments.at(0).kind, MarkdownSegment::Kind::Text);
+        QCOMPARE(segments.at(1).kind, MarkdownSegment::Kind::Code);
+        QCOMPARE(segments.at(1).language, QStringLiteral("cpp"));
+        QCOMPARE(segments.at(1).text, QStringLiteral("int x = 1;"));
+        QCOMPARE(segments.at(2).text, QStringLiteral("After"));
+        QCOMPARE(segments.at(3).text, QStringLiteral("unclosed"));
+        // A shorter or different marker does not close a fence.
+        const QList<MarkdownSegment> nested = splitMarkdown(u"````\n```\nstill code\n````");
+        QCOMPARE(nested.size(), 1);
+        QCOMPARE(nested.at(0).text, QStringLiteral("```\nstill code"));
+    }
+
+    void markdownTakesTheAnswerStyle() {
+        QTextDocument document;
+        document.setMarkdown(
+            QStringLiteral("### Plan\n\nBody with `code` and **bold**.\n\n- one\n- two"));
+        styleMarkdown(&document, markdownRecipe(Theme::Light), 1.0, QFont(),
+                      QStringLiteral("Menlo"));
+        const QTextBlock heading = document.begin();
+        QCOMPARE(heading.begin().fragment().charFormat().intProperty(QTextFormat::FontPixelSize),
+                 20);
+        QCOMPARE(heading.blockFormat().bottomMargin(), 7.0);
+        const QTextBlock body = heading.next();
+        QCOMPARE(body.blockFormat().lineHeight(), qreal(qFloor(15 * 1.75)));
+        QCOMPARE(body.blockFormat().bottomMargin(), 16.0);
+        bool mono = false;
+        bool strong = false;
+        for (auto it = body.begin(); !it.atEnd(); ++it) {
+            const QTextCharFormat chars = it.fragment().charFormat();
+            mono |= chars.fontFamilies().toStringList().contains(QStringLiteral("Menlo"));
+            strong |= chars.fontWeight() == 550;
+        }
+        QVERIFY(mono);
+        QVERIFY(strong);
+        const QTextBlock first = body.next();
+        QVERIFY(first.textList());
+        QCOMPARE(first.blockFormat().bottomMargin(), 5.0); // the list gap, not a paragraph
+        QCOMPARE(document.indentWidth(), 17.0);
+
+        QTextDocument quoted;
+        quoted.setMarkdown(QStringLiteral("Before\n\n> Quoted"));
+        styleMarkdown(&quoted, markdownRecipe(Theme::Light), 1.0, QFont(), QString());
+        const QTextBlockFormat quote = quoted.lastBlock().blockFormat();
+        QCOMPARE(quote.background().color(), Tokens::color(u"accent-subtle", Theme::Light));
+        QCOMPARE(quote.leftMargin(), 14.0);
+    }
+
+    void agentMentionsFollowTheMock() {
+        const QString text = QStringLiteral("Ask @agent/48 about it");
+        const auto mention = agentMention(text, 13);
+        QVERIFY(mention);
+        QCOMPARE(mention->start, 4);
+        QCOMPARE(mention->end, 13);
+        QCOMPARE(mention->query, QStringLiteral("48"));
+        QVERIFY(agentMention(u"Ask @agent/", 11));
+        QCOMPARE(agentMention(u"Ask @agent/", 11)->query, QString());
+        QVERIFY(!agentMention(u"Ask @file.cpp", 13)); // a plain @ mentions a file
+        QVERIFY(!agentMention(u"mail@agent/1", 12));  // not after a space or bracket
+        QVERIFY(agentMention(u"(@agent/1", 9));
+        QCOMPARE(agentMention(u"@agent/AB", 9)->query, QStringLiteral("ab"));
+        QCOMPARE(agentMentionText(u"4821"), QStringLiteral("@agent/4821 "));
+    }
+
+    void richRecipesFollowTheKetPlusMock() {
+        QCOMPARE(codeBlockRecipe(Theme::Light).background,
+                 Tokens::color(u"panel-bg-subtle", Theme::Light));
+        QCOMPARE(codeBlockRecipe(Theme::Light).padding, 17.0);
+        QCOMPARE(mentionPickerRecipe(Theme::Light).maxWidth, 520.0);
+        QCOMPARE(mentionPickerRecipe(Theme::Light).border,
+                 Tokens::color(u"border-strong", Theme::Light));
+        QCOMPARE(mentionOptionRecipe(true, Theme::Light).title,
+                 Tokens::color(u"accent-text", Theme::Light));
+        QCOMPARE(mentionOptionRecipe(false, Theme::Light).height, 34.0);
+        QCOMPARE(usageRingRecipe(0.3, false, Theme::Light).arc,
+                 Tokens::color(u"text-muted", Theme::Light));
+        QCOMPARE(usageRingRecipe(0.3, true, Theme::Light).arc,
+                 Tokens::color(u"accent", Theme::Light));
+        QCOMPARE(usageRingRecipe(0.85, false, Theme::Light).arc,
+                 Tokens::color(u"warning", Theme::Light));
+        QCOMPARE(usageRingRecipe(0.97, false, Theme::Light).arc,
+                 Tokens::color(u"danger", Theme::Light));
+        QCOMPARE(usageRingRecipe(0, false, Theme::Light).size, 19.0);
     }
 
     void appearanceZoomRoundsToWholePixels() {

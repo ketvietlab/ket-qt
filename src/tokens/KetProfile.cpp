@@ -175,6 +175,42 @@ Profile Profile::designSystem() {
     p.activityRowPixels = px(u"text-sm");
     p.activityRowIconSize = 16;
     p.activityRowChevronSize = 14;
+    p.markdownHeading1Pixels = px(u"text-2xl");
+    p.markdownHeading2Pixels = px(u"text-xl");
+    p.markdownHeading3Pixels = px(u"text-xl");
+    p.markdownHeadingLineHeight = 1.3;
+    p.markdownHeadingSpacingAfter = px(u"space-2");
+    p.markdownParagraphSpacing = px(u"space-4");
+    p.markdownListIndent = px(u"space-5");
+    p.markdownListItemGap = px(u"space-1");
+    p.markdownStrongWeight = qRound(Tokens::number(u"weight-semibold"));
+    p.markdownQuotePadding = px(u"space-3");
+    p.markdownQuoteBorder = 3; // `[data-ui="markdown"] blockquote`
+    p.codePixels = px(u"text-sm");
+    p.codeLineHeight = 1.5;
+    p.codePadding = px(u"space-4");
+    p.codeRadius = px(u"radius-md");
+    p.codeMargin = px(u"space-4");
+    p.mentionMaxWidth = px(u"space-16") * 8;
+    p.mentionPadding = px(u"space-1");
+    p.mentionRadius = px(u"radius-md");
+    p.mentionOverlap = px(u"space-1");
+    p.mentionTitlePixels = px(u"text-xs");
+    p.mentionTitleWeight = qRound(Tokens::number(u"weight-semibold"));
+    p.mentionTitlePaddingInline = px(u"space-2");
+    p.mentionTitlePaddingTop = px(u"space-1");
+    p.mentionTitlePaddingBottom = px(u"space-1-5");
+    p.mentionOptionHeight = px(u"control-height-md");
+    p.mentionOptionPadding = px(u"space-2");
+    p.mentionOptionRadius = px(u"radius-sm");
+    p.mentionOptionGap = px(u"space-2");
+    p.mentionOptionPixels = px(u"text-sm");
+    p.mentionPlacePixels = px(u"text-xs");
+    p.mentionMaxItems = 6;
+    p.usageRingSize = px(u"space-5");
+    p.usageRingStroke = 3;
+    p.usageWarningAt = 0.8;
+    p.usageDangerAt = 0.95;
     return p;
 }
 
@@ -343,6 +379,43 @@ Profile Profile::ketPlus() {
     p.activityRowPixels = 13; // kp-text-md
     p.activityRowIconSize = 16;
     p.activityRowChevronSize = 12;
+    // `.answer` (desktop-alignment, workspace.css) and `.markdown-preview pre`.
+    p.markdownHeading1Pixels = 24;
+    p.markdownHeading2Pixels = 21; // `h2`, 18 px at the 15 px interface scale
+    p.markdownHeading3Pixels = 20; // `.answer h3`
+    p.markdownHeadingLineHeight = 1.4;
+    p.markdownHeadingSpacingAfter = 7;
+    p.markdownParagraphSpacing = 16; // `.answer p, .answer ul`
+    p.markdownListIndent = 17;       // `.answer ul` padding-left
+    p.markdownListItemGap = 5;
+    p.markdownStrongWeight = 550; // `.answer strong`
+    p.markdownQuotePadding = 14;  // `.markdown-callout`
+    p.markdownQuoteBorder = 3;
+    p.codePixels = 13;      // `pre`: max(13px, kp-text-md)
+    p.codeLineHeight = 1.6; // not in the mock; denser than prose
+    p.codePadding = 17;
+    p.codeRadius = 5;
+    p.codeMargin = 15;
+    p.mentionMaxWidth = 520; // `.mention-menu`
+    p.mentionPadding = 6;    // 5 px plus the border
+    p.mentionRadius = 7;
+    p.mentionOverlap = 4;      // bottom: calc(100% - 4px)
+    p.mentionTitlePixels = 12; // `.mention-menu-title`
+    p.mentionTitleWeight = 600;
+    p.mentionTitlePaddingInline = 8;
+    p.mentionTitlePaddingTop = 4;
+    p.mentionTitlePaddingBottom = 6;
+    p.mentionOptionHeight = 34; // `.mention-option`
+    p.mentionOptionPadding = 8;
+    p.mentionOptionRadius = 5;
+    p.mentionOptionGap = 10;
+    p.mentionOptionPixels = 13;
+    p.mentionPlacePixels = 12;
+    p.mentionMaxItems = 6; // K.conversationSuggestions
+    p.usageRingSize = 19;  // `.composer-toolbar .usage-ring`
+    p.usageRingStroke = 3;
+    p.usageWarningAt = 0.8; // not in the mock
+    p.usageDangerAt = 0.95;
     return p;
 }
 

@@ -9,6 +9,7 @@
 #include "KitchenSinkCommon.h"
 #include "NavigationPages.h"
 #include "OverlayPages.h"
+#include "RichPages.h"
 
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -43,6 +44,7 @@ const PageEntry kPages[] = {
     {"overlays", "Components", "Overlays", overlayPage},
     {"navigation", "Components", "Navigation", navigationPage},
     {"conversation", "Components", "Conversation", conversationPage},
+    {"rich", "Components", "Rich transcript", richPage},
 };
 
 Theme theme() { return Appearance::instance().theme(); }

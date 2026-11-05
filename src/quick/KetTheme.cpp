@@ -4,7 +4,9 @@
 #include "KetAppearance.h"
 #include "KetConversationRecipes.h"
 #include "KetIcons.h"
+#include "KetMarkdown.h"
 #include "KetRecipes.h"
+#include "KetRichRecipes.h"
 
 #include <QFontDatabase>
 #include <QGuiApplication>
@@ -346,6 +348,80 @@ void QuickTheme::applyLineHeight(QQuickTextDocument* document, qreal pixels) con
     QTextCursor cursor(document->textDocument());
     cursor.select(QTextCursor::Document);
     cursor.mergeBlockFormat(format);
+}
+
+QVariantMap QuickTheme::markdownRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::markdownRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"bodyPixels", u"heading1Pixels", u"heading2Pixels", u"heading3Pixels",
+                  u"headingSpacingAfter", u"paragraphSpacing", u"listIndent", u"listItemGap",
+                  u"quotePadding", u"quoteBorderWidth", u"codePixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::codeBlockRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::codeBlockRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom, {u"padding", u"radius", u"margin", u"fontPixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::mentionPickerRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::mentionPickerRecipe(themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"maxWidth", u"padding", u"radius", u"overlap", u"titlePixels",
+                  u"titlePaddingInline", u"titlePaddingTop", u"titlePaddingBottom",
+                  u"emptyPixels"});
+    scaleLengths(recipe, zoom, kShadowLengths);
+    return recipe;
+}
+
+QVariantMap QuickTheme::mentionOptionRecipe(bool dark, qreal zoom, bool highlighted) const {
+    QVariantMap recipe = toVariantMap(ket::mentionOptionRecipe(highlighted, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"height", u"paddingInline", u"radius", u"spacing", u"fontPixels",
+                  u"numberPixels", u"placePixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::usageRingRecipe(bool dark, qreal zoom, qreal used, bool hovered) const {
+    QVariantMap recipe = toVariantMap(ket::usageRingRecipe(used, hovered, themeOf(dark)));
+    scaleLengths(recipe, zoom, {u"size", u"stroke"});
+    return recipe;
+}
+
+QVariantList QuickTheme::markdownSegments(const QString& markdown) const {
+    QVariantList segments;
+    for (const MarkdownSegment& segment : splitMarkdown(markdown))
+        segments.append(
+            QVariantMap{{QStringLiteral("kind"),
+                         segment.kind == MarkdownSegment::Kind::Code    ? QStringLiteral("code")
+                         : segment.kind == MarkdownSegment::Kind::Quote ? QStringLiteral("quote")
+                                                                        : QStringLiteral("text")},
+                        {QStringLiteral("text"), segment.text},
+                        {QStringLiteral("language"), segment.language}});
+    return segments;
+}
+
+void QuickTheme::styleMarkdown(QQuickTextDocument* document, bool dark, qreal zoom) const {
+    if (!document)
+        return;
+    QFont base = QGuiApplication::font();
+    base.setFamilies({fontFamily()});
+    ket::styleMarkdown(document->textDocument(), ket::markdownRecipe(themeOf(dark)), zoom, base,
+                       monoFontFamily());
+}
+
+QVariant QuickTheme::agentMention(const QString& text, int cursor) const {
+    const std::optional<AgentMention> mention = ket::agentMention(text, cursor);
+    if (!mention)
+        return {};
+    return QVariantMap{{QStringLiteral("start"), int(mention->start)},
+                       {QStringLiteral("end"), int(mention->end)},
+                       {QStringLiteral("query"), mention->query}};
+}
+
+QString QuickTheme::agentMentionText(const QString& number) const {
+    return ket::agentMentionText(number);
 }
 
 QString QuickTheme::iconSource(const QString& code, qreal box, int weight) const {

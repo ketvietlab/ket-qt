@@ -11,6 +11,7 @@ Item {
     id: composer
 
     property alias text: input.text
+    property alias cursorPosition: input.cursorPosition
     property alias placeholderText: input.placeholderText
     property bool busy: false
     property alias leadingTools: leading.data
@@ -19,8 +20,81 @@ Item {
     readonly property var recipe: KetTheme.composerRecipe(KetTheme.dark, KetTheme.zoom, focused)
     readonly property real lineBox: Math.floor(recipe.textPixels * recipe.lineHeight)
 
+    // `@agent/` completion: answer mentionQuery(query) by setting mentionItems
+    // ([{ number, title, place }]), which opens the picker; null closes it.
+    property var mentionItems: null
+    property var mention: null
+    readonly property alias mentionPicker: picker
+
     signal submitted(string text)
     signal stopRequested()
+    signal mentionQuery(string query)
+    signal mentionClosed()
+
+    function updateMention() {
+        const found = input.selectedText === ""
+            ? KetTheme.agentMention(input.text, input.cursorPosition) : null
+        if (!found) {
+            if (mention) {
+                mention = null
+                mentionItems = null
+                mentionClosed()
+            }
+            return
+        }
+        if (mention && mention.query === found.query) {
+            mention = found
+            return
+        }
+        mention = found
+        mentionQuery(found.query)
+    }
+
+    function applyMention(item) {
+        const found = KetTheme.agentMention(input.text, input.cursorPosition)
+        if (found) {
+            input.remove(found.start, found.end)
+            input.insert(found.start, KetTheme.agentMentionText(item.number))
+            input.cursorPosition = found.start + KetTheme.agentMentionText(item.number).length
+        }
+        mention = null
+        mentionItems = null
+        input.forceActiveFocus()
+    }
+
+    // Arrow keys, Enter, Tab and Escape belong to the open picker.
+    function handleMentionKey(event) {
+        if (!picker.opened)
+            return false
+        if (event.key === Qt.Key_Escape) {
+            mention = null
+            mentionItems = null
+            mentionClosed()
+            return true
+        }
+        const count = picker.shownItems.length
+        if (event.key === Qt.Key_Down || event.key === Qt.Key_Up) {
+            picker.moveHighlight(event.key === Qt.Key_Down ? 1 : -1)
+            return count > 0
+        }
+        if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter
+             || event.key === Qt.Key_Tab) && count > 0) {
+            applyMention(picker.shownItems[Math.max(0, picker.highlightedIndex)])
+            return true
+        }
+        return false
+    }
+
+    KetMentionPicker {
+        id: picker
+        x: card.x
+        y: card.y + recipe.overlap - height
+        width: Math.min(recipe.maxWidth, card.width)
+        items: composer.mentionItems || []
+        visible: composer.mentionItems !== null && composer.mentionItems !== undefined
+        onVisibleChanged: if (visible) highlightedIndex = 0
+        onActivated: item => composer.applyMention(item)
+    }
 
     function submit() {
         if (input.text.trim() === "")
@@ -89,6 +163,13 @@ Item {
                     font.family: KetTheme.fontFamily
                     font.pixelSize: composer.recipe.textPixels
                     background: null
+                    Keys.onPressed: event => {
+                        if (composer.handleMentionKey(event))
+                            event.accepted = true
+                        else
+                            event.accepted = false
+                    }
+                    onCursorPositionChanged: composer.updateMention()
                     Keys.onReturnPressed: event => {
                         if (event.modifiers & Qt.ShiftModifier)
                             event.accepted = false
@@ -110,6 +191,7 @@ Item {
                         formatting = true
                         KetTheme.applyLineHeight(textDocument, composer.lineBox)
                         formatting = false
+                        composer.updateMention()
                     }
                     Component.onCompleted: KetTheme.applyLineHeight(textDocument, composer.lineBox)
                 }

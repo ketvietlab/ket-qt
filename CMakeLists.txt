@@ -43,6 +43,8 @@ add_library(ketqt_tokens STATIC
     src/tokens/KetOverlayRecipes.cpp
     src/tokens/KetNavigationRecipes.cpp
     src/tokens/KetConversationRecipes.h src/tokens/KetConversationRecipes.cpp
+    src/tokens/KetRichRecipes.h src/tokens/KetRichRecipes.cpp
+    src/tokens/KetMarkdown.h src/tokens/KetMarkdown.cpp
     src/tokens/KetProfile.h src/tokens/KetProfile.cpp
 )
 add_library(KetQt::Tokens ALIAS ketqt_tokens)
@@ -95,6 +97,8 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetComposer.h src/widgets/KetComposer.cpp
         src/widgets/KetTranscript.h src/widgets/KetTranscript.cpp
         src/widgets/KetActivityRow.h src/widgets/KetActivityRow.cpp
+        src/widgets/KetMarkdownView.h src/widgets/KetMarkdownView.cpp
+        src/widgets/KetMentionPicker.h src/widgets/KetMentionPicker.cpp
     )
     add_library(KetQt::Widgets ALIAS ketqt_widgets)
     target_include_directories(ketqt_widgets PUBLIC
@@ -134,6 +138,9 @@ if(KETQT_BUILD_QUICK)
                   src/quick/qml/KetComposer.qml src/quick/qml/KetReadingText.qml
                   src/quick/qml/KetUserMessage.qml src/quick/qml/KetAssistantMessage.qml
                   src/quick/qml/KetDayDivider.qml src/quick/qml/KetActivityRow.qml
+                  src/quick/qml/KetMarkdownText.qml src/quick/qml/KetCodeBlock.qml
+                  src/quick/qml/KetMarkdown.qml src/quick/qml/KetMentionPicker.qml
+                  src/quick/qml/KetUsageRing.qml
         RESOURCE_PREFIX /qt/qml
     )
     foreach(file KetButton KetIconButton KetBadge KetTag KetIcon KetTextField KetSelect
@@ -141,7 +148,8 @@ if(KETQT_BUILD_QUICK)
                  KetBanner KetToast KetDialog KetMenu KetMenuItem KetMenuSeparator KetToolTip
                  KetNavItem KetKbd KetSegmentedControl KetTabBar KetTabButton KetProgressBar
                  KetActivityIndicator KetEmptyState KetConversationRow KetComposer
-                 KetReadingText KetUserMessage KetAssistantMessage KetDayDivider KetActivityRow)
+                 KetReadingText KetUserMessage KetAssistantMessage KetDayDivider KetActivityRow
+                 KetMarkdownText KetCodeBlock KetMarkdown KetMentionPicker KetUsageRing)
         set_source_files_properties(src/quick/qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
     endforeach()
     add_library(KetQt::Quick ALIAS ketqt_quick)
@@ -176,6 +184,7 @@ install(TARGETS ${ketqt_install_targets} EXPORT KetQtTargets
 )
 install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRecipes.h
               src/tokens/KetProfile.h src/tokens/KetConversationRecipes.h
+              src/tokens/KetRichRecipes.h src/tokens/KetMarkdown.h
               src/icons/KetIcons.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 if(KETQT_BUILD_WIDGETS)
@@ -187,7 +196,8 @@ if(KETQT_BUILD_WIDGETS)
                   src/widgets/KetSegmentedControl.h src/widgets/KetActivityIndicator.h
                   src/widgets/KetEmptyState.h src/widgets/KetConversationRow.h
                   src/widgets/KetComposer.h src/widgets/KetTranscript.h
-                  src/widgets/KetActivityRow.h
+                  src/widgets/KetActivityRow.h src/widgets/KetMarkdownView.h
+                  src/widgets/KetMentionPicker.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 endif()
 install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)
