@@ -150,8 +150,8 @@ QVariantMap toVariantMap(const TreeItemRecipe& r) {
 GroupHeaderRecipe groupHeaderRecipe(bool selected, const InteractionState& state, Theme theme) {
     GroupHeaderRecipe recipe;
     const bool live = state.enabled;
-    recipe.text = token(live && (state.hovered || state.pressed) || selected ? u"text-secondary"
-                                                                             : u"text-muted",
+    recipe.text = token((live && (state.hovered || state.pressed)) || selected ? u"text-secondary"
+                                                                               : u"text-muted",
                         theme);
     recipe.focusRing = live && state.focused ? token(u"focus-border", theme) : transparent();
     recipe.height = profile().groupHeaderHeight;

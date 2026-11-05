@@ -6,6 +6,7 @@
 #include "KetIcons.h"
 #include "KetMarkdown.h"
 #include "KetParagraph.h"
+#include "KetProfile.h"
 
 #include <QBoxLayout>
 #include <QClipboard>
@@ -56,7 +57,7 @@ void CodeBlock::setLanguage(const QString& language) {
 
 QFont CodeBlock::codeFont() const {
     QFont font = this->font();
-    if (const QString family = Tokens::availableFamily(u"font-mono"); !family.isEmpty())
+    if (const QString family = Profile::current().monoFamily(); !family.isEmpty())
         font.setFamilies({family});
     font.setPixelSize(qRound(scaled(codeBlockRecipe(theme()).fontPixels)));
     return font;
@@ -136,7 +137,7 @@ void MarkdownText::render() {
     const MarkdownRecipe r = markdownRecipe(theme());
     setMarkdown(markdown_);
     styleMarkdown(document(), r, Appearance::instance().zoom(), font(),
-                  Tokens::availableFamily(u"font-mono"));
+                  Profile::current().monoFamily());
     QPalette palette = this->palette();
     palette.setColor(QPalette::Base, Qt::transparent);
     palette.setColor(QPalette::Text, r.text);

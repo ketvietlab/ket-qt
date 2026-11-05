@@ -17,7 +17,9 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
   `ket::UsageRing`, `ket::Popover`, `ket::Meter`, `ket::AttachmentChip`,
   `ket::Suggestion`, `ket::QuestionCard`, `ket::ActivityGroup`, `ket::Gallery`,
   `ket::StepSlider`, `ket::Avatar`, `ket::TreeItem`, `ket::GroupHeader`, `ket::RouteTabs`,
-  `ket::StatusBar`, `ket::Breadcrumb`, `ket::PaneHeader`;
+  `ket::StatusBar`, `ket::Breadcrumb`, `ket::PaneHeader`, `ket::CommandPalette`,
+  `ket::FileRow`, `ket::ChangedFiles`, `ket::DiffView`, `ket::TaskBar`, `ket::TaskRow`,
+  `ket::UpdateCard`, `ket::UpdatePill`, `ket::ThemeCard`, `ket::AccentSwatch`;
   `ket::Style` also draws every `QMenu`, the select popup, `QToolTip`, top
   `QTabBar`s, horizontal `QProgressBar`s and horizontal `QSlider`s.
 - `KetQt::Quick`: the QML module `Ket` with `KetTheme`, `KetButton`, `KetIconButton`,
@@ -30,7 +32,10 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
   `KetMentionPicker`, `KetUsageRing`, `KetPopover`, `KetPopoverText`, `KetPopoverDivider`,
   `KetMeter`, `KetAttachmentChip`, `KetSuggestion`, `KetQuestionCard`, `KetActivityGroup`,
   `KetGallery`, `KetSlider`, `KetStepSlider`, `KetAvatar`, `KetTreeItem`, `KetGroupHeader`,
-  `KetRouteTabs`, `KetStatusBar`, `KetStatusItem`, `KetBreadcrumb`, `KetPaneHeader`.
+  `KetRouteTabs`, `KetStatusBar`, `KetStatusItem`, `KetBreadcrumb`, `KetPaneHeader`,
+  `KetCommandPalette`, `KetCommandResult`, `KetFileRow`, `KetChangedFiles`, `KetDiffView`,
+  `KetTaskBar`, `KetTaskRow`, `KetUpdateCard`, `KetUpdatePill`, `KetThemeCard`,
+  `KetAccentSwatch`.
 
 Components follow the new KetPlus desktop mock and are added in the order KetPlus uses
 them; see [docs/architecture.md](docs/architecture.md#component-scope-and-source).

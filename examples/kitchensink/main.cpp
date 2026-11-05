@@ -3,12 +3,15 @@
 // Qt Quick versions side by side. Command-line options make review evidence repeatable:
 //   --page=<id> --dark|--light --zoom=1.25 --screenshot=<file>   render one page and exit
 //   --smoke                                               open every page; fail on QML errors
+//   --fonts=<dir>   register the .ttf/.otf files in <dir> first (repeatable), e.g. KÉT Sans
 #include "KetAppearance.h"
 #include "KetStyle.h"
 #include "KitchenSinkWindow.h"
 
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QDir>
+#include <QFontDatabase>
 #include <QQuickItem>
 #include <QQuickWidget>
 #include <QScrollArea>
@@ -61,8 +64,24 @@ int main(int argc, char** argv) {
         QStringLiteral("WxH"), QStringLiteral("1280x860"));
     const QCommandLineOption full(
         QStringLiteral("full"), QStringLiteral("With --screenshot, save the whole scrolled page."));
-    parser.addOptions({page, dark, light, zoom, size, screenshot, full, smoke});
+    const QCommandLineOption fonts(
+        QStringLiteral("fonts"),
+        QStringLiteral("Register the .ttf and .otf files in <dir> before styling (repeatable). "
+                       "The kit bundles no fonts."),
+        QStringLiteral("dir"));
+    parser.addOptions({page, dark, light, zoom, size, screenshot, full, smoke, fonts});
     parser.process(application);
+
+    for (const QString& path : parser.values(fonts)) {
+        const QDir dir(path);
+        const QStringList files =
+            dir.entryList({QStringLiteral("*.ttf"), QStringLiteral("*.otf")}, QDir::Files);
+        if (files.isEmpty())
+            std::fprintf(stderr, "--fonts: no .ttf or .otf files in %s\n", qPrintable(path));
+        for (const QString& file : files)
+            if (QFontDatabase::addApplicationFont(dir.filePath(file)) < 0)
+                std::fprintf(stderr, "--fonts: could not load %s\n", qPrintable(file));
+    }
 
     if (parser.isSet(smoke))
         qInstallMessageHandler(countQmlProblems);
@@ -119,7 +138,12 @@ int main(int argc, char** argv) {
             QWidget* target = &window;
             if (wholePage) {
                 for (QScrollArea* area : window.findChildren<QScrollArea*>()) {
-                    if (area->isVisible() && area->widget() && area->widget()->isVisible())
+                    // Skip scroll areas inside a page, such as the command palette's list.
+                    bool nested = false;
+                    for (QWidget* up = area->parentWidget(); up && !nested; up = up->parentWidget())
+                        nested = qobject_cast<QScrollArea*>(up) != nullptr;
+                    if (!nested && area->isVisible() && area->widget() &&
+                        area->widget()->isVisible())
                         target = area->widget();
                 }
             }

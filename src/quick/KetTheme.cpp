@@ -6,6 +6,7 @@
 #include "KetConversationRecipes.h"
 #include "KetIcons.h"
 #include "KetMarkdown.h"
+#include "KetProfile.h"
 #include "KetRecipes.h"
 #include "KetRichRecipes.h"
 
@@ -57,7 +58,7 @@ QString QuickTheme::fontFamily() const {
 }
 
 QString QuickTheme::monoFontFamily() const {
-    const QString family = Tokens::availableFamily(u"font-mono");
+    const QString family = Profile::current().monoFamily();
     return family.isEmpty() ? QFontDatabase::systemFont(QFontDatabase::FixedFont).family() : family;
 }
 

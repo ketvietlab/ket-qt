@@ -13,6 +13,8 @@ Profile& storage() {
 
 } // namespace
 
+QString Profile::monoFamily() const { return Tokens::installedFamily(monoFamilies); }
+
 const Profile& Profile::current() { return storage(); }
 
 void Profile::setCurrent(const Profile& profile) { storage() = profile; }

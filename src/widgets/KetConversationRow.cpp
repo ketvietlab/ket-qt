@@ -3,6 +3,7 @@
 
 #include "KetAppearance.h"
 #include "KetIcons.h"
+#include "KetProfile.h"
 
 #include <QPainter>
 #include <QtMath>
@@ -68,7 +69,7 @@ ConversationRowRecipe ConversationRow::recipe() const {
 QFont ConversationRow::font(qreal pixels, int weight, bool mono) const {
     QFont result = QAbstractButton::font();
     if (mono)
-        if (const QString family = Tokens::availableFamily(u"font-mono"); !family.isEmpty())
+        if (const QString family = Profile::current().monoFamily(); !family.isEmpty())
             result.setFamilies({family});
     result.setPixelSize(qRound(scaled(pixels)));
     result.setWeight(QFont::Weight(weight));

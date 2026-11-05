@@ -113,11 +113,24 @@ QStringList Tokens::fontFamilies(QStringView name) {
     return families;
 }
 
-QString Tokens::availableFamily(QStringView name) {
+QString Tokens::availableFamily(QStringView name) { return installedFamily(fontFamilies(name)); }
+
+QString Tokens::installedFamily(const QStringList& families) {
+    const auto folded = [](const QString& family) {
+        QString result;
+        for (QChar ch : family.normalized(QString::NormalizationForm_D))
+            if (ch.category() != QChar::Mark_NonSpacing)
+                result.append(ch.toCaseFolded());
+        return result;
+    };
     const QStringList installed = QFontDatabase::families();
-    for (const QString& family : fontFamilies(name)) {
+    for (const QString& family : families) {
         if (installed.contains(family))
             return family;
+        const QString key = folded(family);
+        for (const QString& candidate : installed)
+            if (folded(candidate) == key)
+                return candidate;
     }
     return {};
 }

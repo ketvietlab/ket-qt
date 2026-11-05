@@ -2,12 +2,13 @@
 #pragma once
 
 #include <QString>
+#include <QStringList>
 
 namespace ket {
 
 // How a product composes the design system: the metrics a recipe takes from the product's
 // own design (its mock) rather than from a token. Colours always come from tokens; a
-// profile holds sizes, spacing, weights and opacities only.
+// profile holds sizes, spacing, weights, opacities and the preferred code font only.
 //
 // The kit ships two profiles. designSystem() uses only Két DS tokens. ketPlus() follows the
 // KetPlus desktop mock (`ketplus.ketatlas`) and is the default. Another product, such as
@@ -16,6 +17,12 @@ namespace ket {
 // switching it at run time does not repaint existing controls.
 struct Profile {
     QString name;
+
+    // The code font, in order of preference (diffs, code blocks, inline code, paths).
+    // monoFamily() picks the first installed one. The kit bundles no fonts: an app that may
+    // ship one registers it with QFontDatabase before it creates any window.
+    QStringList monoFamilies;
+    [[nodiscard]] QString monoFamily() const; // empty when none is installed
 
     qreal disabledOpacity = 0;
 
@@ -385,6 +392,111 @@ struct Profile {
     qreal paneHeaderGap = 0;
     qreal paneHeaderPixels = 0;
     qreal paneHeaderIconSize = 0;
+
+    // Surfaces: command palette, file rows, changed files, diffs, background tasks,
+    // updates and theme choices.
+    qreal paletteWidth = 0;
+    qreal paletteTop = 0;
+    qreal paletteMaxListHeight = 0;
+    qreal paletteInputPixels = 0;
+    qreal paletteSearchIconSize = 0;
+    qreal paletteSearchPaddingBlock = 0;
+    qreal paletteSearchPaddingInline = 0;
+    qreal paletteSearchGap = 0;
+    qreal paletteInputPaddingBlock = 0;
+    qreal paletteGroupPixels = 0;
+    int paletteGroupWeight = 0;
+    qreal paletteGroupLetterSpacing = 0;
+    qreal paletteGroupPaddingTop = 0;
+    qreal paletteGroupPaddingInline = 0;
+    qreal paletteGroupPaddingBottom = 0;
+    qreal paletteListPaddingInline = 0;
+    qreal paletteListPaddingBottom = 0;
+    qreal paletteFooterPaddingBlock = 0;
+    qreal paletteFooterPaddingInline = 0;
+    qreal paletteFooterGap = 0;
+    qreal paletteFooterPixels = 0;
+    qreal paletteEmptyIconSize = 0;
+    qreal paletteEmptyHeight = 0;
+    qreal paletteResultPaddingBlock = 0;
+    qreal paletteResultPaddingInline = 0;
+    qreal paletteResultRadius = 0;
+    qreal paletteTrailingSize = 0;
+    qreal paletteResultPixels = 0;
+    int paletteResultWeight = 0;
+    qreal paletteDetailGap = 0;
+    qreal fileRowHeight = 0;
+    qreal folderRowHeight = 0;
+    qreal fileRowPaddingInline = 0;
+    qreal fileRowGap = 0;
+    qreal folderRowGap = 0;
+    qreal fileRowIconSize = 0;
+    qreal fileRowChevronSize = 0;
+    qreal fileRowPixels = 0;
+    qreal fileRowStatusPixels = 0;
+    qreal fileRowIndentStart = 0;
+    qreal fileRowIndentStep = 0;
+    qreal changedRadius = 0;
+    qreal changedPaddingBlock = 0;
+    qreal changedPaddingInline = 0;
+    qreal changedHeadingGap = 0;
+    qreal changedRowPaddingBlock = 0;
+    qreal changedRowGap = 0;
+    qreal changedFooterPaddingBlock = 0;
+    qreal changedArrowSize = 0;
+    qreal changedTextPixels = 0;
+    qreal changedTitlePixels = 0;
+    int changedTitleWeight = 0;
+    int changedNameWeight = 0;
+    qreal changedPathPixels = 0;
+    qreal changedLineHeight = 0;
+    qreal diffLineHeight = 0;
+    qreal diffNumberWidth = 0;
+    qreal diffNumberGap = 0;
+    qreal diffSignWidth = 0;
+    qreal diffCodeGap = 0;
+    qreal diffHunkPaddingBlock = 0;
+    qreal diffHunkPaddingInline = 0;
+    qreal diffPaddingBlock = 0;
+    qreal diffPaddingEnd = 0;
+    qreal taskRowHeight = 0;
+    qreal taskRowPaddingStart = 0;
+    qreal taskRowPaddingEnd = 0;
+    qreal taskRowGap = 0;
+    qreal taskRowRadius = 0;
+    qreal taskRowIconSize = 0;
+    qreal taskRowPixels = 0;
+    qreal taskMetaPixels = 0;
+    qreal taskBarHeight = 0;
+    qreal taskBarPaddingInline = 0;
+    qreal taskBarRadius = 0;
+    qreal taskBarIconSize = 0;
+    qreal taskBarChevronSize = 0;
+    qreal taskBarGap = 0;
+    qreal taskBarRowGap = 0;
+    qreal updatePaddingBlock = 0;
+    qreal updatePaddingInline = 0;
+    qreal updateTitlePixels = 0;
+    int updateTitleWeight = 0;
+    qreal updateHeaderGap = 0;
+    qreal updateHeaderColumnGap = 0;
+    qreal updateSectionGap = 0;
+    qreal updateNotesLineHeight = 0;
+    qreal updateNotesIndent = 0;
+    qreal updateActionsGap = 0;
+    qreal updateActionsTop = 0;
+    qreal updatePillPaddingBlock = 0;
+    qreal updatePillPaddingInline = 0;
+    qreal updatePillRadius = 0;
+    qreal updatePillGap = 0;
+    qreal updatePillIconSize = 0;
+    qreal themeMiniHeight = 0;
+    qreal themeMiniMargin = 0;
+    qreal themeMiniSideWidth = 0;
+    qreal themeLabelPaddingBlock = 0;
+    qreal themeLabelPaddingInline = 0;
+    qreal accentSwatchRadius = 0;
+    qreal accentSwatchBorder = 0;
 
     [[nodiscard]] static Profile designSystem();
     [[nodiscard]] static Profile ketPlus();

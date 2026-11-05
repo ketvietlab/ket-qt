@@ -14,6 +14,10 @@ qreal px(QStringView token) { return Tokens::px(token); }
 
 Profile Profile::ketPlus() {
     Profile p;
+    // `--kv-font-mono` in the mock's fonts-inline.css, then the Két DS stack.
+    p.monoFamilies = QStringList{QStringLiteral("KÉT Sans Mono"), QStringLiteral("SF Mono"),
+                                 QStringLiteral("Menlo")} +
+                     Tokens::fontFamilies(u"font-mono");
     p.name = QStringLiteral("ketplus");
     p.disabledOpacity = 0.48; // `button:disabled`
     p.controlRadius = px(u"radius-sm");
@@ -339,6 +343,108 @@ Profile Profile::ketPlus() {
     p.paneHeaderGap = 8;
     p.paneHeaderPixels = 13; // kp-text-md
     p.paneHeaderIconSize = 13;
+    p.paletteWidth = 640;         // `.spotlight`
+    p.paletteTop = 120;           // `.spotlight-backdrop` padding-top
+    p.paletteMaxListHeight = 520; // `#spotlight-results`
+    p.paletteInputPixels = 18;    // round(14px × the 1.25 font scale)
+    p.paletteSearchIconSize = 20;
+    p.paletteSearchPaddingBlock = 12; // `.spotlight > form`
+    p.paletteSearchPaddingInline = 18;
+    p.paletteSearchGap = 11;
+    p.paletteInputPaddingBlock = 9;
+    p.paletteGroupPixels = 10; // `.search-group-label`, kp-text-xs
+    p.paletteGroupWeight = 550;
+    p.paletteGroupLetterSpacing = 0.7;
+    p.paletteGroupPaddingTop = 13;
+    p.paletteGroupPaddingInline = 12;
+    p.paletteGroupPaddingBottom = 5;
+    p.paletteListPaddingInline = 10;
+    p.paletteListPaddingBottom = 13;
+    p.paletteFooterPaddingBlock = 13; // `.spotlight > footer`
+    p.paletteFooterPaddingInline = 19;
+    p.paletteFooterGap = 18;
+    p.paletteFooterPixels = 10;
+    p.paletteEmptyIconSize = 27; // `.search-empty`
+    p.paletteEmptyHeight = 230;
+    p.paletteResultPaddingBlock = 10; // `.spotlight-result`
+    p.paletteResultPaddingInline = 12;
+    p.paletteResultRadius = 5;
+    p.paletteTrailingSize = 12;
+    p.paletteResultPixels = 13; // `b`, kp-text-md
+    p.paletteResultWeight = 500;
+    p.paletteDetailGap = 3;
+    p.fileRowHeight = 29;   // `.file-row`
+    p.folderRowHeight = 28; // `.explorer-folder summary`
+    p.fileRowPaddingInline = 12;
+    p.fileRowGap = 7;
+    p.folderRowGap = 6;
+    p.fileRowIconSize = 13;
+    p.fileRowChevronSize = 10;
+    p.fileRowPixels = 14;       // kp-text-base
+    p.fileRowStatusPixels = 10; // `.file-row small`
+    p.fileRowIndentStart = 25;  // `.indent-1` is 37 = 25 + 12
+    p.fileRowIndentStep = 12;
+    p.changedRadius = 7;        // `.changed-files`, `.update-card`, `.theme-card`
+    p.changedPaddingBlock = 10; // `.changed-heading`
+    p.changedPaddingInline = 13;
+    p.changedHeadingGap = 10;
+    p.changedRowPaddingBlock = 9; // `.changed-file`
+    p.changedRowGap = 14;
+    p.changedFooterPaddingBlock = 8; // `.changed-footer`
+    p.changedArrowSize = 12;
+    p.changedTextPixels = 12;  // kp-text-sm
+    p.changedTitlePixels = 13; // kp-text-md
+    p.changedTitleWeight = 550;
+    p.changedNameWeight = 500;
+    p.changedPathPixels = 10;  // kp-text-xs
+    p.changedLineHeight = 1.5; // `.file-label`
+    p.diffLineHeight = 25;     // `.diff-line`
+    p.diffNumberWidth = 28;    // `.line-number`
+    p.diffNumberGap = 8;
+    p.diffSignWidth = 20; // `.diff-sign`
+    p.diffCodeGap = 12;
+    p.diffHunkPaddingBlock = 7; // `.hunk-header`
+    p.diffHunkPaddingInline = 20;
+    p.diffPaddingBlock = 8; // `.diff-lines`
+    p.diffPaddingEnd = 20;
+    p.taskRowHeight = 34; // `.bg-row`
+    p.taskRowPaddingStart = 12;
+    p.taskRowPaddingEnd = 6;
+    p.taskRowGap = 8;
+    p.taskRowRadius = 10;
+    p.taskRowIconSize = 13;
+    p.taskRowPixels = 12;  // kp-text-sm
+    p.taskMetaPixels = 10; // kp-text-xs
+    p.taskBarHeight = 24;  // `.bg-bar-header`
+    p.taskBarPaddingInline = 10;
+    p.taskBarRadius = 8;
+    p.taskBarIconSize = 10;
+    p.taskBarChevronSize = 12;
+    p.taskBarGap = 6;
+    p.taskBarRowGap = 4;       // `.bg-bar` gap
+    p.updatePaddingBlock = 18; // `.update-card`
+    p.updatePaddingInline = 20;
+    p.updateTitlePixels = 14; // `h3`, kp-text-base
+    p.updateTitleWeight = 600;
+    p.updateHeaderGap = 6;
+    p.updateHeaderColumnGap = 10;
+    p.updateSectionGap = 14;       // progress and banner margin-top
+    p.updateNotesLineHeight = 1.7; // `.update-notes`
+    p.updateNotesIndent = 18;
+    p.updateActionsGap = 8; // `.update-actions`
+    p.updateActionsTop = 16;
+    p.updatePillPaddingBlock = 8; // `.update-pill`
+    p.updatePillPaddingInline = 9;
+    p.updatePillRadius = 6;
+    p.updatePillGap = 8;
+    p.updatePillIconSize = 15;
+    p.themeMiniHeight = 123; // `.theme-mini`
+    p.themeMiniMargin = 12;
+    p.themeMiniSideWidth = 44; // `.theme-mini-side`
+    p.themeLabelPaddingBlock = 11;
+    p.themeLabelPaddingInline = 13;
+    p.accentSwatchRadius = 6; // `.accent-swatch`
+    p.accentSwatchBorder = 3;
     return p;
 }
 

@@ -88,7 +88,12 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery, Slider and step slider, Avatar, Tree item, Group header, Route tabs, Pane header, Breadcrumb, Status bar (pill tabs are the Segmented control; the search field is a TextField with a leading icon) | Command palette, File explorer rows, Changed files and diff lines, Background tasks, Update card and pill, Theme card and accent swatch |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery, Slider and step slider, Avatar, Tree item, Group header, Route tabs, Pane header, Breadcrumb, Status bar, Command palette, File explorer row, Changed files, Diff lines, Background tasks, Update card and pill, Theme card, Accent swatch (pill tabs are the Segmented control; the search field is a TextField with a leading icon) | None: every component of the mock is in the kit |
+
+The surfaces only present data. `ket::DiffView` and `KetDiffView` draw lines that the app
+supplies (`parseUnified()` only reads a unified diff's hunks and line numbers); the file
+row, changed-files card, task bar and command palette hold no file system, Git, process or
+search logic. The app filters the palette's groups as its query changes.
 
 ### Overlays
 
@@ -166,3 +171,13 @@ Colours that are user data, such as tag colours, are parameters.
 The kit does not bundle fonts. `font-sans` names KÉT Sans, then Inter. The first
 installed family is used, and otherwise the platform font. An app that is licensed to
 ship KÉT Sans or Inter registers it with `QFontDatabase` before creating windows.
+
+Code (diffs, code blocks, inline code and paths) uses `Profile::monoFamilies`:
+the KetPlus profile follows the mock's `--kv-font-mono` (KÉT Sans Mono, SF Mono, Menlo,
+then the `font-mono` token), and the Két DS profile uses the `font-mono` token alone.
+`Profile::monoFamily()` returns the first installed one.
+
+Family names match without regard to case or accents
+(`Tokens::installedFamily`), because the KÉT Sans font files register as "KET Sans" and
+"KET Sans Mono". The kitchensink's `--fonts=<dir>` registers local font files for review
+screenshots; no font file is committed.
