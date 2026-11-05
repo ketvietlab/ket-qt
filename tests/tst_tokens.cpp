@@ -140,6 +140,50 @@ class TokensTest final : public QObject {
         QCOMPARE(neutral.text, Tokens::color(u"text-secondary", Theme::Light));
     }
 
+    void fieldRecipesFollowTheKetPlusMock() {
+        const FieldRecipe rest = fieldRecipe({}, false, Theme::Light);
+        QCOMPARE(rest.background, Tokens::color(u"input-bg", Theme::Light));
+        QCOMPARE(rest.border, Tokens::color(u"input-border", Theme::Light));
+        QCOMPARE(rest.placeholder, Tokens::color(u"input-placeholder", Theme::Light));
+        QCOMPARE(rest.height, 34.0);
+        QCOMPARE(rest.radius, Tokens::px(u"radius-sm"));
+        QCOMPARE(rest.borderWidth, 1.0);
+        const FieldRecipe focused = fieldRecipe({false, false, true, true}, false, Theme::Dark);
+        QCOMPARE(focused.border, Tokens::color(u"focus-border", Theme::Dark));
+        QCOMPARE(focused.borderWidth, 2.0);
+        QCOMPARE(fieldRecipe({}, true, Theme::Light).border,
+                 Tokens::color(u"danger", Theme::Light));
+        QCOMPARE(fieldRecipe({false, false, false, false}, false, Theme::Light).opacity, 0.48);
+    }
+
+    void toggleRecipesMarkTheCheckedState() {
+        const ToggleRecipe off = toggleRecipe(ToggleKind::Checkbox, false, {}, Theme::Light);
+        QCOMPARE(off.mark.alpha(), 0);
+        QCOMPARE(off.border, Tokens::color(u"border-strong", Theme::Light));
+        QCOMPARE(off.size, 16.0);
+        const ToggleRecipe on = toggleRecipe(ToggleKind::Checkbox, true, {}, Theme::Light);
+        QCOMPARE(on.background, Tokens::color(u"accent", Theme::Light));
+        QCOMPARE(on.mark, Tokens::color(u"action-primary-ink", Theme::Light));
+        const ToggleRecipe radio = toggleRecipe(ToggleKind::Radio, true, {}, Theme::Dark);
+        QCOMPARE(radio.radius, 8.0);
+        QCOMPARE(radio.background, Tokens::color(u"input-bg", Theme::Dark));
+        QCOMPARE(radio.mark, Tokens::color(u"accent", Theme::Dark));
+    }
+
+    void choiceAndFieldRowRecipes() {
+        const ChoiceRecipe off = choiceRecipe(false, {}, Theme::Light);
+        QCOMPARE(off.border, Tokens::color(u"panel-border", Theme::Light));
+        QCOMPARE(off.background.alpha(), 0);
+        const ChoiceRecipe on = choiceRecipe(true, {}, Theme::Light);
+        QCOMPARE(on.background, Tokens::color(u"accent-subtle", Theme::Light));
+        QCOMPARE(on.border, Tokens::color(u"accent-border", Theme::Light));
+        QCOMPARE(on.titleWeight, 550);
+        const FieldRowRecipe row = fieldRowRecipe(Theme::Light);
+        QCOMPARE(row.labelWidth, 180.0);
+        QCOMPARE(row.label, Tokens::color(u"text-secondary", Theme::Light));
+        QCOMPARE(row.error, Tokens::color(u"danger", Theme::Light));
+    }
+
     void tagRecipesTintTheAppColour() {
         const QColor blue(QStringLiteral("#2f6fde"));
         const TagRecipe rest = tagRecipe(blue, false, false, Theme::Light);

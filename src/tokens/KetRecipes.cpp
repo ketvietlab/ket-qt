@@ -24,6 +24,19 @@ constexpr qreal kTagOverflowPadding = 5; // `.tag-more`
 constexpr qreal kTagTint = 0.13;         // color-mix(tag 13%, transparent)
 constexpr qreal kTagHoverTint = 0.22;
 
+constexpr qreal kFieldHeight = 34;      // `input, select` min-height
+constexpr qreal kFieldPadding = 11;     // 10 px padding plus the 1 px border
+constexpr qreal kFieldIconSize = 14;    // `.search-field .icon`
+constexpr qreal kFieldIconGap = 9;      // `.search-field` gap
+constexpr qreal kToggleSize = 16;       // the checkbox and radio indicator
+constexpr qreal kChoiceRadius = 6;      // `.choice`
+constexpr qreal kChoicePadding = 12;    // 11 px padding plus the 1 px border
+constexpr int kChoiceTitleWeight = 550; // `.choice b`
+constexpr qreal kFieldLabelWidth = 180; // `.field-row` grid column
+constexpr qreal kFieldRowGap = 18;
+constexpr qreal kFieldLabelTop = 8;
+constexpr qreal kFieldHelpGap = 6; // `.error-text` margin-top
+
 struct Palette {
     QStringView rest; // empty: transparent
     QStringView hover;
@@ -201,6 +214,163 @@ QVariantMap toVariantMap(const TagRecipe& r) {
             {QStringLiteral("maxWidth"), r.maxWidth},
             {QStringLiteral("fontPixels"), r.fontPixels},
             {QStringLiteral("fontWeight"), r.fontWeight}};
+}
+
+FieldRecipe fieldRecipe(const InteractionState& state, bool invalid, Theme theme) {
+    FieldRecipe recipe;
+    const bool live = state.enabled;
+    const bool focused = live && state.focused;
+    const bool hovered = live && state.hovered && !focused;
+    recipe.background = token(focused   ? u"input-bg-focus"
+                              : hovered ? u"input-bg-hover"
+                                        : u"input-bg",
+                              theme);
+    if (invalid)
+        recipe.border = token(u"danger", theme);
+    else
+        recipe.border = token(focused   ? u"focus-border"
+                              : hovered ? u"input-border-hover"
+                                        : u"input-border",
+                              theme);
+    recipe.borderWidth = focused ? 2 : 1;
+    recipe.text = token(u"input-text", theme);
+    recipe.placeholder = token(u"input-placeholder", theme);
+    recipe.icon = token(u"text-muted", theme);
+    recipe.height = kFieldHeight;
+    recipe.radius = Tokens::px(u"radius-sm");
+    recipe.paddingInline = kFieldPadding;
+    recipe.iconSize = kFieldIconSize;
+    recipe.spacing = kFieldIconGap;
+    recipe.fontPixels = Tokens::px(u"text-md");
+    if (!live)
+        recipe.opacity = kDisabledOpacity;
+    return recipe;
+}
+
+ToggleRecipe toggleRecipe(ToggleKind kind, bool checked, const InteractionState& state,
+                          Theme theme) {
+    ToggleRecipe recipe;
+    const bool live = state.enabled;
+    if (checked) {
+        recipe.background = token(live && state.hovered ? u"accent-hover" : u"accent", theme);
+        recipe.border = recipe.background;
+        recipe.mark = token(u"action-primary-ink", theme);
+        if (kind == ToggleKind::Radio) {
+            // A ring with a dot: the accent border around the field colour.
+            recipe.background = token(u"input-bg", theme);
+            recipe.mark = recipe.border;
+        }
+    } else {
+        recipe.background = token(live && state.hovered ? u"input-bg-hover" : u"input-bg", theme);
+        recipe.border =
+            token(live && state.hovered ? u"input-border-hover" : u"border-strong", theme);
+        recipe.mark = transparent();
+    }
+    recipe.focusRing = live && state.focused ? token(u"focus-border", theme) : transparent();
+    recipe.label = token(u"text-secondary", theme);
+    recipe.size = kToggleSize;
+    recipe.radius = kind == ToggleKind::Radio ? kToggleSize / 2 : Tokens::px(u"radius-xs");
+    recipe.spacing = Tokens::px(u"space-2");
+    recipe.fontPixels = Tokens::px(u"text-sm");
+    if (!live)
+        recipe.opacity = kDisabledOpacity;
+    return recipe;
+}
+
+ChoiceRecipe choiceRecipe(bool checked, const InteractionState& state, Theme theme) {
+    ChoiceRecipe recipe;
+    const bool live = state.enabled;
+    if (checked) {
+        recipe.background = token(u"accent-subtle", theme);
+        recipe.border = token(u"accent-border", theme);
+    } else {
+        recipe.background = live && state.hovered ? token(u"surface-hover", theme) : transparent();
+        recipe.border = token(u"panel-border", theme);
+    }
+    recipe.title = token(u"text-main", theme);
+    recipe.description = token(u"text-muted", theme);
+    recipe.focusRing = live && state.focused ? token(u"focus-border", theme) : transparent();
+    recipe.padding = kChoicePadding;
+    recipe.radius = kChoiceRadius;
+    recipe.spacing = Tokens::px(u"space-2-5");
+    recipe.titlePixels = Tokens::px(u"text-sm");
+    recipe.titleWeight = kChoiceTitleWeight;
+    recipe.descriptionPixels = Tokens::px(u"text-xs");
+    if (!live)
+        recipe.opacity = kDisabledOpacity;
+    return recipe;
+}
+
+FieldRowRecipe fieldRowRecipe(Theme theme) {
+    FieldRowRecipe recipe;
+    recipe.label = token(u"text-secondary", theme);
+    recipe.help = token(u"text-muted", theme);
+    recipe.error = token(u"danger", theme);
+    recipe.labelWidth = kFieldLabelWidth;
+    recipe.gap = kFieldRowGap;
+    recipe.labelTop = kFieldLabelTop;
+    recipe.labelPixels = Tokens::px(u"text-md");
+    recipe.helpPixels = Tokens::px(u"text-sm");
+    recipe.helpGap = kFieldHelpGap;
+    recipe.rowGap = Tokens::px(u"space-5");
+    return recipe;
+}
+
+QVariantMap toVariantMap(const FieldRecipe& r) {
+    return {{QStringLiteral("background"), r.background},
+            {QStringLiteral("border"), r.border},
+            {QStringLiteral("text"), r.text},
+            {QStringLiteral("placeholder"), r.placeholder},
+            {QStringLiteral("icon"), r.icon},
+            {QStringLiteral("height"), r.height},
+            {QStringLiteral("radius"), r.radius},
+            {QStringLiteral("borderWidth"), r.borderWidth},
+            {QStringLiteral("paddingInline"), r.paddingInline},
+            {QStringLiteral("iconSize"), r.iconSize},
+            {QStringLiteral("spacing"), r.spacing},
+            {QStringLiteral("fontPixels"), r.fontPixels},
+            {QStringLiteral("opacity"), r.opacity}};
+}
+
+QVariantMap toVariantMap(const ToggleRecipe& r) {
+    return {{QStringLiteral("background"), r.background},
+            {QStringLiteral("border"), r.border},
+            {QStringLiteral("mark"), r.mark},
+            {QStringLiteral("focusRing"), r.focusRing},
+            {QStringLiteral("label"), r.label},
+            {QStringLiteral("size"), r.size},
+            {QStringLiteral("radius"), r.radius},
+            {QStringLiteral("spacing"), r.spacing},
+            {QStringLiteral("fontPixels"), r.fontPixels},
+            {QStringLiteral("opacity"), r.opacity}};
+}
+
+QVariantMap toVariantMap(const ChoiceRecipe& r) {
+    return {{QStringLiteral("background"), r.background},
+            {QStringLiteral("border"), r.border},
+            {QStringLiteral("title"), r.title},
+            {QStringLiteral("description"), r.description},
+            {QStringLiteral("focusRing"), r.focusRing},
+            {QStringLiteral("padding"), r.padding},
+            {QStringLiteral("radius"), r.radius},
+            {QStringLiteral("spacing"), r.spacing},
+            {QStringLiteral("titlePixels"), r.titlePixels},
+            {QStringLiteral("titleWeight"), r.titleWeight},
+            {QStringLiteral("descriptionPixels"), r.descriptionPixels},
+            {QStringLiteral("opacity"), r.opacity}};
+}
+
+QVariantMap toVariantMap(const FieldRowRecipe& r) {
+    return {{QStringLiteral("label"), r.label},
+            {QStringLiteral("help"), r.help},
+            {QStringLiteral("error"), r.error},
+            {QStringLiteral("labelWidth"), r.labelWidth},
+            {QStringLiteral("gap"), r.gap},
+            {QStringLiteral("labelTop"), r.labelTop},
+            {QStringLiteral("labelPixels"), r.labelPixels},
+            {QStringLiteral("helpPixels"), r.helpPixels},
+            {QStringLiteral("helpGap"), r.helpGap},
+            {QStringLiteral("rowGap"), r.rowGap}};
 }
 
 } // namespace ket

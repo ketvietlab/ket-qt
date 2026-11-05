@@ -24,6 +24,7 @@ static_assert(int(QuickTheme::ButtonVariant::GhostDanger) == int(ButtonVariant::
 static_assert(int(QuickTheme::ControlSize::Medium) == int(ControlSize::Medium));
 static_assert(int(QuickTheme::BadgeTone::Danger) == int(BadgeTone::Danger));
 static_assert(int(QuickTheme::IconWeight::Regular) == int(ket::IconWeight::Regular));
+static_assert(int(QuickTheme::ToggleKind::Radio) == int(ket::ToggleKind::Radio));
 
 } // namespace
 
@@ -90,6 +91,46 @@ QVariantMap QuickTheme::tagRecipe(bool dark, qreal zoom, const QColor& color, bo
     QVariantMap recipe = toVariantMap(ket::tagRecipe(color, overflow, hovered, themeOf(dark)));
     scaleLengths(recipe, zoom,
                  {u"height", u"radius", u"paddingInline", u"maxWidth", u"fontPixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::fieldRecipe(bool dark, qreal zoom, bool hovered, bool focused, bool enabled,
+                                    bool invalid) const {
+    const InteractionState state{hovered, false, enabled, focused};
+    QVariantMap recipe = toVariantMap(ket::fieldRecipe(state, invalid, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"height", u"radius", u"paddingInline", u"iconSize", u"spacing", u"fontPixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::toggleRecipe(bool dark, qreal zoom, int kind, bool checked, bool hovered,
+                                     bool pressed, bool enabled, bool focused) const {
+    const InteractionState state{hovered, pressed, enabled, focused};
+    QVariantMap recipe =
+        toVariantMap(ket::toggleRecipe(ket::ToggleKind(kind), checked, state, themeOf(dark)));
+    scaleLengths(recipe, zoom, {u"size", u"spacing", u"fontPixels"});
+    // The radius follows the scaled size so a radio stays round.
+    recipe.insert(QStringLiteral("radius"),
+                  kind == int(ket::ToggleKind::Radio)
+                      ? recipe.value(QStringLiteral("size")).toReal() / 2
+                      : Appearance::scale(recipe.value(QStringLiteral("radius")).toReal(), zoom));
+    return recipe;
+}
+
+QVariantMap QuickTheme::choiceRecipe(bool dark, qreal zoom, bool checked, bool hovered,
+                                     bool pressed, bool enabled, bool focused) const {
+    const InteractionState state{hovered, pressed, enabled, focused};
+    QVariantMap recipe = toVariantMap(ket::choiceRecipe(checked, state, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"padding", u"radius", u"spacing", u"titlePixels", u"descriptionPixels"});
+    return recipe;
+}
+
+QVariantMap QuickTheme::fieldRowRecipe(bool dark, qreal zoom) const {
+    QVariantMap recipe = toVariantMap(ket::fieldRowRecipe(themeOf(dark)));
+    scaleLengths(
+        recipe, zoom,
+        {u"labelWidth", u"gap", u"labelTop", u"labelPixels", u"helpPixels", u"helpGap", u"rowGap"});
     return recipe;
 }
 

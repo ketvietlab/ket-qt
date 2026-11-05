@@ -98,6 +98,45 @@ class QuickTest final : public QObject {
                  QUrl(QStringLiteral("qrc:/ket-symbol/light/20/close.svg")));
     }
 
+    void formControlsMatchTheWidgetsRecipes() {
+        std::unique_ptr<QObject> field =
+            create(QByteArrayLiteral("import QtQuick\nimport Ket\n"
+                                     "KetTextField { leadingIcon: \"search\"; invalid: true }\n"));
+        auto* fieldItem = qobject_cast<QQuickItem*>(field.get());
+        QVERIFY(fieldItem);
+        const FieldRecipe fieldR = fieldRecipe({}, true, Theme::Light);
+        QCOMPARE(fieldItem->implicitHeight(), fieldR.height);
+        QCOMPARE(fieldItem->property("leftPadding").toReal(),
+                 fieldR.paddingInline + fieldR.iconSize + fieldR.spacing);
+        auto* background = fieldItem->property("background").value<QQuickItem*>();
+        QCOMPARE(
+            background->property("border").value<QObject*>()->property("color").value<QColor>(),
+            fieldR.border);
+
+        std::unique_ptr<QObject> check = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\nKetCheckbox { text: \"Follow\"; checked: true }\n"));
+        auto* checkItem = qobject_cast<QQuickItem*>(check.get());
+        QVERIFY(checkItem);
+        auto* indicator = checkItem->property("indicator").value<QQuickItem*>();
+        QCOMPARE(indicator->property("color").value<QColor>(),
+                 toggleRecipe(ToggleKind::Checkbox, true, {}, Theme::Light).background);
+
+        std::unique_ptr<QObject> choice = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "KetChoice { text: \"Read only\"; kind: KetTheme.ToggleKind.Radio; checked: true }\n"));
+        auto* choiceItem = qobject_cast<QQuickItem*>(choice.get());
+        QVERIFY(choiceItem);
+        auto* card = choiceItem->property("background").value<QQuickItem*>();
+        QCOMPARE(card->property("color").value<QColor>(),
+                 choiceRecipe(true, {}, Theme::Light).background);
+
+        std::unique_ptr<QObject> row = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "KetFieldRow { label: \"Font\"; help: \"Help\"; KetSelect { model: [\"A\"] } }\n"));
+        QVERIFY(qobject_cast<QQuickItem*>(row.get()));
+        QVERIFY(row->property("implicitWidth").toReal() > fieldRowRecipe(Theme::Light).labelWidth);
+    }
+
     void tagMatchesTheWidgetsRecipe() {
         std::unique_ptr<QObject> root = create(QByteArrayLiteral(
             "import QtQuick\nimport Ket\n"

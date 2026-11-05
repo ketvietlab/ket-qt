@@ -2,10 +2,15 @@
 #include "KetAppearance.h"
 #include "KetBadge.h"
 #include "KetButton.h"
+#include "KetChoice.h"
+#include "KetFieldRow.h"
 #include "KetIcon.h"
 #include "KetIcons.h"
+#include "KetSelect.h"
 #include "KetStyle.h"
 #include "KetTag.h"
+#include "KetTextField.h"
+#include "KetToggle.h"
 
 #include <QApplication>
 #include <QTest>
@@ -112,6 +117,65 @@ class WidgetsTest final : public QObject {
         QCOMPARE(icon.color(), Tokens::color(u"text-main", Theme::Dark));
         icon.setColor(QColor(Qt::red));
         QCOMPARE(icon.color(), QColor(Qt::red));
+    }
+
+    void textFieldsDrawTheFieldRecipe() {
+        TextField field;
+        field.setPlaceholderText(QStringLiteral("Search conversations"));
+        QCOMPARE(field.sizeHint().height(), 34);
+        QCOMPARE(field.palette().color(QPalette::PlaceholderText),
+                 Tokens::color(u"input-placeholder", Theme::Light));
+        const int plain = field.textMargins().left();
+        field.setLeadingIcon(QStringLiteral("search"));
+        QCOMPARE(field.textMargins().left(), plain + 14 + 9);
+        field.resize(240, field.sizeHint().height());
+        const QImage image = field.grab().toImage();
+        QCOMPARE(image.pixelColor(image.width() - 6, image.height() / 2).rgb(),
+                 Tokens::color(u"input-bg", Theme::Light).rgb());
+        field.setInvalid(true);
+        QCOMPARE(field.recipe().border, Tokens::color(u"danger", Theme::Light));
+        Appearance::instance().setMode(Appearance::Mode::Dark);
+        QCOMPARE(field.palette().color(QPalette::Text), Tokens::color(u"input-text", Theme::Dark));
+    }
+
+    void selectsAndTogglesFollowTheirRecipes() {
+        Select select;
+        select.addItems({QStringLiteral("Default · 760 px"), QStringLiteral("Wide · 864 px")});
+        QCOMPARE(select.sizeHint().height(), 34);
+        select.resize(select.sizeHint());
+        QVERIFY(!select.grab().isNull());
+
+        Checkbox check(QStringLiteral("Follow system appearance"));
+        QVERIFY(!check.isChecked());
+        QCOMPARE(check.recipe().mark.alpha(), 0);
+        check.click();
+        QVERIFY(check.isChecked());
+        QCOMPARE(check.recipe().background, Tokens::color(u"accent", Theme::Light));
+
+        QWidget group;
+        auto* first = new Radio(QStringLiteral("Workspace write"), &group);
+        auto* second = new Radio(QStringLiteral("Read only"), &group);
+        first->click();
+        second->click();
+        QVERIFY(!first->isChecked());
+        QVERIFY(second->isChecked());
+    }
+
+    void choicesAndFieldRows() {
+        Choice choice(QStringLiteral("Check for updates automatically"),
+                      QStringLiteral("Once a day while KetPlus is open."));
+        QVERIFY(choice.isCheckable());
+        QCOMPARE(choice.recipe().border, Tokens::color(u"panel-border", Theme::Light));
+        choice.click();
+        QCOMPARE(choice.recipe().background, Tokens::color(u"accent-subtle", Theme::Light));
+        QVERIFY(choice.heightForWidth(200) > choice.heightForWidth(600));
+
+        auto* field = new TextField;
+        FieldRow row(QStringLiteral("Interface font"), field, QStringLiteral("Help"));
+        row.setError(QStringLiteral("Required"));
+        QVERIFY(field->isInvalid());
+        row.setError({});
+        QVERIFY(!field->isInvalid());
     }
 
     void tagElidesAtTheRecipeWidth() {

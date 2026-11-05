@@ -8,9 +8,11 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
   the shared theme state (`ket::Appearance`) and component recipes.
 - `KetQt::Icons`: Két Symbol icons with their size and weight rules (`ket::Icons`).
 - `KetQt::Widgets`: `ket::Style` (Fusion-based), `ket::Button`, `ket::IconButton`,
-  `ket::Badge`, `ket::Tag`, `ket::Icon`.
+  `ket::Badge`, `ket::Tag`, `ket::Icon`, `ket::TextField`, `ket::Select`, `ket::Checkbox`,
+  `ket::Radio`, `ket::Choice`, `ket::FieldRow`.
 - `KetQt::Quick`: the QML module `Ket` with `KetTheme`, `KetButton`, `KetIconButton`,
-  `KetBadge`, `KetTag`, `KetIcon`.
+  `KetBadge`, `KetTag`, `KetIcon`, `KetTextField`, `KetSelect`, `KetCheckbox`, `KetRadio`,
+  `KetChoice`, `KetFieldRow`.
 
 Components follow the new KetPlus desktop mock and are added in the order KetPlus uses
 them; see [docs/architecture.md](docs/architecture.md#component-scope-and-source).
@@ -38,6 +40,7 @@ twin in each variant, size and state. Theme and zoom switch live from the toolba
 open build/examples/kitchensink/ketqt_kitchensink.app        # macOS
 build/examples/kitchensink/ketqt_kitchensink                 # Windows, Linux
 ketqt_kitchensink --page=button --dark --zoom=1.25 --screenshot=button-dark.png
+ketqt_kitchensink --page=forms --full --screenshot=forms.png   # the whole scrolled page
 ketqt_kitchensink --smoke   # every page, light and dark; non-zero on QML errors (a CTest)
 ```
 

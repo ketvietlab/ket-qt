@@ -71,6 +71,11 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetBadge.h src/widgets/KetBadge.cpp
         src/widgets/KetTag.h src/widgets/KetTag.cpp
         src/widgets/KetIcon.h src/widgets/KetIcon.cpp
+        src/widgets/KetTextField.h src/widgets/KetTextField.cpp
+        src/widgets/KetSelect.h src/widgets/KetSelect.cpp
+        src/widgets/KetToggle.h src/widgets/KetToggle.cpp
+        src/widgets/KetChoice.h src/widgets/KetChoice.cpp
+        src/widgets/KetFieldRow.h src/widgets/KetFieldRow.cpp
     )
     add_library(KetQt::Widgets ALIAS ketqt_widgets)
     target_include_directories(ketqt_widgets PUBLIC
@@ -95,9 +100,14 @@ if(KETQT_BUILD_QUICK)
         SOURCES src/quick/KetTheme.h src/quick/KetTheme.cpp
         QML_FILES src/quick/qml/KetButton.qml src/quick/qml/KetIconButton.qml
                   src/quick/qml/KetBadge.qml src/quick/qml/KetTag.qml src/quick/qml/KetIcon.qml
+                  src/quick/qml/KetTextField.qml src/quick/qml/KetSelect.qml
+                  src/quick/qml/KetToggleIndicator.qml src/quick/qml/KetCheckbox.qml
+                  src/quick/qml/KetRadio.qml src/quick/qml/KetChoice.qml
+                  src/quick/qml/KetFieldRow.qml
         RESOURCE_PREFIX /qt/qml
     )
-    foreach(file KetButton KetIconButton KetBadge KetTag KetIcon)
+    foreach(file KetButton KetIconButton KetBadge KetTag KetIcon KetTextField KetSelect
+                 KetToggleIndicator KetCheckbox KetRadio KetChoice KetFieldRow)
         set_source_files_properties(src/quick/qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
     endforeach()
     add_library(KetQt::Quick ALIAS ketqt_quick)
@@ -135,7 +145,9 @@ install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRe
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 if(KETQT_BUILD_WIDGETS)
     install(FILES src/widgets/KetStyle.h src/widgets/KetButton.h src/widgets/KetBadge.h
-                  src/widgets/KetTag.h src/widgets/KetIcon.h
+                  src/widgets/KetTag.h src/widgets/KetIcon.h src/widgets/KetTextField.h
+                  src/widgets/KetSelect.h src/widgets/KetToggle.h src/widgets/KetChoice.h
+                  src/widgets/KetFieldRow.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 endif()
 install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)

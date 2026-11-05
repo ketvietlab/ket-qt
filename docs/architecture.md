@@ -19,8 +19,8 @@ flowchart LR
 |---|---|---|
 | `KetQt::Tokens` | `ket::Tokens` (generated table), `ket::Appearance`, `ket::*Recipe` | Core, Gui |
 | `KetQt::Icons` | `ket::Icons`: Két Symbol resources, size and weight rules | Gui, Svg |
-| `KetQt::Widgets` | `ket::Style`, `ket::Button`, `ket::IconButton`, `ket::Badge`, `ket::Tag`, `ket::Icon` | Widgets |
-| `KetQt::Quick` + `KetQt::QuickPlugin` | QML module `Ket`: `KetTheme`, `KetButton`, `KetIconButton`, `KetBadge`, `KetTag`, `KetIcon` | Qml, Quick, QuickControls2 |
+| `KetQt::Widgets` | `ket::Style`, `ket::Button`, `ket::IconButton`, `ket::Badge`, `ket::Tag`, `ket::Icon`, `ket::TextField`, `ket::Select`, `ket::Checkbox`, `ket::Radio`, `ket::Choice`, `ket::FieldRow` | Widgets |
+| `KetQt::Quick` + `KetQt::QuickPlugin` | QML module `Ket`: `KetTheme`, `KetButton`, `KetIconButton`, `KetBadge`, `KetTag`, `KetIcon`, `KetTextField`, `KetSelect`, `KetCheckbox`, `KetRadio`, `KetChoice`, `KetFieldRow` | Qml, Quick, QuickControls2 |
 
 ## Tokens
 
@@ -58,6 +58,11 @@ the 0.48 disabled opacity or the 18 px tag), the recipe keeps it as a named cons
 to its source rule in `KetRecipes.cpp`; when the design system adds a token, the constant
 is replaced by it. Font sizes are the mock's at its default 15 px interface size.
 
+Focus is drawn inside a control's bounds (a 2 px `focus-border` border on fields, a ring
+around toggles), not as the mock's outside outline, which Qt Widgets cannot paint. The
+composer text area stays in the app; the select popup uses the platform list until the
+Menu component lands.
+
 Icons are Két Symbol 0.11.0 (`third_party/ket-symbol`, CC BY 4.0, separate files with
 their own notice), compiled into `KetQt::Icons` by `tools/generate_icons.py`:
 
@@ -77,7 +82,7 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon | TextField and search field, Select, Checkbox and Choice card, Field row, Banner, Toast, Dialog, Context menu, Tooltip, sidebar row, tabs, progress and spinner, empty state, kbd |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row | Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, sidebar row, tabs, progress and spinner, empty state, kbd |
 
 ## Adding a component
 
@@ -86,7 +91,9 @@ Colours that are user data, such as tag colours, are parameters.
 3. Add a Widgets test and a Quick test that compare against the same recipe.
 4. Add it to a kitchensink page (`examples/kitchensink`) in every variant, size and pinned
    state, and check light, dark and 125% zoom
-   (`--page=<id> --dark --zoom=1.25 --screenshot=<file>`).
+   (`--page=<id> --dark --zoom=1.25 --screenshot=<file>`, `--full` for the whole page).
+   Run `--smoke` on a real display as well as offscreen: it also checks that every Qt Quick
+   view matches its root size.
 
 ## Consuming KetQt
 
