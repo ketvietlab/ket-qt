@@ -9,6 +9,7 @@ function(ketqt_test name)
 endfunction()
 
 ketqt_test(tst_tokens LIBS KetQt::Tokens)
+ketqt_test(tst_icons LIBS KetQt::Icons)
 if(KETQT_BUILD_WIDGETS)
     ketqt_test(tst_widgets LIBS KetQt::Widgets)
 endif()

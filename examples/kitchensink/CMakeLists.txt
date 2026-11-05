@@ -11,10 +11,10 @@ qt_add_qml_module(ketqt_kitchensink
     VERSION 1.0
     QML_FILES qml/ButtonMatrix.qml qml/ButtonLive.qml qml/IconButtonMatrix.qml qml/IconButtonLive.qml
               qml/BadgeTones.qml qml/TagSamples.qml
-    RESOURCES icons/close.svg icons/plus.svg icons/check.svg icons/more.svg
+              qml/IconGallery.qml
     RESOURCE_PREFIX /qt/qml
 )
-foreach(file ButtonMatrix ButtonLive IconButtonMatrix IconButtonLive BadgeTones TagSamples)
+foreach(file ButtonMatrix ButtonLive IconButtonMatrix IconButtonLive BadgeTones TagSamples IconGallery)
     set_source_files_properties(qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
 endforeach()
 set_target_properties(ketqt_kitchensink PROPERTIES
@@ -23,10 +23,8 @@ set_target_properties(ketqt_kitchensink PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "KetQt Kitchensink"
     MACOSX_BUNDLE_GUI_IDENTIFIER vn.ketviet.ketqt.kitchensink
 )
-# The sample icons are SVG; the kit itself does not need Qt Svg.
-find_package(Qt6 REQUIRED COMPONENTS Svg)
 target_link_libraries(ketqt_kitchensink PRIVATE
-    KetQt::Widgets KetQt::Quick KetQt::QuickPlugin Qt6::QuickWidgets Qt6::Svg)
+    KetQt::Widgets KetQt::Quick KetQt::QuickPlugin Qt6::QuickWidgets)
 ketqt_warnings(ketqt_kitchensink)
 
 if(KETQT_BUILD_TESTS)

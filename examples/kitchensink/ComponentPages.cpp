@@ -4,6 +4,8 @@
 #include "KetAppearance.h"
 #include "KetBadge.h"
 #include "KetButton.h"
+#include "KetIcon.h"
+#include "KetIcons.h"
 #include "KetTag.h"
 #include "KitchenSinkCommon.h"
 
@@ -37,9 +39,7 @@ const std::pair<const char*, ButtonVariant> kVariants[] = {
     {"Ghost danger", ButtonVariant::GhostDanger},
 };
 
-QIcon sampleIcon(const char* name) {
-    return QIcon(QStringLiteral(":/qt/qml/KetKitchenSink/icons/%1.svg").arg(QLatin1String(name)));
-}
+QIcon sampleIcon(const char* code) { return Icons::icon(QString::fromLatin1(code)); }
 
 // Sample tag colours in light and dark. Tag colours belong to the app (KetPlus keeps them
 // with each tag), so the kit takes them as a parameter; these mirror the KetPlus mock.
@@ -199,7 +199,78 @@ QWidget* tagEdgeCases(QWidget* parent) {
     return host;
 }
 
+// One icon in every box size and weight: 14 (scaled 16 master), 16, 17 (16 centred), 20, 24.
+QWidget* iconSizes(QWidget* parent) {
+    auto* host = new QWidget(parent);
+    auto* grid = new QGridLayout(host);
+    grid->setContentsMargins(0, 0, 0, 0);
+    grid->setHorizontalSpacing(qRound(Tokens::px(u"space-6")));
+    grid->setVerticalSpacing(qRound(Tokens::px(u"space-2")));
+    const int sizes[] = {14, 16, 17, 20, 24};
+    for (int c = 0; c < int(std::size(sizes)); ++c)
+        grid->addWidget(caption(QStringLiteral("%1 px").arg(sizes[c]), host), 0, c + 1);
+    const std::pair<const char*, IconWeight> weights[] = {{"Light", IconWeight::Light},
+                                                          {"Regular", IconWeight::Regular}};
+    for (int r = 0; r < int(std::size(weights)); ++r) {
+        grid->addWidget(caption(QString::fromLatin1(weights[r].first), host), r + 1, 0);
+        for (int c = 0; c < int(std::size(sizes)); ++c) {
+            auto* icon = new Icon(QStringLiteral("settings"), sizes[c], host);
+            icon->setWeight(weights[r].second);
+            grid->addWidget(icon, r + 1, c + 1, Qt::AlignLeft | Qt::AlignVCenter);
+        }
+    }
+    return host;
+}
+
+// Every Két code compiled into KetQt::Icons, at the mock's 17 px box.
+QWidget* iconGrid(QWidget* parent) {
+    auto* host = new QWidget(parent);
+    auto* grid = new QGridLayout(host);
+    grid->setContentsMargins(0, 0, 0, 0);
+    grid->setHorizontalSpacing(qRound(Tokens::px(u"space-4")));
+    grid->setVerticalSpacing(qRound(Tokens::px(u"space-2")));
+    constexpr int kColumns = 6;
+    const QStringList codes = Icons::codes();
+    for (int i = 0; i < codes.size(); ++i) {
+        auto* cell = new QWidget(host);
+        auto* row = new QHBoxLayout(cell);
+        row->setContentsMargins(0, 0, 0, 0);
+        row->setSpacing(qRound(Tokens::px(u"space-2")));
+        row->addWidget(new Icon(codes[i], 17, cell));
+        row->addWidget(new TokenLabel(codes[i], QStringLiteral("text-secondary"),
+                                      QStringLiteral("text-xs"), 400, cell, false));
+        row->addStretch();
+        grid->addWidget(cell, i / kColumns, i % kColumns);
+    }
+    return host;
+}
+
 } // namespace
+
+QWidget* iconPage() {
+    PageFrame frame = makePage(
+        QStringLiteral("Icons"),
+        QStringLiteral("Két Symbol 0.11.0 (CC BY 4.0) through ket::Icons, ket::Icon and KetIcon. "
+                       "A box up to 18 px draws the 16 px master, 19-22 px the 20 px master and "
+                       "23 px or more the 24 px master, at its own size on whole device pixels. "
+                       "Light is the default; Regular is for emphasis."));
+    frame.body->addWidget(sectionTitle(QStringLiteral("Sizes and weights"), frame.page));
+    frame.body->addWidget(toolkits(
+        iconSizes(frame.page), quickView(QStringLiteral("IconGallery"), frame.page), frame.page));
+    frame.body->addWidget(sectionTitle(
+        QStringLiteral("All %1 icons · 17 px").arg(Icons::codes().size()), frame.page));
+    auto* allQuick = quickView(QStringLiteral("IconGallery"), frame.page);
+    if (QQuickItem* root = allQuick->rootObject())
+        root->setProperty("all", true);
+    frame.body->addWidget(toolkits(iconGrid(frame.page), allQuick, frame.page));
+    frame.body->addWidget(new TokenLabel(
+        QStringLiteral("Két Symbol © 2026 Két Việt, CC BY 4.0 "
+                       "(https://creativecommons.org/licenses/by/4.0/). Két and Két Symbol are "
+                       "trademarks and are not licensed."),
+        QStringLiteral("text-muted"), QStringLiteral("text-xs"), 400, frame.page));
+    frame.body->addStretch();
+    return frame.page;
+}
 
 QWidget* buttonPage() {
     PageFrame frame = makePage(

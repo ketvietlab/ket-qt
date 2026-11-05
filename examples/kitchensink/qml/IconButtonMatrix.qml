@@ -51,7 +51,7 @@ Item {
                 Layout.row: Math.floor(index / page.states.length) + 1
                 Layout.column: index % page.states.length + 1
                 text: "Close"
-                icon.source: "qrc:/qt/qml/KetKitchenSink/icons/close.svg"
+                iconName: "close"
                 controlSize: page.sizes[Math.floor(index / page.states.length)].value
                 previewState: stateEntry.state
                 enabled: stateEntry.state.enabled !== false

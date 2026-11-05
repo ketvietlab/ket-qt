@@ -96,7 +96,7 @@ class TokensTest final : public QObject {
         QCOMPARE(secondary.border, Tokens::color(u"border-default", Theme::Light));
         QCOMPARE(secondary.fontWeight, 400);
         QCOMPARE(secondary.spacing, 7.0);
-        QCOMPARE(secondary.iconSize, 16.0);
+        QCOMPARE(secondary.iconSize, 17.0);
         QCOMPARE(
             buttonRecipe(ButtonVariant::Secondary, ControlSize::Medium, hover, Theme::Light).border,
             Tokens::color(u"border-strong", Theme::Light));
