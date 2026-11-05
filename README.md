@@ -1,7 +1,7 @@
 # KetQt
 
-Két Design System components for Qt 6.8 or later, shared by KetPlus and KétChat. Qt
-Widgets and Qt Quick draw the same components from the same tokens and recipes, so an
+Két Design System components for Qt 6.8 or later, shared by KetPlus, KétChat and Lampion
+OS. Qt Widgets and Qt Quick draw the same components from the same tokens and recipes, so an
 app looks the same in both toolkits and on macOS, Windows and Linux.
 
 - `KetQt::Tokens`: design-system tokens generated from the pinned Két DS `tokens.css`,
@@ -17,8 +17,9 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
 Components follow the new KetPlus desktop mock and are added in the order KetPlus uses
 them; see [docs/architecture.md](docs/architecture.md#component-scope-and-source).
 
-See [docs/architecture.md](docs/architecture.md) and
-[decision 0001](docs/decisions/0001-shared-qt-component-kit.md).
+See [docs/architecture.md](docs/architecture.md),
+[decision 0001](docs/decisions/0001-shared-qt-component-kit.md) and
+[decision 0002](docs/decisions/0002-product-profiles-and-lampion.md) (product profiles, Lampion OS).
 
 ## Build and test
 
@@ -48,8 +49,10 @@ ketqt_kitchensink --smoke   # every page, light and dark; non-zero on QML errors
 
 ```cpp
 #include "KetButton.h"
+#include "KetProfile.h"
 #include "KetStyle.h"
 
+ket::Profile::setCurrent(ket::Profile::ketPlus()); // or designSystem(), or a product's own
 ket::Style::install(app);
 auto* save = new ket::Button(tr("Save"), ket::ButtonVariant::Primary);
 ```

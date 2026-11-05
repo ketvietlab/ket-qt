@@ -17,7 +17,8 @@ Read `docs/architecture.md` and `docs/decisions/` before changing code.
   recipe, and appears in the kitchensink (`examples/kitchensink`) in every variant,
   size and state (`setPreviewState()` / `previewState` pin a state).
 - Keep Qt 6.8 compatibility. Do not use native platform styles for kit components.
-- No app-specific code (KetPlus, KétChat) and no fonts, credentials or machine paths.
+- No app-specific code (KetPlus, KétChat, Lampion OS) and no fonts, credentials or machine
+  paths. Product metrics live only in `ket::Profile` (decision 0002); colours only in tokens.
 - Format C++ with the repository `.clang-format`. Run `ctest` and `git diff --check`
   before committing.
 - Work on `develop`; `main` is for releases. Consumers pin release tags.

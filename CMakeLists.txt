@@ -40,6 +40,7 @@ add_library(ketqt_tokens STATIC
     src/tokens/KetTokens.h src/tokens/KetTokens.cpp
     src/tokens/KetAppearance.h src/tokens/KetAppearance.cpp
     src/tokens/KetRecipes.h src/tokens/KetRecipes.cpp
+    src/tokens/KetProfile.h src/tokens/KetProfile.cpp
 )
 add_library(KetQt::Tokens ALIAS ketqt_tokens)
 target_include_directories(ketqt_tokens PUBLIC
@@ -141,6 +142,7 @@ install(TARGETS ${ketqt_install_targets} EXPORT KetQtTargets
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt
 )
 install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRecipes.h
+              src/tokens/KetProfile.h
               src/icons/KetIcons.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 if(KETQT_BUILD_WIDGETS)

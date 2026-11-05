@@ -17,7 +17,7 @@ flowchart LR
 
 | Target | Contents | Qt modules |
 |---|---|---|
-| `KetQt::Tokens` | `ket::Tokens` (generated table), `ket::Appearance`, `ket::*Recipe` | Core, Gui |
+| `KetQt::Tokens` | `ket::Tokens` (generated table), `ket::Appearance`, `ket::Profile`, `ket::*Recipe` | Core, Gui |
 | `KetQt::Icons` | `ket::Icons`: Két Symbol resources, size and weight rules | Gui, Svg |
 | `KetQt::Widgets` | `ket::Style`, `ket::Button`, `ket::IconButton`, `ket::Badge`, `ket::Tag`, `ket::Icon`, `ket::TextField`, `ket::Select`, `ket::Checkbox`, `ket::Radio`, `ket::Choice`, `ket::FieldRow` | Widgets |
 | `KetQt::Quick` + `KetQt::QuickPlugin` | QML module `Ket`: `KetTheme`, `KetButton`, `KetIconButton`, `KetBadge`, `KetTag`, `KetIcon`, `KetTextField`, `KetSelect`, `KetCheckbox`, `KetRadio`, `KetChoice`, `KetFieldRow` | Qml, Quick, QuickControls2 |
@@ -48,15 +48,22 @@ have an appearance setting forward it here instead of keeping a second theme.
 In QML, pass `KetTheme.dark` and `KetTheme.zoom` to recipe functions and `KetTheme.px()`
 so bindings re-evaluate; recipes returned to QML are already scaled.
 
-## Component scope and source
+## Component scope and product profiles
 
-Components are added in the order the new KetPlus desktop mock uses them
-(`ketplus.ketatlas` in `ketvietlab/ketplus`, built on the same Két DS release). A recipe
-follows the mock's composition: which tokens fill, border and colour each state. Where the
-mock uses a literal with no token (for example the 7 px `.btn` gap, the 30 px `.icon-btn`,
-the 0.48 disabled opacity or the 18 px tag), the recipe keeps it as a named constant next
-to its source rule in `KetRecipes.cpp`; when the design system adds a token, the constant
-is replaced by it. Font sizes are the mock's at its default 15 px interface size.
+Components are added in the order the KetPlus desktop mock uses them (`ketplus.ketatlas` in
+`ketvietlab/ketplus`, built on the same Két DS release).
+
+A recipe takes its colours from tokens, choosing which token fills, borders and colours
+each state. It takes the metrics a product decides from the current `ket::Profile`
+(decision 0002): sizes, spacing, weights and opacities.
+
+- **`Profile::ketPlus()`** is the default. It holds the KetPlus mock's literals, each next to
+  its source rule, for example the 7 px `.btn` gap, the 30 px `.icon-btn`, the 0.48
+  disabled opacity and the 18 px tag. Its font sizes are the mock's at its default 15 px
+  interface size.
+- **`Profile::designSystem()`** uses tokens only.
+- **Other products**, such as Lampion OS, install their own profile before creating
+  windows.
 
 Focus is drawn inside a control's bounds (a 2 px `focus-border` border on fields, a ring
 around toggles), not as the mock's outside outline, which Qt Widgets cannot paint. The
@@ -86,7 +93,8 @@ Colours that are user data, such as tag colours, are parameters.
 
 ## Adding a component
 
-1. Add a recipe (`KetRecipes.h`) built from tokens, with a token test.
+1. Add a recipe (`KetRecipes.h`) built from tokens, with a token test. A new product metric
+   becomes a `ket::Profile` field, set in both `designSystem()` and `ketPlus()`.
 2. Draw it in `src/widgets/` and `src/quick/qml/`; neither layer chooses colours itself.
 3. Add a Widgets test and a Quick test that compare against the same recipe.
 4. Add it to a kitchensink page (`examples/kitchensink`) in every variant, size and pinned
