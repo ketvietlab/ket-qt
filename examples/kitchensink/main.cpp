@@ -9,6 +9,8 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QQuickItem>
+#include <QQuickWidget>
 #include <QTimer>
 #include <QtQml/qqmlextensionplugin.h>
 
@@ -71,9 +73,28 @@ int main(int argc, char** argv) {
     window.show();
 
     if (parser.isSet(smoke)) {
-        for (const QString& id : kitchensink::KitchenSinkWindow::pageIds()) {
-            window.showPage(id);
-            QApplication::processEvents();
+        // A Qt Quick view whose root is not exactly its size draws a stretched texture.
+        const auto checkViews = [&window](const QString& id) {
+            for (QQuickWidget* view : window.findChildren<QQuickWidget*>()) {
+                const QQuickItem* root = view->rootObject();
+                if (!root || !view->isVisibleTo(&window))
+                    continue;
+                if (QSizeF(view->size()) != root->size()) {
+                    std::fprintf(stderr, "%s: view %dx%d, root %gx%g\n", qPrintable(id),
+                                 view->width(), view->height(), root->width(), root->height());
+                    ++failures;
+                }
+            }
+        };
+        for (const qreal factor : {1.0, 1.25}) {
+            Appearance::instance().setZoom(factor);
+            for (const QString& id : kitchensink::KitchenSinkWindow::pageIds()) {
+                window.showPage(id);
+                // Views resize through queued calls; let them settle before checking.
+                for (int pass = 0; pass < 4; ++pass)
+                    QApplication::processEvents();
+                checkViews(id);
+            }
         }
         Appearance::instance().setMode(Appearance::Mode::Dark);
         QApplication::processEvents();

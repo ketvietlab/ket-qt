@@ -259,9 +259,8 @@ QWidget* iconPage() {
         iconSizes(frame.page), quickView(QStringLiteral("IconGallery"), frame.page), frame.page));
     frame.body->addWidget(sectionTitle(
         QStringLiteral("All %1 icons · 17 px").arg(Icons::codes().size()), frame.page));
-    auto* allQuick = quickView(QStringLiteral("IconGallery"), frame.page);
-    if (QQuickItem* root = allQuick->rootObject())
-        root->setProperty("all", true);
+    auto* allQuick =
+        quickView(QStringLiteral("IconGallery"), frame.page, {{QStringLiteral("all"), true}});
     frame.body->addWidget(toolkits(iconGrid(frame.page), allQuick, frame.page));
     frame.body->addWidget(new TokenLabel(
         QStringLiteral("Két Symbol © 2026 Két Việt, CC BY 4.0 "
@@ -282,9 +281,8 @@ QWidget* buttonPage() {
                                    quickView(QStringLiteral("ButtonMatrix"), frame.page),
                                    frame.page));
     frame.body->addWidget(sectionTitle(QStringLiteral("Small · control-height-sm"), frame.page));
-    auto* smallQuick = quickView(QStringLiteral("ButtonMatrix"), frame.page);
-    if (QQuickItem* root = smallQuick->rootObject())
-        root->setProperty("small", true);
+    auto* smallQuick =
+        quickView(QStringLiteral("ButtonMatrix"), frame.page, {{QStringLiteral("small"), true}});
     frame.body->addWidget(
         toolkits(buttonMatrix(ControlSize::Small, frame.page), smallQuick, frame.page));
     frame.body->addWidget(
@@ -323,15 +321,13 @@ QWidget* tagPage() {
     auto* restQuick = quickView(QStringLiteral("TagSamples"), frame.page);
     frame.body->addWidget(toolkits(tagRow(frame.page, false), restQuick, frame.page));
     frame.body->addWidget(sectionTitle(QStringLiteral("Hover"), frame.page));
-    auto* hoverQuick = quickView(QStringLiteral("TagSamples"), frame.page);
-    if (QQuickItem* root = hoverQuick->rootObject())
-        root->setProperty("mode", QStringLiteral("hover"));
+    auto* hoverQuick = quickView(QStringLiteral("TagSamples"), frame.page,
+                                 {{QStringLiteral("mode"), QStringLiteral("hover")}});
     frame.body->addWidget(toolkits(tagRow(frame.page, true), hoverQuick, frame.page));
     frame.body->addWidget(
         sectionTitle(QStringLiteral("Filterable, elided and overflow"), frame.page));
-    auto* edgeQuick = quickView(QStringLiteral("TagSamples"), frame.page);
-    if (QQuickItem* root = edgeQuick->rootObject())
-        root->setProperty("mode", QStringLiteral("edge"));
+    auto* edgeQuick = quickView(QStringLiteral("TagSamples"), frame.page,
+                                {{QStringLiteral("mode"), QStringLiteral("edge")}});
     frame.body->addWidget(toolkits(tagEdgeCases(frame.page), edgeQuick, frame.page));
     frame.body->addStretch();
     return frame.page;
