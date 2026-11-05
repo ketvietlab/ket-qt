@@ -90,7 +90,9 @@ int main(int argc, char** argv) {
             Appearance::instance().setZoom(factor);
             for (const QString& id : kitchensink::KitchenSinkWindow::pageIds()) {
                 window.showPage(id);
-                QApplication::processEvents();
+                // Views resize through queued calls; let them settle before checking.
+                for (int pass = 0; pass < 4; ++pass)
+                    QApplication::processEvents();
                 checkViews(id);
             }
         }
