@@ -82,6 +82,36 @@ class TokensTest final : public QObject {
         QVERIFY(!Tokens::contains(u"terminal-ansi-16"));
     }
 
+    void syntaxColoursReadInTheEditor() {
+        // Every syntax role reads at 4.5:1 on panel-bg, the editor's background, in both
+        // themes (12 px code is normal text for WCAG AA).
+        const auto luminance = [](const QColor& c) {
+            const auto linear = [](qreal v) {
+                return v <= 0.04045 ? v / 12.92 : std::pow((v + 0.055) / 1.055, 2.4);
+            };
+            return 0.2126 * linear(c.redF()) + 0.7152 * linear(c.greenF()) +
+                   0.0722 * linear(c.blueF());
+        };
+        for (const Theme theme : {Theme::Light, Theme::Dark}) {
+            const qreal panel = luminance(Tokens::color(u"panel-bg", theme));
+            const SyntaxRecipe recipe = syntaxRecipe(theme);
+            const QList<std::pair<const char*, QColor>> roles{
+                {"keyword", recipe.keyword}, {"string", recipe.string},
+                {"number", recipe.number},   {"type", recipe.type},
+                {"comment", recipe.comment}, {"attribute", recipe.attribute}};
+            for (const auto& [name, colour] : roles) {
+                const qreal a = luminance(colour);
+                const qreal ratio = (qMax(a, panel) + 0.05) / (qMin(a, panel) + 0.05);
+                const QString label =
+                    QStringLiteral("%1 (%2) is %3:1")
+                        .arg(QLatin1String(name), theme == Theme::Dark ? QStringLiteral("dark")
+                                                                       : QStringLiteral("light"))
+                        .arg(ratio);
+                QVERIFY2(ratio >= 4.5, qPrintable(label));
+            }
+        }
+    }
+
     void unknownNamesAreEmpty() {
         QVERIFY(!Tokens::contains(u"no-such-token"));
         QVERIFY(!Tokens::color(u"no-such-token", Theme::Light).isValid());
