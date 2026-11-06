@@ -306,23 +306,41 @@ class QuickTest final : public QObject {
         std::unique_ptr<QObject> root = create(QByteArrayLiteral(
             "import QtQuick\nimport Ket\n"
             "Item { width: 800; height: 600\n"
-            "  property alias empty: empty\n"
+            "  property alias empty: empty; property alias natural: natural\n"
             "  KetEmptyState { id: empty; width: 200; iconName: \"search\"; title: \"No results\";"
             "    message: \"Nothing in ketplus-desktop matches this query. Check the spelling, "
             "or search for a shorter word.\" }\n"
+            "  KetEmptyState { id: natural; iconName: \"search\"; title: \"No results\";"
+            "    message: \"Nothing in ketplus-desktop matches this query. Check the spelling, "
+            "or search for a shorter word.\"; actionText: \"Clear search\" }\n"
             "}\n"));
         QVERIFY(root);
+        const auto messageOf = [](QQuickItem* state) -> QQuickItem* {
+            for (auto* item : state->findChildren<QQuickItem*>())
+                if (item->property("text").toString().startsWith(u"Nothing in"))
+                    return item;
+            return nullptr;
+        };
         auto* empty = root->property("empty").value<QQuickItem*>();
-        QQuickItem* message = nullptr;
-        for (auto* item : empty->findChildren<QQuickItem*>())
-            if (item->property("text").toString().startsWith(u"Nothing in"))
-                message = item;
+        QQuickItem* message = messageOf(empty);
         QVERIFY(message);
         QVERIFY2(message->width() <= empty->width(), qPrintable(QString::number(message->width())));
         QVERIFY(message->property("lineCount").toInt() > 1);
         // It uses the pane's width, not just the width of the title or the action.
         QVERIFY2(message->width() > empty->width() * 0.8,
                  qPrintable(QString::number(message->width())));
+
+        // Without a width, the state keeps its natural size: the message at the recipe's
+        // maximum width, not squeezed to the width of the title or the action.
+        auto* natural = root->property("natural").value<QQuickItem*>();
+        QQuickItem* naturalMessage = messageOf(natural);
+        QVERIFY(naturalMessage);
+        const qreal maxWidth =
+            natural->property("recipe").toMap().value("messageMaxWidth").toReal();
+        QVERIFY(maxWidth > 200);
+        QCOMPARE(natural->width(), maxWidth);
+        QCOMPARE(naturalMessage->width(), maxWidth);
+        QVERIFY(naturalMessage->property("lineCount").toInt() <= 3);
     }
 
     void conversationBlocksLoad() {
