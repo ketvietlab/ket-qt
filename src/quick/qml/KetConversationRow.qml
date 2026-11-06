@@ -146,6 +146,7 @@ Basic.AbstractButton {
                 color: control.statusRecipe.labelColor
                 font.family: KetTheme.fontFamily
                 font.pixelSize: control.recipe.metaPixels
+                font.weight: control.recipe.metaWeight
             }
         }
     }

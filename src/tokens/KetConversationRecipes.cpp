@@ -48,6 +48,7 @@ ConversationRowRecipe conversationRowRecipe(bool selected, const InteractionStat
         selected ? profile().conversationSelectedTitleWeight : profile().conversationTitleWeight;
     recipe.numberPixels = profile().conversationNumberPixels;
     recipe.metaPixels = profile().conversationMetaPixels;
+    recipe.metaWeight = profile().conversationMetaWeight;
     recipe.metaHeight = profile().conversationMetaHeight;
     recipe.metaGap = profile().conversationMetaGap;
     recipe.tagGap = profile().conversationTagGap;
@@ -91,6 +92,13 @@ ConversationStatusRecipe conversationStatusRecipe(ConversationStatus status, The
         recipe.icon = QStringLiteral("stop");
         recipe.iconColor = token(u"text-muted", theme);
         break;
+    case ConversationStatus::AwaitingReply:
+        // A finished turn that asks for the user: not the success tick, and not the warning
+        // pause of a blocked turn.
+        recipe.icon = QStringLiteral("help");
+        recipe.iconColor = token(u"accent-text", theme);
+        recipe.labelColor = recipe.iconColor;
+        break;
     }
     return recipe;
 }
@@ -109,6 +117,8 @@ QString conversationStatusLabel(ConversationStatus status) {
         return QStringLiteral("Completed");
     case ConversationStatus::Stopped:
         return QStringLiteral("Stopped");
+    case ConversationStatus::AwaitingReply:
+        return QStringLiteral("Waiting for you");
     }
     return {};
 }
@@ -262,6 +272,7 @@ QVariantMap toVariantMap(const ConversationRowRecipe& r) {
                   {"titleWeight", r.titleWeight},
                   {"numberPixels", r.numberPixels},
                   {"metaPixels", r.metaPixels},
+                  {"metaWeight", r.metaWeight},
                   {"metaHeight", r.metaHeight},
                   {"metaGap", r.metaGap},
                   {"tagGap", r.tagGap},

@@ -32,6 +32,8 @@ static_assert(int(QuickTheme::ToggleKind::Radio) == int(ket::ToggleKind::Radio))
 static_assert(int(QuickTheme::BannerTone::Danger) == int(ket::BannerTone::Danger));
 static_assert(int(QuickTheme::ConversationStatus::Stopped) ==
               int(ket::ConversationStatus::Stopped));
+static_assert(int(QuickTheme::ConversationStatus::AwaitingReply) ==
+              int(ket::ConversationStatus::AwaitingReply));
 
 } // namespace
 

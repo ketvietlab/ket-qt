@@ -168,6 +168,7 @@ struct Profile {
     qreal conversationTitleLineHeight = 0; // pixels
     int conversationTitleWeight = 400;
     int conversationSelectedTitleWeight = 400;
+    int conversationMetaWeight = 400;
     qreal conversationNumberPixels = 0;
     qreal conversationMetaPixels = 0;
     qreal conversationMetaHeight = 0;

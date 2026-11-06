@@ -126,6 +126,7 @@ Profile Profile::designSystem() {
     p.conversationTitleLineHeight = px(u"space-5");
     p.conversationTitleWeight = qRound(Tokens::number(u"weight-normal"));
     p.conversationSelectedTitleWeight = qRound(Tokens::number(u"weight-medium"));
+    p.conversationMetaWeight = qRound(Tokens::number(u"weight-normal"));
     p.conversationNumberPixels = px(u"text-sm");
     p.conversationMetaPixels = px(u"text-xs");
     p.conversationMetaHeight = px(u"space-5");
