@@ -148,7 +148,8 @@
     --kv-accent-border: light-dark(#c2d1ff, var(--kv-ref-primary-border));
     /* Brand accent is a fill. Dark links use step 300 (8:1 on a panel). */
     --kv-accent-text: light-dark(#1238db, var(--kv-ref-primary-300));
-    --kv-focus-border: light-dark(#1746ff, #668cff);
+    /* Light focus follows the accent; dark keeps a lighter blue for 3:1 on panels. */
+    --kv-focus-border: light-dark(var(--kv-accent), #668cff);
     --kv-focus-ring: 0 0 0 3px light-dark(#dde6ff, rgb(102 140 255 / 24%));
     --kv-on-accent: var(--kv-ref-white);
     --kv-positive: light-dark(#1d5d3b, var(--kv-ref-success));

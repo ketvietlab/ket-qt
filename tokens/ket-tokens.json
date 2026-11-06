@@ -2,8 +2,8 @@
   "source": {
     "package": "@ketvietlab/design-system",
     "version": "0.1.44",
-    "revision": "2e01c9e41a8f880f5c7bafc06ade7f671d477a19",
-    "sha256": "71ab1c44628674f683d179bb83423b21f99fc7877f1d12c20421d37ab57c66fa"
+    "revision": "6eac4fd8b33433b902f4ba3090ab5448193872ce",
+    "sha256": "50d98becabde7d0e09072e82004479bfa06c13482fc41b95b6ec391543776267"
   },
   "tokens": {
     "accent": {
@@ -238,7 +238,7 @@
     },
     "color-focus": {
       "kind": "Color",
-      "light": "#1746ff",
+      "light": "#365fd6",
       "dark": "#668cff"
     },
     "color-focus-ring": {
@@ -458,7 +458,7 @@
     },
     "focus-border": {
       "kind": "Color",
-      "light": "#1746ff",
+      "light": "#365fd6",
       "dark": "#668cff"
     },
     "focus-ring": {
@@ -548,7 +548,7 @@
     },
     "input-border-focus": {
       "kind": "Color",
-      "light": "#1746ff",
+      "light": "#365fd6",
       "dark": "#668cff"
     },
     "input-border-hover": {
