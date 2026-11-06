@@ -137,9 +137,12 @@
     --kv-interactive-hover: light-dark(#f7f5f5, var(--kv-ref-control-hover));
     --kv-interactive-active: light-dark(#efedee, var(--kv-ref-control-active));
     --kv-interactive-disabled: light-dark(#efedee, var(--kv-ref-control-disabled));
-    --kv-accent: var(--kv-ref-primary);
-    --kv-accent-hover: var(--kv-ref-primary-hover);
-    --kv-accent-active: var(--kv-ref-primary-active);
+    /* The accent is the quieter action blue, not Két Blue itself: fills,
+       tracks, selection marks and primary actions share it. Két Blue stays the
+       brand reference for identity and the first chart series. */
+    --kv-accent: #365fd6;
+    --kv-accent-hover: #3151c6;
+    --kv-accent-active: #2b46b7;
     --kv-accent-subtle: light-dark(#edf2ff, var(--kv-ref-primary-subtle));
     --kv-accent-muted: light-dark(#dde6ff, var(--kv-ref-primary-muted));
     --kv-accent-border: light-dark(#c2d1ff, var(--kv-ref-primary-border));
@@ -363,10 +366,10 @@
        fill. Dark mode keeps its existing panel/header and canvas hierarchy. */
     --kv-page-chrome-bg: light-dark(var(--kv-page-bg), var(--kv-panel-bg));
     --kv-page-content-bg: var(--kv-page-bg);
-    /* Quieter action fills retain the brand hue and at least 5.58:1 white-label contrast. */
-    --kv-action-primary-bg: #365fd6;
-    --kv-action-primary-hover: #3151c6;
-    --kv-action-primary-active: #2b46b7;
+    /* Action fills are the accent and keep at least 5.58:1 white-label contrast. */
+    --kv-action-primary-bg: var(--kv-accent);
+    --kv-action-primary-hover: var(--kv-accent-hover);
+    --kv-action-primary-active: var(--kv-accent-active);
     --kv-action-primary-ink: var(--kv-on-accent);
     --kv-action-status-ink: light-dark(var(--kv-ref-white), var(--kv-ref-bg-main));
     --kv-input-bg: light-dark(#ffffff, #20252b);

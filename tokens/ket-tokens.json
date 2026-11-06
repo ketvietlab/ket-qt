@@ -2,19 +2,19 @@
   "source": {
     "package": "@ketvietlab/design-system",
     "version": "0.1.44",
-    "revision": "e8adee2da3bfeea66c01f46f110fdc5243fb23c0",
-    "sha256": "f920ee68488887e67430b0c71690e608068e0a691b7978f2a8b67cbe92c41d7f"
+    "revision": "2e01c9e41a8f880f5c7bafc06ade7f671d477a19",
+    "sha256": "71ab1c44628674f683d179bb83423b21f99fc7877f1d12c20421d37ab57c66fa"
   },
   "tokens": {
     "accent": {
       "kind": "Color",
-      "light": "#1746ff",
-      "dark": "#1746ff"
+      "light": "#365fd6",
+      "dark": "#365fd6"
     },
     "accent-active": {
       "kind": "Color",
-      "light": "#102eb3",
-      "dark": "#102eb3"
+      "light": "#2b46b7",
+      "dark": "#2b46b7"
     },
     "accent-border": {
       "kind": "Color",
@@ -23,8 +23,8 @@
     },
     "accent-hover": {
       "kind": "Color",
-      "light": "#1238db",
-      "dark": "#1238db"
+      "light": "#3151c6",
+      "dark": "#3151c6"
     },
     "accent-muted": {
       "kind": "Color",
@@ -203,13 +203,13 @@
     },
     "color-accent": {
       "kind": "Color",
-      "light": "#1746ff",
-      "dark": "#1746ff"
+      "light": "#365fd6",
+      "dark": "#365fd6"
     },
     "color-accent-hover": {
       "kind": "Color",
-      "light": "#1238db",
-      "dark": "#1238db"
+      "light": "#3151c6",
+      "dark": "#3151c6"
     },
     "color-accent-soft": {
       "kind": "Color",

@@ -3,7 +3,7 @@
   "version": "0.1.44",
   "repository": "https://github.com/ketvietlab/ketsuite",
   "path": "ketsuite/packages/design-system/src/foundations/tokens.css",
-  "revision": "e8adee2da3bfeea66c01f46f110fdc5243fb23c0",
+  "revision": "2e01c9e41a8f880f5c7bafc06ade7f671d477a19",
   "license": "MIT",
-  "sha256": "f920ee68488887e67430b0c71690e608068e0a691b7978f2a8b67cbe92c41d7f"
+  "sha256": "71ab1c44628674f683d179bb83423b21f99fc7877f1d12c20421d37ab57c66fa"
 }
