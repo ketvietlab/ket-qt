@@ -11,6 +11,7 @@
 #include <QTest>
 #include <QTextBlock>
 #include <QTextDocument>
+#include <QTextTable>
 
 using namespace ket;
 
@@ -452,6 +453,29 @@ class TokensTest final : public QObject {
         const QTextBlockFormat quote = quoted.lastBlock().blockFormat();
         QCOMPARE(quote.background().color(), Tokens::color(u"accent-subtle", Theme::Light));
         QCOMPARE(quote.leftMargin(), 14.0);
+
+        // h1 and h2 tighten; h3 keeps normal spacing.
+        QTextDocument headings;
+        headings.setMarkdown(QStringLiteral("# One\n\n## Two\n\n### Three"));
+        styleMarkdown(&headings, markdownRecipe(Theme::Light), 1.0, QFont(), QString());
+        const auto spacing = [](const QTextBlock& block) {
+            return block.begin().fragment().charFormat().fontLetterSpacing();
+        };
+        QCOMPARE(spacing(headings.begin()), 24 * -0.02);
+        QCOMPARE(spacing(headings.begin().next()), 21 * -0.02);
+        QCOMPARE(spacing(headings.lastBlock()), 0.0);
+
+        // Tables draw one quiet hairline instead of Qt's default grey frame.
+        QTextDocument tabled;
+        tabled.setMarkdown(QStringLiteral("| A | B |\n| --- | --- |\n| 1 | 2 |"));
+        styleMarkdown(&tabled, markdownRecipe(Theme::Dark), 1.0, QFont(), QString());
+        const QList<QTextFrame*> frames = tabled.rootFrame()->childFrames();
+        QCOMPARE(frames.size(), 1);
+        const QTextTableFormat table = qobject_cast<QTextTable*>(frames.first())->format();
+        QCOMPARE(table.borderBrush().color(), Tokens::color(u"panel-border", Theme::Dark));
+        QVERIFY(table.borderCollapse());
+        QCOMPARE(table.border(), 1.0);
+        QCOMPARE(table.cellPadding(), 8.0);
     }
 
     void agentMentionsFollowTheMock() {

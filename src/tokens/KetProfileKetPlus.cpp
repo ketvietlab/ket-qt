@@ -189,6 +189,8 @@ Profile Profile::ketPlus() {
     p.markdownHeading3Pixels = 20; // `.answer h3`
     p.markdownHeadingLineHeight = 1.4;
     p.markdownHeadingSpacingAfter = 7;
+    p.markdownHeadingTracking = -0.02; // not in the mock: tightens the two display sizes
+    p.markdownTableCellPadding = 8;
     p.markdownParagraphSpacing = 16; // `.answer p, .answer ul`
     p.markdownListIndent = 17;       // `.answer ul` padding-left
     p.markdownListItemGap = 5;

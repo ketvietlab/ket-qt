@@ -17,12 +17,15 @@ struct MarkdownRecipe {
     QColor quoteText;
     QColor quoteBorder;
     QColor rule;
+    QColor tableBorder; // table cell edges: the quiet panel hairline, not Qt's default grey
     qreal bodyPixels = 0;
     qreal lineHeight = 1.0;
     qreal heading1Pixels = 0;
     qreal heading2Pixels = 0;
     qreal heading3Pixels = 0;
     qreal headingLineHeight = 1.0;
+    // Letter spacing of h1 and h2, in em; negative tightens the larger headings.
+    qreal headingTracking = 0;
     int headingWeight = 600;
     qreal headingSpacingAfter = 0;
     qreal paragraphSpacing = 0;
@@ -32,6 +35,7 @@ struct MarkdownRecipe {
     qreal quotePadding = 0;
     qreal quoteBorderWidth = 0;
     qreal codePixels = 0;
+    qreal tableCellPadding = 0;
 };
 
 struct CodeBlockRecipe {
