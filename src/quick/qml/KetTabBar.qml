@@ -14,6 +14,8 @@ Basic.TabBar {
     spacing: 0
 
     contentItem: ListView {
+        // Tabs that do not fit scroll inside the bar instead of drawing over its neighbours.
+        clip: true
         model: control.contentModel
         currentIndex: control.currentIndex
         spacing: control.spacing
