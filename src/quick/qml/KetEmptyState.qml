@@ -51,7 +51,7 @@ Item {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             visible: empty.message !== ""
-            width: Math.min(implicitWidth, empty.recipe.messageMaxWidth)
+            width: Math.min(implicitWidth, empty.recipe.messageMaxWidth, empty.width)
             text: empty.message
             textFormat: Text.PlainText
             horizontalAlignment: Text.AlignHCenter

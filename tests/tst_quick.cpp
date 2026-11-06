@@ -300,6 +300,31 @@ class QuickTest final : public QObject {
         QVERIFY(root->property("empty").value<QQuickItem*>()->implicitHeight() > 35);
     }
 
+    // In a pane narrower than the recipe's message width, the message wraps inside the
+    // pane like the title does, instead of drawing past both edges.
+    void emptyStateMessageFitsANarrowPane() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "Item { width: 800; height: 600\n"
+            "  property alias empty: empty\n"
+            "  KetEmptyState { id: empty; width: 200; iconName: \"search\"; title: \"No results\";"
+            "    message: \"Nothing in ketplus-desktop matches this query. Check the spelling, "
+            "or search for a shorter word.\" }\n"
+            "}\n"));
+        QVERIFY(root);
+        auto* empty = root->property("empty").value<QQuickItem*>();
+        QQuickItem* message = nullptr;
+        for (auto* item : empty->findChildren<QQuickItem*>())
+            if (item->property("text").toString().startsWith(u"Nothing in"))
+                message = item;
+        QVERIFY(message);
+        QVERIFY2(message->width() <= empty->width(), qPrintable(QString::number(message->width())));
+        QVERIFY(message->property("lineCount").toInt() > 1);
+        // It uses the pane's width, not just the width of the title or the action.
+        QVERIFY2(message->width() > empty->width() * 0.8,
+                 qPrintable(QString::number(message->width())));
+    }
+
     void conversationBlocksLoad() {
         std::unique_ptr<QObject> root = create(QByteArrayLiteral(
             "import QtQuick\nimport Ket\n"
