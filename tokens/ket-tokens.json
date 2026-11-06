@@ -2,8 +2,8 @@
   "source": {
     "package": "@ketvietlab/design-system",
     "version": "0.1.44",
-    "revision": "52207982a1755e9eefe9536ac34e7321556a60c3",
-    "sha256": "50d98becabde7d0e09072e82004479bfa06c13482fc41b95b6ec391543776267"
+    "revision": "18609c971fe46fa706f1451be2401a4bfe1fab29",
+    "sha256": "ffcb1de26f70e65da025b377e9857950ea18d5750c17f64fcf2aed7435b35733"
   },
   "tokens": {
     "accent": {
@@ -1480,6 +1480,86 @@
       "kind": "Length",
       "light": "288",
       "dark": "288"
+    },
+    "terminal-ansi-0": {
+      "kind": "Color",
+      "light": "#24262a",
+      "dark": "#30363f"
+    },
+    "terminal-ansi-1": {
+      "kind": "Color",
+      "light": "#b42318",
+      "dark": "#ef665c"
+    },
+    "terminal-ansi-10": {
+      "kind": "Color",
+      "light": "#174b30",
+      "dark": "#5fe39a"
+    },
+    "terminal-ansi-11": {
+      "kind": "Color",
+      "light": "#70490e",
+      "dark": "#f5c66a"
+    },
+    "terminal-ansi-12": {
+      "kind": "Color",
+      "light": "#102eb3",
+      "dark": "#9eb5ff"
+    },
+    "terminal-ansi-13": {
+      "kind": "Color",
+      "light": "#63398f",
+      "dark": "#d0b0f5"
+    },
+    "terminal-ansi-14": {
+      "kind": "Color",
+      "light": "#11555f",
+      "dark": "#4edaff"
+    },
+    "terminal-ansi-15": {
+      "kind": "Color",
+      "light": "#ffffff",
+      "dark": "#f2f4f7"
+    },
+    "terminal-ansi-2": {
+      "kind": "Color",
+      "light": "#1d5d3b",
+      "dark": "#40c97b"
+    },
+    "terminal-ansi-3": {
+      "kind": "Color",
+      "light": "#8b5c12",
+      "dark": "#e5a93c"
+    },
+    "terminal-ansi-4": {
+      "kind": "Color",
+      "light": "#1238db",
+      "dark": "#668cff"
+    },
+    "terminal-ansi-5": {
+      "kind": "Color",
+      "light": "#7a4bad",
+      "dark": "#b389e8"
+    },
+    "terminal-ansi-6": {
+      "kind": "Color",
+      "light": "#156b78",
+      "dark": "#45c2d1"
+    },
+    "terminal-ansi-7": {
+      "kind": "Color",
+      "light": "#5a5c5e",
+      "dark": "#b4bac4"
+    },
+    "terminal-ansi-8": {
+      "kind": "Color",
+      "light": "#6b6d6d",
+      "dark": "#858d99"
+    },
+    "terminal-ansi-9": {
+      "kind": "Color",
+      "light": "#912018",
+      "dark": "#ff8a80"
     },
     "text-2xl": {
       "kind": "Length",

@@ -30,6 +30,9 @@ flowchart LR
 - Only the desktop values are generated: the base `:root` and `[data-kv-design-system]`
   blocks. Media queries, density variants and `prefers-reduced-motion` are ignored.
 - QML reads the same table as `KetTheme.t` with camelCase keys (`KetTheme.t.pageBg`).
+- A terminal draws the 16 ANSI colours from `terminal-ansi-0` … `terminal-ansi-15`
+  (`KetTheme.t.terminalAnsi0` …) on `page-bg`. Each reads at 4.5:1 or more on that
+  background, except black (0) on dark and bright white (15) on light (`tst_tokens`).
 
 ### Updating the design system
 
