@@ -3,6 +3,8 @@
 #include "KetConversationRecipes.h"
 #include "KetRecipes.h"
 
+#include <QDirIterator>
+#include <QFile>
 #include <QGuiApplication>
 #include <QQmlComponent>
 #include <QQmlEngine>
@@ -32,6 +34,20 @@ void countQmlWarnings(QtMsgType type, const QMessageLogContext& context, const Q
 class QuickTest final : public QObject {
     Q_OBJECT
   private slots:
+    // The attached Basic.ToolTip ignores the kit's recipe and shows Qt's black box.
+    void componentsUseKetToolTip() {
+        int files = 0;
+        QDirIterator it(QStringLiteral(":/qt/qml/Ket"), {QStringLiteral("*.qml")}, QDir::Files,
+                        QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            QFile file(it.next());
+            QVERIFY(file.open(QIODevice::ReadOnly));
+            ++files;
+            QVERIFY2(!file.readAll().contains("ToolTip.visible"), qPrintable(file.fileName()));
+        }
+        QVERIFY(files > 50);
+    }
+
     void initTestCase() { previousHandler = qInstallMessageHandler(countQmlWarnings); }
 
     void cleanup() {
@@ -309,6 +325,10 @@ class QuickTest final : public QObject {
         QCOMPARE(bubble->property("color").value<QColor>(),
                  userMessageRecipe(Theme::Light).background);
         QVERIFY(bubble->x() > 0);
+        // The glyphs sit in the middle of the line box, as in CSS: half the leading above.
+        auto* label = bubble->childItems().value(0);
+        QVERIFY(label);
+        QVERIFY(label->y() > userMessageRecipe(Theme::Light).paddingBlock);
         auto* composer = root->property("composer").value<QQuickItem*>();
         // Without tools the toolbar row hides; with one it adds its 40 px.
         QVERIFY(composer->implicitHeight() >= 48);

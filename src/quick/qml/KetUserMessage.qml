@@ -24,10 +24,17 @@ Item {
         radius: message.recipe.radius
         color: message.recipe.background
 
+        // Text.FixedHeight puts the glyphs at the top of each line box; CSS and ket::Paragraph
+        // centre them, so shift the label by half the leading.
+        FontMetrics {
+            id: metrics
+            font: label.font
+        }
+
         Text {
             id: label
             x: message.recipe.paddingInline
-            y: message.recipe.paddingBlock
+            y: message.recipe.paddingBlock + Math.max(0, (label.lineHeight - metrics.height) / 2)
             width: Math.min(implicitWidth + 1,
                             message.width * message.recipe.maxWidth - 2 * message.recipe.paddingInline)
             text: message.text
