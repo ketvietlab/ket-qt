@@ -424,9 +424,23 @@ class WidgetsTest final : public QObject {
         QCOMPARE(submitted.count(), 1);
         QCOMPARE(submitted.first().first().toString(), QStringLiteral("Hello\nthere\nagain"));
         QVERIFY(composer.text().isEmpty());
+        // One circle: while busy with nothing typed it stops the turn, otherwise it sends.
         QSignalSpy stopped(&composer, &Composer::stopRequested);
         composer.setBusy(true);
+        QVERIFY(composer.sendButton()->isEnabled());
+        QCOMPARE(composer.sendButton()->accessibleName(), QStringLiteral("Stop turn"));
+        QTest::mouseClick(composer.sendButton(), Qt::LeftButton);
+        QCOMPARE(stopped.count(), 1);
+        QTest::keyClicks(composer.editor(), QStringLiteral("Also check Linux"));
         QCOMPARE(composer.sendButton()->accessibleName(), QStringLiteral("Send guidance"));
+        QTest::mouseClick(composer.sendButton(), Qt::LeftButton);
+        QCOMPARE(submitted.count(), 2);
+        QCOMPARE(stopped.count(), 1);
+        QCOMPARE(composer.sendButton()->width(), composer.sendButton()->height());
+        // The user's bubble is tinted, not filled with the accent.
+        QCOMPARE(userMessageRecipe(Theme::Light).background,
+                 Tokens::color(u"accent-subtle", Theme::Light));
+        QCOMPARE(userMessageRecipe(Theme::Light).text, Tokens::color(u"text-main", Theme::Light));
     }
 
     void transcriptBlocksWrapAndAlign() {

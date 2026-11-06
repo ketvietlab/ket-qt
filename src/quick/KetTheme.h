@@ -103,6 +103,9 @@ class QuickTheme final : public QObject {
     Q_INVOKABLE QVariantMap conversationStatusRecipe(bool dark, int status) const;
     Q_INVOKABLE QString conversationStatusLabel(int status) const;
     Q_INVOKABLE QVariantMap composerRecipe(bool dark, qreal zoom, bool focused) const;
+    // The composer's one action circle: send, or stop the turn while the box is empty.
+    Q_INVOKABLE QVariantMap composerActionRecipe(bool dark, qreal zoom, bool busy, bool hasText,
+                                                 bool hovered, bool pressed, bool focused) const;
     Q_INVOKABLE QVariantMap userMessageRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap assistantMessageRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap dayDividerRecipe(bool dark, qreal zoom) const;

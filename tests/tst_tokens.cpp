@@ -373,11 +373,17 @@ class TokensTest final : public QObject {
         QCOMPARE(focused.ring, Tokens::color(u"accent-subtle", Theme::Light));
         QCOMPARE(focused.radius, 12.0);
 
-        // color-mix(in srgb, accent 74%, black)
-        const QColor accent = Tokens::color(u"accent", Theme::Light);
-        const QColor bubble = userMessageRecipe(Theme::Light).background;
-        QCOMPARE(bubble.red(), qRound(accent.red() * 0.74));
-        QCOMPARE(bubble.blue(), qRound(accent.blue() * 0.74));
+        // The user's bubble is tinted; the action circle is a circle.
+        QCOMPARE(userMessageRecipe(Theme::Light).background,
+                 Tokens::color(u"accent-subtle", Theme::Light));
+        const ComposerActionRecipe send =
+            composerActionRecipe(ComposerAction::Send, true, {}, Theme::Light);
+        QCOMPARE(send.background, Tokens::color(u"accent", Theme::Light));
+        QCOMPARE(send.size, 32.0);
+        QCOMPARE(composerAction(true, false), ComposerAction::Stop);
+        QCOMPARE(composerAction(true, true), ComposerAction::Send);
+        QCOMPARE(composerActionRecipe(ComposerAction::Send, false, {}, Theme::Light).icon,
+                 Tokens::color(u"text-disabled", Theme::Light));
         QCOMPARE(userMessageRecipe(Theme::Light).fontPixels, 15.0);
         QCOMPARE(assistantMessageRecipe(Theme::Light).avatarSize, 25.0);
         QCOMPARE(dayDividerRecipe(Theme::Light).marginBottom, 22.0);

@@ -21,32 +21,62 @@ namespace {
 
 qreal scaled(qreal length) { return Appearance::instance().scaled(length); }
 
-// `.send-button.stop`: a filled square button with the stop glyph in the on-accent colour.
-class StopButton final : public QAbstractButton {
+// `.send-button`: one circle that sends, or stops the running turn while the box is empty.
+class ActionButton final : public QAbstractButton {
   public:
-    explicit StopButton(Composer* composer) : QAbstractButton(composer), composer_(composer) {
-        setAccessibleName(Composer::tr("Stop turn"));
-        setToolTip(accessibleName());
+    explicit ActionButton(Composer* composer) : QAbstractButton(composer), composer_(composer) {
         setCursor(Qt::PointingHandCursor);
+        setFocusPolicy(Qt::TabFocus);
+    }
+
+    [[nodiscard]] ComposerAction action() const {
+        return composerAction(composer_->isBusy(), !composer_->text().trimmed().isEmpty());
+    }
+
+    void sync() {
+        const bool stop = action() == ComposerAction::Stop;
+        setEnabled(stop || !composer_->text().trimmed().isEmpty());
+        setAccessibleName(stop                  ? Composer::tr("Stop turn")
+                          : composer_->isBusy() ? Composer::tr("Send guidance")
+                                                : Composer::tr("Send request"));
+        setToolTip(accessibleName());
+        update();
     }
 
   protected:
     void paintEvent(QPaintEvent*) override {
-        const ComposerRecipe r = composer_->recipe();
+        const ComposerAction kind = action();
+        const ComposerActionRecipe r = composerActionRecipe(
+            kind, isEnabled(), InteractionState{underMouse(), isDown(), isEnabled(), hasFocus()},
+            Appearance::instance().theme());
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
-        painter.setOpacity(isEnabled() ? 1.0 : Profile::current().disabledOpacity);
-        const qreal radius = scaled(Tokens::px(u"control-radius"));
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(r.stopBackground);
-        painter.drawRoundedRect(QRectF(rect()), radius, radius);
-        const qreal box = scaled(r.stopIconSize);
-        // The mock fills Lucide `square`: an 18/24 square with 2/24 corners.
-        const qreal inset = box * 3 / 24;
-        const QRectF square = QRectF((width() - box) / 2, (height() - box) / 2, box, box)
-                                  .adjusted(inset, inset, -inset, -inset);
-        painter.setBrush(r.stopIcon);
-        painter.drawRoundedRect(square, box * 2 / 24, box * 2 / 24);
+        painter.setOpacity(r.opacity);
+        const QRectF circle = QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5);
+        painter.setPen(r.focusRing.alpha() ? QPen(r.focusRing, 2) : Qt::NoPen);
+        painter.setBrush(r.background);
+        painter.drawEllipse(circle);
+        if (kind == ComposerAction::Stop) {
+            const qreal side = scaled(r.stopGlyph);
+            const qreal radius = scaled(r.stopRadius);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(r.icon);
+            painter.drawRoundedRect(QRectF((width() - side) / 2, (height() - side) / 2, side, side),
+                                    radius, radius);
+            return;
+        }
+        const qreal box = scaled(r.iconSize);
+        painter.drawPixmap(QPointF(qRound((width() - box) / 2), qRound((height() - box) / 2)),
+                           Icons::pixmap(u"arrow-up", box, devicePixelRatioF(), r.icon));
+    }
+
+    void enterEvent(QEnterEvent* event) override {
+        update();
+        QAbstractButton::enterEvent(event);
+    }
+    void leaveEvent(QEvent* event) override {
+        update();
+        QAbstractButton::leaveEvent(event);
     }
 
   private:
@@ -64,8 +94,7 @@ class PaddedEdit final : public QTextEdit {
 } // namespace
 
 Composer::Composer(QWidget* parent)
-    : QWidget(parent), editor_(new PaddedEdit(this)),
-      send_(new Button({}, ButtonVariant::Secondary, this)), stop_(new StopButton(this)),
+    : QWidget(parent), editor_(new PaddedEdit(this)), send_(new ActionButton(this)),
       leading_(new QHBoxLayout), trailing_(new QHBoxLayout), input_(new QHBoxLayout),
       chips_(new QWidget(this)), chipRow_(new QHBoxLayout(chips_)), toolbar_(new QWidget(this)) {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -77,15 +106,10 @@ Composer::Composer(QWidget* parent)
     editor_->setAutoFillBackground(false);
     editor_->setPlaceholderText(tr("Ask for follow-up changes"));
     editor_->installEventFilter(this);
-    send_->setIcon(Icons::icon(u"arrow-up"));
-    send_->setAccessibleName(tr("Send request"));
-    send_->setToolTip(send_->accessibleName());
-    send_->setEnabled(false);
-    stop_->hide();
+    static_cast<ActionButton*>(send_)->sync();
 
     input_->setContentsMargins(0, 0, 0, 0);
     input_->addWidget(editor_, 1);
-    input_->addWidget(stop_, 0, Qt::AlignBottom);
     input_->addWidget(send_, 0, Qt::AlignBottom);
     chipRow_->addStretch(1);
     chips_->hide();
@@ -103,13 +127,17 @@ Composer::Composer(QWidget* parent)
     column->addWidget(toolbar_);
 
     connect(editor_, &QTextEdit::textChanged, this, [this] {
-        send_->setEnabled(!text().trimmed().isEmpty());
+        static_cast<ActionButton*>(send_)->sync();
         fitEditor();
         updateMention();
     });
     connect(editor_, &QTextEdit::cursorPositionChanged, this, &Composer::updateMention);
-    connect(send_, &QAbstractButton::clicked, this, &Composer::submit);
-    connect(stop_, &QAbstractButton::clicked, this, &Composer::stopRequested);
+    connect(send_, &QAbstractButton::clicked, this, [this] {
+        if (static_cast<ActionButton*>(send_)->action() == ComposerAction::Stop)
+            emit stopRequested();
+        else
+            submit();
+    });
     connect(&Appearance::instance(), &Appearance::themeChanged, this, &Composer::applyRecipe);
     connect(&Appearance::instance(), &Appearance::zoomChanged, this, &Composer::applyRecipe);
     applyRecipe();
@@ -159,9 +187,7 @@ void Composer::setPlaceholderText(const QString& text) { editor_->setPlaceholder
 
 void Composer::setBusy(bool busy) {
     busy_ = busy;
-    stop_->setVisible(busy);
-    send_->setAccessibleName(busy ? tr("Send guidance") : tr("Send request"));
-    send_->setToolTip(send_->accessibleName());
+    static_cast<ActionButton*>(send_)->sync();
 }
 
 void Composer::submit() {
@@ -186,7 +212,6 @@ void Composer::applyRecipe() {
                                ring + 1 + padding);
     const int send = qRound(scaled(r.sendSize));
     send_->setFixedSize(send, send);
-    stop_->setFixedSize(send, send);
     input_->setSpacing(qRound(scaled(Tokens::px(u"space-1"))));
     // The send button sits centred on the input's first line box.
     input_->setContentsMargins(0, 0, 0, qMax(0, qRound((scaled(r.minInputHeight) - send) / 2)));

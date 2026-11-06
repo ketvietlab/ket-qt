@@ -188,7 +188,9 @@ struct Profile {
     qreal composerMinInputHeight = 0;
     int composerMaxLines = 0;
     qreal composerSendSize = 0;
-    qreal composerStopIconSize = 0;
+    qreal composerSendIconSize = 0; // the arrow in the action circle
+    qreal composerStopGlyph = 0;    // the stop square's side
+    qreal composerStopGlyphRadius = 0;
     qreal composerToolbarHeight = 0;
     qreal composerToolbarGap = 0;
 
@@ -199,7 +201,6 @@ struct Profile {
     qreal userBubblePaddingInline = 0;
     qreal userBubblePaddingBlock = 0;
     qreal userBubbleMaxWidth = 1.0; // fraction of the transcript width
-    qreal userBubbleShade = 0;      // how much of the accent stays when mixed with black
     qreal messageSpacing = 0;
     qreal avatarSize = 0;
     qreal avatarRadius = 0;

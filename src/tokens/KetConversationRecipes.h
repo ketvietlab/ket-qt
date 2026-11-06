@@ -50,8 +50,6 @@ struct ComposerRecipe {
     QColor ring; // transparent unless focused
     QColor text;
     QColor placeholder;
-    QColor stopBackground;
-    QColor stopIcon;
     Shadow shadow;
     qreal radius = 0;
     qreal padding = 0;
@@ -63,10 +61,27 @@ struct ComposerRecipe {
     qreal minInputHeight = 0;
     int maxLines = 0;
     qreal sendSize = 0;
-    qreal stopIconSize = 0;
     qreal toolbarHeight = 0;
     qreal toolbarGap = 0;
 };
+
+// The composer's one action button (`.send-button`): a circle that sends, or stops the
+// running turn while the message box is empty. Sending is disabled with nothing typed.
+enum class ComposerAction { Send, Stop };
+struct ComposerActionRecipe {
+    QColor background;
+    QColor icon;
+    QColor focusRing; // transparent unless focused
+    qreal size = 0;
+    qreal iconSize = 0;
+    qreal stopGlyph = 0; // the stop square's side
+    qreal stopRadius = 0;
+    qreal opacity = 1.0;
+};
+[[nodiscard]] ComposerAction composerAction(bool busy, bool hasText);
+[[nodiscard]] ComposerActionRecipe composerActionRecipe(ComposerAction action, bool enabled,
+                                                        const InteractionState& state, Theme theme);
+[[nodiscard]] QVariantMap toVariantMap(const ComposerActionRecipe& recipe);
 
 struct UserMessageRecipe {
     QColor background;
