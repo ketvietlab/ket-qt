@@ -32,11 +32,13 @@ Item {
     }
 
     component SampleComposer: KetComposer {
+        id: sample
         width: KetTheme.px(620, KetTheme.zoom)
         leadingTools: [
             KetIconButton {
                 text: "Add images or text files"; iconName: "plus"
                 iconWeight: KetTheme.IconWeight.Regular
+                glyphSize: sample.recipe.attachIconSize
             },
             KetButton {
                 text: "Ask before edits"; iconName: "shield"

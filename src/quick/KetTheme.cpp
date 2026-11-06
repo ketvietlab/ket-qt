@@ -310,7 +310,8 @@ QVariantMap QuickTheme::composerRecipe(bool dark, qreal zoom, bool focused) cons
     QVariantMap recipe = toVariantMap(ket::composerRecipe(focused, themeOf(dark)));
     scaleLengths(recipe, zoom,
                  {u"radius", u"padding", u"textPixels", u"textPaddingInline", u"textPaddingBlock",
-                  u"minInputHeight", u"sendSize", u"toolbarHeight", u"toolbarGap"});
+                  u"minInputHeight", u"sendSize", u"attachIconSize", u"toolbarHeight",
+                  u"toolbarGap"});
     scaleLengths(recipe, zoom, kShadowLengths);
     return recipe;
 }

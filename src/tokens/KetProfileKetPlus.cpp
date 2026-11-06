@@ -154,7 +154,8 @@ Profile Profile::ketPlus() {
     p.composerSendIconSize = 16; // a circle with a centred arrow (Jay, 2026-11-06)
     p.composerStopGlyph = 10;    // one button: the stop square replaces the arrow
     p.composerStopGlyphRadius = 2;
-    p.composerToolbarHeight = 40; // `.composer-toolbar.composer-foot`
+    p.composerAttachIconSize = 20; // the 16px plus read as too small (Jay, 2026-11-06)
+    p.composerToolbarHeight = 40;  // `.composer-toolbar.composer-foot`
     p.composerToolbarGap = 10;
     // Transcript: workspace.css with the desktop-alignment overrides.
     p.readingPixels = 15; // --kp-text-reading

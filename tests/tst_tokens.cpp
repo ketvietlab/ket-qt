@@ -380,6 +380,7 @@ class TokensTest final : public QObject {
             composerActionRecipe(ComposerAction::Send, true, {}, Theme::Light);
         QCOMPARE(send.background, Tokens::color(u"accent", Theme::Light));
         QCOMPARE(send.size, 32.0);
+        QCOMPARE(composerRecipe(false, Theme::Light).attachIconSize, 20.0);
         QCOMPARE(composerAction(true, false), ComposerAction::Stop);
         QCOMPARE(composerAction(true, true), ComposerAction::Send);
         QCOMPARE(composerActionRecipe(ComposerAction::Send, false, {}, Theme::Light).icon,

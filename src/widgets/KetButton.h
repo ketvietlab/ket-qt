@@ -52,9 +52,14 @@ class IconButton final : public Button {
 
     [[nodiscard]] QString label() const { return accessibleName(); }
     void setLabel(const QString& label);
+    // Unscaled glyph side; 0 keeps the size recipe's icon.
+    void setGlyphSize(qreal size);
 
     [[nodiscard]] ButtonRecipe recipe() const override;
     [[nodiscard]] QSize sizeHint() const override;
+
+  private:
+    qreal glyphSize_ = 0;
 };
 
 } // namespace ket

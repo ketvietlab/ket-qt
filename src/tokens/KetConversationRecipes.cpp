@@ -131,6 +131,7 @@ ComposerRecipe composerRecipe(bool focused, Theme theme) {
     recipe.minInputHeight = profile().composerMinInputHeight;
     recipe.maxLines = profile().composerMaxLines;
     recipe.sendSize = profile().composerSendSize;
+    recipe.attachIconSize = profile().composerAttachIconSize;
     recipe.toolbarHeight = profile().composerToolbarHeight;
     recipe.toolbarGap = profile().composerToolbarGap;
     return recipe;
@@ -298,6 +299,7 @@ QVariantMap toVariantMap(const ComposerRecipe& r) {
                   {"minInputHeight", r.minInputHeight},
                   {"maxLines", r.maxLines},
                   {"sendSize", r.sendSize},
+                  {"attachIconSize", r.attachIconSize},
                   {"toolbarHeight", r.toolbarHeight},
                   {"toolbarGap", r.toolbarGap}});
 }

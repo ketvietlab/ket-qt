@@ -126,8 +126,17 @@ void IconButton::setLabel(const QString& label) {
     setToolTip(label);
 }
 
+void IconButton::setGlyphSize(qreal size) {
+    glyphSize_ = size;
+    update();
+}
+
 ButtonRecipe IconButton::recipe() const {
-    return iconButtonRecipe(controlSize(), interactionState(), Appearance::instance().theme());
+    ButtonRecipe r =
+        iconButtonRecipe(controlSize(), interactionState(), Appearance::instance().theme());
+    if (glyphSize_ > 0)
+        r.iconSize = glyphSize_;
+    return r;
 }
 
 QSize IconButton::sizeHint() const {

@@ -191,6 +191,7 @@ struct Profile {
     qreal composerSendIconSize = 0; // the arrow in the action circle
     qreal composerStopGlyph = 0;    // the stop square's side
     qreal composerStopGlyphRadius = 0;
+    qreal composerAttachIconSize = 0; // the leading plus, larger than toolbar icons
     qreal composerToolbarHeight = 0;
     qreal composerToolbarGap = 0;
 

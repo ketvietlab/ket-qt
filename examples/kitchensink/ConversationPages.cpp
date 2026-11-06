@@ -117,6 +117,7 @@ QWidget* composer(QWidget* parent) {
         auto* field = new Composer(host);
         auto* attach = new IconButton(Icons::icon(u"plus", IconWeight::Regular),
                                       QStringLiteral("Add images or text files"), field);
+        attach->setGlyphSize(composerRecipe(false, Appearance::instance().theme()).attachIconSize);
         field->leadingTools()->addWidget(attach);
         auto* mode = new Button(QStringLiteral("Ask before edits"), ButtonVariant::Ghost, field);
         mode->setIcon(Icons::icon(u"shield"));

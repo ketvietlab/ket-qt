@@ -97,6 +97,10 @@ class QuickTest final : public QObject {
         QCOMPARE(button->implicitHeight(), recipe.height);
         auto* background = button->property("background").value<QQuickItem*>();
         QCOMPARE(background->property("color").value<QColor>(), recipe.background);
+        QCOMPARE(button->property("glyphSize").toReal(), recipe.iconSize);
+        button->setProperty("glyphSize", 20);
+        QCOMPARE(button->implicitWidth(), recipe.height);
+        button->setProperty("glyphSize", recipe.iconSize);
         auto* icon = button->property("contentItem").value<QQuickItem*>();
         QCOMPARE(icon->property("color").value<QColor>(), recipe.text);
     }

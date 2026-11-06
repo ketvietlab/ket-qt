@@ -61,6 +61,7 @@ struct ComposerRecipe {
     qreal minInputHeight = 0;
     int maxLines = 0;
     qreal sendSize = 0;
+    qreal attachIconSize = 0; // glyph of the leading add button (IconButton::setGlyphSize)
     qreal toolbarHeight = 0;
     qreal toolbarGap = 0;
 };
