@@ -57,15 +57,18 @@ Basic.AbstractButton {
         font.weight: control.moreRecipe.fontWeight
     }
 
-    RotationAnimator {
-        target: indicator
-        from: 0
-        to: 360
-        duration: control.statusRecipe.spinMs
-        loops: Animation.Infinite
-        running: control.statusRecipe.spinning && control.visible
-        onRunningChanged: if (!running) indicator.rotation = 0
+    // A working icon turns once per spin period on KetTheme's stepped clock.
+    readonly property bool spins: statusRecipe.spinning && visible
+    property bool holdsClock: false
+    function syncClock() {
+        if (spins !== holdsClock) {
+            holdsClock = spins
+            KetTheme.holdAnimationClock(spins)
+        }
     }
+    onSpinsChanged: syncClock()
+    Component.onCompleted: syncClock()
+    Component.onDestruction: if (holdsClock) KetTheme.holdAnimationClock(false)
 
     contentItem: Item {
         KetIcon {
@@ -74,6 +77,10 @@ Basic.AbstractButton {
             y: control.recipe.paddingBlock + control.recipe.indicatorTop
             name: control.statusRecipe.icon
             box: control.recipe.indicatorSize
+            rotation: control.holdsClock
+                      ? 360 * (KetTheme.animationClock % control.statusRecipe.spinMs)
+                        / control.statusRecipe.spinMs
+                      : 0
             color: control.statusRecipe.iconColor
         }
 

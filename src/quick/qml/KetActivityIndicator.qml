@@ -10,19 +10,26 @@ Item {
     property color color: "transparent" // transparent keeps the recipe's success colour
     property bool running: visible
     property real previewTime: -1 // >= 0 freezes the animation, for screenshots
-    property real elapsed: 0
     readonly property var recipe: KetTheme.activityRecipe(KetTheme.dark, KetTheme.zoom, color)
-    readonly property real time: previewTime >= 0 ? previewTime : elapsed
+    readonly property real time: previewTime >= 0 ? previewTime : holdsClock ? KetTheme.animationClock : 0
+    readonly property bool animates: running && previewTime < 0
+    property bool holdsClock: false
 
     implicitWidth: recipe.bars * recipe.barWidth + (recipe.bars - 1) * recipe.spacing
     implicitHeight: recipe.barHeight
     Accessible.role: Accessible.Animation
     Accessible.name: qsTr("Working")
 
-    FrameAnimation {
-        running: indicator.running && indicator.previewTime < 0
-        onTriggered: indicator.elapsed += frameTime * 1000
+    // The bars follow KetTheme's stepped clock while running.
+    function syncClock() {
+        if (animates !== holdsClock) {
+            holdsClock = animates
+            KetTheme.holdAnimationClock(animates)
+        }
     }
+    onAnimatesChanged: syncClock()
+    Component.onCompleted: syncClock()
+    Component.onDestruction: if (holdsClock) KetTheme.holdAnimationClock(false)
 
     Row {
         anchors.centerIn: parent

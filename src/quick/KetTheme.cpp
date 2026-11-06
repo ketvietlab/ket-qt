@@ -45,6 +45,30 @@ QuickTheme::QuickTheme(QObject* parent) : QObject(parent) {
         emit themeChanged();
     });
     connect(&appearance, &Appearance::zoomChanged, this, &QuickTheme::zoomChanged);
+    animationElapsed_.start();
+    connect(&animationTimer_, &QTimer::timeout, this, [this] {
+        animationClock_ = qreal(animationElapsed_.elapsed());
+        emit animationClockChanged();
+    });
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this,
+            &QuickTheme::updateAnimationClock);
+}
+
+void QuickTheme::holdAnimationClock(bool hold) {
+    animationHolds_ = qMax(0, animationHolds_ + (hold ? 1 : -1));
+    updateAnimationClock();
+}
+
+// 20 steps a second in front, 4 behind another application: enough to read as moving.
+void QuickTheme::updateAnimationClock() {
+    if (animationHolds_ == 0) {
+        animationTimer_.stop();
+        return;
+    }
+    const bool active = QGuiApplication::applicationState() == Qt::ApplicationActive;
+    animationTimer_.setInterval(active ? 50 : 250);
+    if (!animationTimer_.isActive())
+        animationTimer_.start();
 }
 
 QuickTheme* QuickTheme::create(QQmlEngine*, QJSEngine*) { return new QuickTheme; }
