@@ -45,6 +45,7 @@ add_library(ketqt_tokens STATIC
     src/tokens/KetConversationRecipes.h src/tokens/KetConversationRecipes.cpp
     src/tokens/KetRichRecipes.h src/tokens/KetRichRecipes.cpp
     src/tokens/KetMarkdown.h src/tokens/KetMarkdown.cpp
+    src/tokens/KetSyntax.h src/tokens/KetSyntax.cpp
     src/tokens/KetChatRecipes.h src/tokens/KetChatRecipes.cpp
     src/tokens/KetControlRecipes.h src/tokens/KetControlRecipes.cpp
     src/tokens/KetSurfaceRecipes.h src/tokens/KetSurfaceRecipes.cpp
@@ -239,7 +240,7 @@ install(TARGETS ${ketqt_install_targets} EXPORT KetQtTargets
 )
 install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRecipes.h
               src/tokens/KetProfile.h src/tokens/KetConversationRecipes.h
-              src/tokens/KetRichRecipes.h src/tokens/KetMarkdown.h
+              src/tokens/KetRichRecipes.h src/tokens/KetMarkdown.h src/tokens/KetSyntax.h
               src/tokens/KetSurfaceRecipes.h
               src/tokens/KetControlRecipes.h
               src/tokens/KetChatRecipes.h

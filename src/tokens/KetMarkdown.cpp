@@ -8,6 +8,7 @@
 #include <QTextCursor>
 #include <QTextDocument>
 #include <QTextList>
+#include <QTextTable>
 #include <QtMath>
 
 namespace ket {
@@ -150,7 +151,10 @@ void styleMarkdown(QTextDocument* document, const MarkdownRecipe& recipe, qreal 
                               qRound(mono && level == 0 ? px(recipe.codePixels) : size));
             if (level > 0)
                 chars.setFontWeight(recipe.headingWeight);
-            else if (chars.fontWeight() >= QFont::DemiBold)
+            if (level == 1 || level == 2) {
+                chars.setFontLetterSpacingType(QFont::AbsoluteSpacing);
+                chars.setFontLetterSpacing(size * recipe.headingTracking);
+            } else if (chars.fontWeight() >= QFont::DemiBold)
                 chars.setFontWeight(recipe.strongWeight);
             if (chars.isAnchor()) {
                 chars.setForeground(recipe.link);
@@ -164,6 +168,21 @@ void styleMarkdown(QTextDocument* document, const MarkdownRecipe& recipe, qreal 
             cursor.setPosition(fragment.position() + fragment.length(), QTextCursor::KeepAnchor);
             cursor.setCharFormat(chars);
         }
+    }
+
+    // Tables: one collapsed hairline in the panel border colour, with padded cells.
+    for (QTextFrame* frame : document->rootFrame()->childFrames()) {
+        auto* table = qobject_cast<QTextTable*>(frame);
+        if (!table)
+            continue;
+        QTextTableFormat format = table->format();
+        format.setBorder(1);
+        format.setBorderBrush(recipe.tableBorder);
+        format.setBorderStyle(QTextFrameFormat::BorderStyle_Solid);
+        format.setBorderCollapse(true);
+        format.setCellSpacing(0);
+        format.setCellPadding(px(recipe.tableCellPadding));
+        table->setFormat(format);
     }
     cursor.endEditBlock();
 }

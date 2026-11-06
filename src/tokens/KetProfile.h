@@ -228,6 +228,8 @@ struct Profile {
     qreal markdownHeading3Pixels = 0;
     qreal markdownHeadingLineHeight = 1.0;
     qreal markdownHeadingSpacingAfter = 0;
+    qreal markdownHeadingTracking = 0; // em, h1 and h2
+    qreal markdownTableCellPadding = 0;
     qreal markdownParagraphSpacing = 0;
     qreal markdownListIndent = 0;
     qreal markdownListItemGap = 0;

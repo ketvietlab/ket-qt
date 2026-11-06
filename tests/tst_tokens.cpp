@@ -4,6 +4,7 @@
 #include "KetMarkdown.h"
 #include "KetProfile.h"
 #include "KetRecipes.h"
+#include "KetSyntax.h"
 #include "KetTokens.h"
 
 #include <QFontDatabase>
@@ -11,6 +12,8 @@
 #include <QTest>
 #include <QTextBlock>
 #include <QTextDocument>
+#include <QTextLayout>
+#include <QTextTable>
 
 using namespace ket;
 
@@ -452,6 +455,84 @@ class TokensTest final : public QObject {
         const QTextBlockFormat quote = quoted.lastBlock().blockFormat();
         QCOMPARE(quote.background().color(), Tokens::color(u"accent-subtle", Theme::Light));
         QCOMPARE(quote.leftMargin(), 14.0);
+
+        // h1 and h2 tighten; h3 keeps normal spacing.
+        QTextDocument headings;
+        headings.setMarkdown(QStringLiteral("# One\n\n## Two\n\n### Three"));
+        styleMarkdown(&headings, markdownRecipe(Theme::Light), 1.0, QFont(), QString());
+        const auto spacing = [](const QTextBlock& block) {
+            return block.begin().fragment().charFormat().fontLetterSpacing();
+        };
+        QCOMPARE(spacing(headings.begin()), 24 * -0.02);
+        QCOMPARE(spacing(headings.begin().next()), 21 * -0.02);
+        QCOMPARE(spacing(headings.lastBlock()), 0.0);
+
+        // Tables draw one quiet hairline instead of Qt's default grey frame.
+        QTextDocument tabled;
+        tabled.setMarkdown(QStringLiteral("| A | B |\n| --- | --- |\n| 1 | 2 |"));
+        styleMarkdown(&tabled, markdownRecipe(Theme::Dark), 1.0, QFont(), QString());
+        const QList<QTextFrame*> frames = tabled.rootFrame()->childFrames();
+        QCOMPARE(frames.size(), 1);
+        const QTextTableFormat table = qobject_cast<QTextTable*>(frames.first())->format();
+        QCOMPARE(table.borderBrush().color(), Tokens::color(u"panel-border", Theme::Dark));
+        QVERIFY(table.borderCollapse());
+        QCOMPARE(table.border(), 1.0);
+        QCOMPARE(table.cellPadding(), 8.0);
+    }
+
+    void syntaxColoursFollowTheLanguage() {
+        const auto roles = [](const QList<SyntaxSpan>& spans) {
+            QList<std::tuple<qsizetype, qsizetype, SyntaxRole>> out;
+            for (const SyntaxSpan& span : spans)
+                out.append({span.start, span.length, span.role});
+            return out;
+        };
+        using R = SyntaxRole;
+        int state = 0;
+        // Keywords, strings and a trailing comment; the number inside the comment stays grey.
+        QCOMPARE(roles(highlightLine(u"const id = \"ok\"; // note 42", u"js", state)),
+                 (QList<std::tuple<qsizetype, qsizetype, R>>{
+                     {0, 5, R::Keyword}, {11, 4, R::String}, {17, 10, R::Comment}}));
+        // QML keys and types; numbers.
+        QCOMPARE(
+            roles(highlightLine(u"    width: 42", u"qml", state)),
+            (QList<std::tuple<qsizetype, qsizetype, R>>{{4, 5, R::Attribute}, {11, 2, R::Number}}));
+        QCOMPARE(roles(highlightLine(u"Item {", u"qml", state)),
+                 (QList<std::tuple<qsizetype, qsizetype, R>>{{0, 4, R::Type}}));
+        // A JSON key is not a string value.
+        QCOMPARE(
+            roles(highlightLine(u"{\"a\": \"b\"}", u"json", state)),
+            (QList<std::tuple<qsizetype, qsizetype, R>>{{1, 3, R::Attribute}, {6, 3, R::String}}));
+        // Shell flags and variables.
+        QCOMPARE(
+            roles(highlightLine(u"cmake --build $DIR", u"sh", state)),
+            (QList<std::tuple<qsizetype, qsizetype, R>>{{6, 7, R::Attribute}, {14, 4, R::Type}}));
+        // Unknown or plain fences stay uncoloured.
+        QVERIFY(highlightLine(u"const x = 1", u"text", state).isEmpty());
+        QVERIFY(highlightLine(u"const x = 1", u"", state).isEmpty());
+        // A block comment carries over lines.
+        const QList<SyntaxSpan> block = highlightCode(u"a /* one\ntwo */ return", u"cpp");
+        QCOMPARE(roles(block), (QList<std::tuple<qsizetype, qsizetype, R>>{
+                                   {2, 6, R::Comment}, {9, 6, R::Comment}, {16, 6, R::Keyword}}));
+        // Rich text per line: escaped, spaces kept, colours from the recipe tokens.
+        const SyntaxRecipe recipe = syntaxRecipe(Theme::Dark);
+        QCOMPARE(recipe.keyword, Tokens::color(u"accent-text", Theme::Dark));
+        QCOMPARE(recipe.string, Tokens::color(u"chart-2", Theme::Dark));
+        const QStringList lines = highlightedLines(u"if (a < b)\n  x", u"cpp", recipe);
+        QCOMPARE(lines.size(), 2);
+        QVERIFY(lines.at(0).startsWith(QStringLiteral("<font color='%1'>if</font>")
+                                           .arg(recipe.keyword.name(QColor::HexArgb))));
+        QVERIFY(lines.at(0).contains(QStringLiteral("&lt;")));
+        QCOMPARE(lines.at(1), QStringLiteral("&nbsp;&nbsp;x"));
+        // The document highlighter colours a TextEdit's blocks the same way.
+        QTextDocument document(QStringLiteral("return 1;"));
+        auto* highlighter = new SyntaxHighlighter(&document);
+        highlighter->setRecipe(recipe);
+        highlighter->setLanguage(QStringLiteral("cpp"));
+        const QList<QTextLayout::FormatRange> formats = document.begin().layout()->formats();
+        QCOMPARE(formats.size(), 2);
+        QCOMPARE(formats.at(0).format.foreground().color(), recipe.keyword);
+        QCOMPARE(formats.at(1).format.foreground().color(), recipe.number);
     }
 
     void agentMentionsFollowTheMock() {

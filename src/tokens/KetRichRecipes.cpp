@@ -31,12 +31,14 @@ MarkdownRecipe markdownRecipe(Theme theme) {
     recipe.quoteText = token(u"text-main", theme);
     recipe.quoteBorder = token(u"accent", theme);
     recipe.rule = token(u"panel-border", theme);
+    recipe.tableBorder = token(u"panel-border", theme);
     recipe.bodyPixels = profile().readingPixels;
     recipe.lineHeight = profile().readingLineHeight;
     recipe.heading1Pixels = profile().markdownHeading1Pixels;
     recipe.heading2Pixels = profile().markdownHeading2Pixels;
     recipe.heading3Pixels = profile().markdownHeading3Pixels;
     recipe.headingLineHeight = profile().markdownHeadingLineHeight;
+    recipe.headingTracking = profile().markdownHeadingTracking;
     recipe.headingWeight = qRound(Tokens::number(u"weight-semibold"));
     recipe.headingSpacingAfter = profile().markdownHeadingSpacingAfter;
     recipe.paragraphSpacing = profile().markdownParagraphSpacing;
@@ -46,6 +48,7 @@ MarkdownRecipe markdownRecipe(Theme theme) {
     recipe.quotePadding = profile().markdownQuotePadding;
     recipe.quoteBorderWidth = profile().markdownQuoteBorder;
     recipe.codePixels = profile().codePixels;
+    recipe.tableCellPadding = profile().markdownTableCellPadding;
     return recipe;
 }
 
@@ -120,6 +123,8 @@ QVariantMap toVariantMap(const MarkdownRecipe& r) {
                   {"quoteBackground", r.quoteBackground},
                   {"quoteText", r.quoteText},
                   {"rule", r.rule},
+                  {"tableBorder", r.tableBorder},
+                  {"headingTracking", r.headingTracking},
                   {"bodyPixels", r.bodyPixels},
                   {"lineHeight", r.lineHeight},
                   {"heading1Pixels", r.heading1Pixels},

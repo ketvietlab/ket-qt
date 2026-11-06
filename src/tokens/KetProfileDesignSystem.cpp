@@ -180,6 +180,8 @@ Profile Profile::designSystem() {
     p.markdownHeading3Pixels = px(u"text-xl");
     p.markdownHeadingLineHeight = 1.3;
     p.markdownHeadingSpacingAfter = px(u"space-2");
+    p.markdownHeadingTracking = -0.02; // no DS token; tightens the two display sizes
+    p.markdownTableCellPadding = px(u"space-2");
     p.markdownParagraphSpacing = px(u"space-4");
     p.markdownListIndent = px(u"space-5");
     p.markdownListItemGap = px(u"space-1");

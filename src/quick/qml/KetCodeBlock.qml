@@ -66,10 +66,13 @@ Item {
                 formatting = true
                 KetTheme.applyLineHeight(
                     textDocument, Math.floor(block.recipe.fontPixels * block.recipe.lineHeight))
+                KetTheme.highlightCode(textDocument, block.language, KetTheme.dark)
                 formatting = false
             }
             Component.onCompleted: format()
             onTextChanged: format()
+            readonly property bool dark: KetTheme.dark
+            onDarkChanged: format()
         }
 
         KetIconButton {
