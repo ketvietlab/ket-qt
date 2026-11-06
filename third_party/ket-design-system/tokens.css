@@ -401,6 +401,27 @@
     --kv-chart-5: light-dark(#1a7d8c, #45c2d1);
     --kv-chart-6: light-dark(#a83a3a, #ef7a72);
     --kv-chart-track: light-dark(#efedee, rgb(255 255 255 / 5.5%));
+
+    /* Terminal: the 16 ANSI colours, drawn on --kv-page-bg. Each reads at 4.5:1 or more
+       except the slot that is the background's own colour: black (0) on dark and
+       bright white (15) on light. Bright colours are lighter on dark, darker on light. */
+    --kv-terminal-ansi-0: light-dark(#24262a, #30363f); /* black */
+    --kv-terminal-ansi-1: light-dark(#b42318, #ef665c); /* red */
+    --kv-terminal-ansi-2: light-dark(#1d5d3b, #40c97b); /* green */
+    --kv-terminal-ansi-3: light-dark(#8b5c12, #e5a93c); /* yellow */
+    --kv-terminal-ansi-4: light-dark(#1238db, #668cff); /* blue */
+    --kv-terminal-ansi-5: light-dark(#7a4bad, #b389e8); /* magenta */
+    --kv-terminal-ansi-6: light-dark(#156b78, #45c2d1); /* cyan */
+    --kv-terminal-ansi-7: light-dark(#5a5c5e, #b4bac4); /* white */
+    --kv-terminal-ansi-8: light-dark(#6b6d6d, #858d99); /* bright black */
+    --kv-terminal-ansi-9: light-dark(#912018, #ff8a80); /* bright red */
+    --kv-terminal-ansi-10: light-dark(#174b30, #5fe39a); /* bright green */
+    --kv-terminal-ansi-11: light-dark(#70490e, #f5c66a); /* bright yellow */
+    --kv-terminal-ansi-12: light-dark(#102eb3, #9eb5ff); /* bright blue */
+    --kv-terminal-ansi-13: light-dark(#63398f, #d0b0f5); /* bright magenta */
+    --kv-terminal-ansi-14: light-dark(#11555f, #4edaff); /* bright cyan */
+    --kv-terminal-ansi-15: light-dark(#ffffff, #f2f4f7); /* bright white */
+
     --kv-sidebar-border: light-dark(#e9e7e8, rgb(255 255 255 / 7%));
     --kv-right-rail-border: var(--kv-sidebar-border);
   }

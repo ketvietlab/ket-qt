@@ -15,6 +15,8 @@
 #include <QTextLayout>
 #include <QTextTable>
 
+#include <cmath>
+
 using namespace ket;
 
 class TokensTest final : public QObject {
@@ -49,6 +51,35 @@ class TokensTest final : public QObject {
             QVERIFY2(Tokens::color(name, Theme::Light).isValid(), qPrintable(name));
             QVERIFY2(Tokens::color(name, Theme::Dark).isValid(), qPrintable(name));
         }
+    }
+
+    void terminalColoursReadOnThePage() {
+        // The 16 ANSI colours read at 4.5:1 on page-bg, except the background's own slot
+        // (black on dark, bright white on light), and the map exposes them to QML.
+        const auto luminance = [](const QColor& c) {
+            const auto linear = [](qreal v) {
+                return v <= 0.04045 ? v / 12.92 : std::pow((v + 0.055) / 1.055, 2.4);
+            };
+            return 0.2126 * linear(c.redF()) + 0.7152 * linear(c.greenF()) +
+                   0.0722 * linear(c.blueF());
+        };
+        for (const Theme theme : {Theme::Light, Theme::Dark}) {
+            const qreal page = luminance(Tokens::color(u"page-bg", theme));
+            const int background = theme == Theme::Dark ? 0 : 15;
+            for (int index = 0; index < 16; ++index) {
+                const QString name = QStringLiteral("terminal-ansi-%1").arg(index);
+                const QColor colour = Tokens::color(name, theme);
+                QVERIFY2(colour.isValid(), qPrintable(name));
+                const qreal a = luminance(colour);
+                const qreal ratio = (qMax(a, page) + 0.05) / (qMin(a, page) + 0.05);
+                if (index != background)
+                    QVERIFY2(ratio >= 4.5,
+                             qPrintable(QStringLiteral("%1 is %2:1").arg(name).arg(ratio)));
+            }
+            QCOMPARE(Tokens::map(theme).value(QStringLiteral("terminalAnsi15")).value<QColor>(),
+                     Tokens::color(u"terminal-ansi-15", theme));
+        }
+        QVERIFY(!Tokens::contains(u"terminal-ansi-16"));
     }
 
     void unknownNamesAreEmpty() {
