@@ -144,7 +144,9 @@ Profile Profile::designSystem() {
     p.composerMinInputHeight = px(u"space-12");
     p.composerMaxLines = 10;
     p.composerSendSize = px(u"control-height-md");
-    p.composerStopIconSize = 12;
+    p.composerSendIconSize = 16;
+    p.composerStopGlyph = 10;
+    p.composerStopGlyphRadius = 2;
     p.composerToolbarHeight = px(u"space-10");
     p.composerToolbarGap = px(u"space-2");
     p.readingPixels = px(u"text-md");
@@ -153,7 +155,6 @@ Profile Profile::designSystem() {
     p.userBubblePaddingInline = px(u"space-3");
     p.userBubblePaddingBlock = px(u"space-2");
     p.userBubbleMaxWidth = 0.8;
-    p.userBubbleShade = 1.0;
     p.messageSpacing = px(u"space-6");
     p.avatarSize = px(u"control-height-xs");
     p.avatarRadius = px(u"radius-md");

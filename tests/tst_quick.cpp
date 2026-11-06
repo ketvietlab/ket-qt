@@ -275,7 +275,9 @@ class QuickTest final : public QObject {
             "    status: KetTheme.ConversationStatus.Working\n"
             "    tags: [{label: \"ui\", color: \"#2f6fde\"}, {label: \"review\", color: "
             "\"#23875a\"}] }\n"
-            "  KetComposer { id: composer; width: 600 }\n"
+            "  property int stops: 0; property string sent\n"
+            "  KetComposer { id: composer; width: 600; onStopRequested: stops++;\n"
+            "    onSubmitted: text => sent = text }\n"
             "  KetUserMessage { id: user; width: 700; text: \"Two lines please.\" }\n"
             "  KetAssistantMessage { width: 600; name: \"Claude\"; time: \"10:42\";"
             "                        text: \"Done.\" }\n"
@@ -294,6 +296,20 @@ class QuickTest final : public QObject {
         QVERIFY(bubble->x() > 0);
         auto* composer = root->property("composer").value<QQuickItem*>();
         QVERIFY(composer->implicitHeight() >= 48 + 40);
+        // One action circle: it stops the turn while busy with nothing typed, then sends.
+        auto* action = composer->property("actionButton").value<QQuickItem*>();
+        QCOMPARE(action->width(), action->height());
+        QVERIFY(!action->isEnabled());
+        composer->setProperty("busy", true);
+        QVERIFY(action->isEnabled());
+        QVERIFY(action->property("look").toMap().value(QStringLiteral("stop")).toBool());
+        QMetaObject::invokeMethod(action, "clicked");
+        QCOMPARE(root->property("stops").toInt(), 1);
+        composer->setProperty("text", QStringLiteral("Also check Linux"));
+        QVERIFY(!action->property("look").toMap().value(QStringLiteral("stop")).toBool());
+        QMetaObject::invokeMethod(action, "clicked");
+        QCOMPARE(root->property("sent").toString(), QStringLiteral("Also check Linux"));
+        QCOMPARE(root->property("stops").toInt(), 1);
         QCOMPARE(root->property("step").value<QQuickItem*>()->implicitHeight(), 32.0);
     }
 

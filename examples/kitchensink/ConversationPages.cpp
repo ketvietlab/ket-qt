@@ -111,10 +111,12 @@ QWidget* composer(QWidget* parent) {
     auto* column = new QVBoxLayout(host);
     column->setContentsMargins(0, 0, 0, 0);
     column->setSpacing(qRound(Tokens::px(u"space-4")));
-    for (bool busy : {false, true}) {
+    // Idle; busy with guidance typed (the circle sends); busy and empty (the circle stops).
+    for (const auto& [busy, typed] :
+         {std::pair{false, false}, std::pair{true, true}, std::pair{true, false}}) {
         auto* field = new Composer(host);
-        auto* attach =
-            new IconButton(Icons::icon(u"plus"), QStringLiteral("Add images or text files"), field);
+        auto* attach = new IconButton(Icons::icon(u"plus", IconWeight::Regular),
+                                      QStringLiteral("Add images or text files"), field);
         field->leadingTools()->addWidget(attach);
         auto* mode = new Button(QStringLiteral("Ask before edits"), ButtonVariant::Ghost, field);
         mode->setIcon(Icons::icon(u"shield"));
@@ -123,10 +125,9 @@ QWidget* composer(QWidget* parent) {
         auto* model = new Button(QStringLiteral("Claude · Opus"), ButtonVariant::Ghost, field);
         model->setControlSize(ControlSize::Small);
         field->trailingTools()->addWidget(model);
-        if (busy) {
+        if (typed)
             field->setText(QStringLiteral("Also keep the +N chip when tags overflow."));
-            field->setBusy(true);
-        }
+        field->setBusy(busy);
         field->setFixedWidth(620);
         column->addWidget(field);
     }

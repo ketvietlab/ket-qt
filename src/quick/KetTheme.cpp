@@ -293,12 +293,24 @@ QString QuickTheme::conversationStatusLabel(int status) const {
     return ket::conversationStatusLabel(ket::ConversationStatus(status));
 }
 
+// The values match ket::ComposerAction: 0 sends, 1 stops.
+QVariantMap QuickTheme::composerActionRecipe(bool dark, qreal zoom, bool busy, bool hasText,
+                                             bool hovered, bool pressed, bool focused) const {
+    const ket::ComposerAction action = ket::composerAction(busy, hasText);
+    const bool enabled = action == ket::ComposerAction::Stop || hasText;
+    QVariantMap recipe = toVariantMap(ket::composerActionRecipe(
+        action, enabled, {hovered, pressed, enabled, focused}, themeOf(dark)));
+    recipe.insert(QStringLiteral("stop"), action == ket::ComposerAction::Stop);
+    recipe.insert(QStringLiteral("enabled"), enabled);
+    scaleLengths(recipe, zoom, {u"size", u"iconSize", u"stopGlyph", u"stopRadius"});
+    return recipe;
+}
+
 QVariantMap QuickTheme::composerRecipe(bool dark, qreal zoom, bool focused) const {
     QVariantMap recipe = toVariantMap(ket::composerRecipe(focused, themeOf(dark)));
     scaleLengths(recipe, zoom,
                  {u"radius", u"padding", u"textPixels", u"textPaddingInline", u"textPaddingBlock",
-                  u"minInputHeight", u"sendSize", u"stopIconSize", u"toolbarHeight",
-                  u"toolbarGap"});
+                  u"minInputHeight", u"sendSize", u"toolbarHeight", u"toolbarGap"});
     scaleLengths(recipe, zoom, kShadowLengths);
     return recipe;
 }

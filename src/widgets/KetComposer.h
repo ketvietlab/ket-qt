@@ -37,7 +37,8 @@ class Composer final : public QWidget {
     [[nodiscard]] QHBoxLayout* leadingTools() const { return leading_; }
     [[nodiscard]] QHBoxLayout* trailingTools() const { return trailing_; }
     [[nodiscard]] QTextEdit* editor() const { return editor_; }
-    [[nodiscard]] Button* sendButton() const { return send_; }
+    // The action circle: it sends, or stops the turn while busy with nothing typed.
+    [[nodiscard]] QAbstractButton* sendButton() const { return send_; }
 
     [[nodiscard]] ComposerRecipe recipe() const;
 
@@ -81,8 +82,7 @@ class Composer final : public QWidget {
     bool handleMentionKey(QKeyEvent* event);
 
     QTextEdit* editor_;
-    Button* send_;
-    QAbstractButton* stop_;
+    QAbstractButton* send_;
     QHBoxLayout* leading_;
     QHBoxLayout* trailing_;
     QHBoxLayout* input_;

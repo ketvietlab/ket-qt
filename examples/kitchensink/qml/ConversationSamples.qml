@@ -34,7 +34,10 @@ Item {
     component SampleComposer: KetComposer {
         width: KetTheme.px(620, KetTheme.zoom)
         leadingTools: [
-            KetIconButton { text: "Add images or text files"; iconName: "plus" },
+            KetIconButton {
+                text: "Add images or text files"; iconName: "plus"
+                iconWeight: KetTheme.IconWeight.Regular
+            },
             KetButton {
                 text: "Ask before edits"; iconName: "shield"
                 variant: KetTheme.ButtonVariant.Ghost; controlSize: KetTheme.ControlSize.Small
@@ -107,6 +110,7 @@ Item {
             spacing: KetTheme.px(KetTheme.t.space4, KetTheme.zoom)
             SampleComposer {}
             SampleComposer { busy: true; text: "Also keep the +N chip when tags overflow." }
+            SampleComposer { busy: true }
         }
     }
 

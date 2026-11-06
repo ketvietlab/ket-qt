@@ -6,7 +6,7 @@ import Ket
 
 // Message composer (`.composer`); it draws ket::composerRecipe, as ket::Composer does.
 // Enter sends and Shift+Enter breaks the line. Put the app's controls in `leadingTools`
-// and `trailingTools`; `busy` adds the stop button.
+// and `trailingTools`. While `busy`, the action circle stops the turn until a message is typed.
 Item {
     id: composer
 
@@ -25,6 +25,7 @@ Item {
     property var mentionItems: null
     property var mention: null
     readonly property alias mentionPicker: picker
+    readonly property alias actionButton: send // send, or stop while busy with nothing typed
 
     signal submitted(string text)
     signal stopRequested()
@@ -234,43 +235,49 @@ Item {
                 }
             }
 
+            // One circle: send, or stop the running turn while the box is empty.
             Basic.AbstractButton {
-                id: stop
+                id: send
+                readonly property var look: KetTheme.composerActionRecipe(
+                    KetTheme.dark, KetTheme.zoom, composer.busy, input.text.trim() !== "",
+                    hovered, down, visualFocus)
                 Layout.alignment: Qt.AlignBottom
-                Layout.bottomMargin: Math.max(0, (composer.recipe.minInputHeight - composer.recipe.sendSize) / 2)
-                visible: composer.busy
-                implicitWidth: composer.recipe.sendSize
-                implicitHeight: composer.recipe.sendSize
-                Accessible.name: qsTr("Stop turn")
-                onClicked: composer.stopRequested()
+                Layout.bottomMargin: Math.max(0, (composer.recipe.minInputHeight - look.size) / 2)
+                implicitWidth: look.size
+                implicitHeight: look.size
+                enabled: look.enabled
+                hoverEnabled: true
+                Accessible.name: look.stop ? qsTr("Stop turn")
+                                 : composer.busy ? qsTr("Send guidance") : qsTr("Send request")
+                Basic.ToolTip.visible: hovered
+                Basic.ToolTip.delay: 600
+                Basic.ToolTip.text: Accessible.name
+                onClicked: look.stop ? composer.stopRequested() : composer.submit()
 
                 background: Rectangle {
-                    radius: KetTheme.px(KetTheme.t.controlRadius, KetTheme.zoom)
-                    color: composer.recipe.stopBackground
+                    radius: width / 2
+                    color: send.look.background
+                    border.width: send.look.focusRing.a > 0 ? 2 : 0
+                    border.color: send.look.focusRing
+                }
 
-                    // The mock fills Lucide `square`: an 18/24 square with 2/24 corners.
-                    Rectangle {
+                contentItem: Item {
+                    KetIcon {
+                        visible: !send.look.stop
                         anchors.centerIn: parent
-                        width: composer.recipe.stopIconSize * 18 / 24
+                        name: "arrow-up"
+                        box: send.look.iconSize
+                        color: send.look.icon
+                    }
+                    Rectangle {
+                        visible: send.look.stop
+                        anchors.centerIn: parent
+                        width: send.look.stopGlyph
                         height: width
-                        radius: composer.recipe.stopIconSize * 2 / 24
-                        color: composer.recipe.stopIcon
+                        radius: send.look.stopRadius
+                        color: send.look.icon
                     }
                 }
-            }
-
-            KetButton {
-                id: send
-                Layout.alignment: Qt.AlignBottom
-                Layout.bottomMargin: Math.max(0, (composer.recipe.minInputHeight - composer.recipe.sendSize) / 2)
-                implicitWidth: composer.recipe.sendSize
-                implicitHeight: composer.recipe.sendSize
-                leftPadding: 0
-                rightPadding: 0
-                iconName: "arrow-up"
-                enabled: input.text.trim() !== ""
-                Accessible.name: composer.busy ? qsTr("Send guidance") : qsTr("Send request")
-                onClicked: composer.submit()
             }
         }
 

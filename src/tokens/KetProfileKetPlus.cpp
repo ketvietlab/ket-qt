@@ -151,7 +151,9 @@ Profile Profile::ketPlus() {
     p.composerMinInputHeight = 48;
     p.composerMaxLines = 10; // not in the mock; the input then scrolls
     p.composerSendSize = 32;
-    p.composerStopIconSize = 11;  // `.send-button.stop .icon`
+    p.composerSendIconSize = 16; // a circle with a centred arrow (Jay, 2026-11-06)
+    p.composerStopGlyph = 10;    // one button: the stop square replaces the arrow
+    p.composerStopGlyphRadius = 2;
     p.composerToolbarHeight = 40; // `.composer-toolbar.composer-foot`
     p.composerToolbarGap = 10;
     // Transcript: workspace.css with the desktop-alignment overrides.
@@ -161,9 +163,8 @@ Profile Profile::ketPlus() {
     p.userBubblePaddingInline = 12;
     p.userBubblePaddingBlock = 8;
     p.userBubbleMaxWidth = 0.8;
-    p.userBubbleShade = 0.74; // color-mix(accent 74%, black)
-    p.messageSpacing = 25;    // `.user-message` margin-bottom
-    p.avatarSize = 25;        // `.agent-avatar .ket-mark`
+    p.messageSpacing = 25; // `.user-message` margin-bottom
+    p.avatarSize = 25;     // `.agent-avatar .ket-mark`
     p.avatarRadius = 6;
     p.assistantGap = 13;
     p.messageNamePixels = 14; // `.message-meta b`, kp-text-base

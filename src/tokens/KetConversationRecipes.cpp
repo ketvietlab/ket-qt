@@ -24,12 +24,6 @@ QColor focusRing(const InteractionState& state, Theme theme) {
     return state.enabled && state.focused ? token(u"focus-border", theme) : transparent();
 }
 
-// CSS color-mix(in srgb, `color` share%, black).
-QColor shade(const QColor& color, qreal share) {
-    return QColor::fromRgbF(float(color.redF() * share), float(color.greenF() * share),
-                            float(color.blueF() * share), color.alphaF());
-}
-
 } // namespace
 
 ConversationRowRecipe conversationRowRecipe(bool selected, const InteractionState& state,
@@ -126,8 +120,6 @@ ComposerRecipe composerRecipe(bool focused, Theme theme) {
     recipe.ring = focused ? token(u"accent-subtle", theme) : transparent();
     recipe.text = token(u"text-main", theme);
     recipe.placeholder = token(u"input-placeholder", theme);
-    recipe.stopBackground = token(u"text-secondary", theme);
-    recipe.stopIcon = token(u"on-accent", theme);
     recipe.shadow = shadowToken(u"shadow-xs", theme);
     recipe.radius = profile().composerRadius;
     recipe.padding = profile().composerPadding;
@@ -139,16 +131,56 @@ ComposerRecipe composerRecipe(bool focused, Theme theme) {
     recipe.minInputHeight = profile().composerMinInputHeight;
     recipe.maxLines = profile().composerMaxLines;
     recipe.sendSize = profile().composerSendSize;
-    recipe.stopIconSize = profile().composerStopIconSize;
     recipe.toolbarHeight = profile().composerToolbarHeight;
     recipe.toolbarGap = profile().composerToolbarGap;
     return recipe;
 }
 
+ComposerAction composerAction(bool busy, bool hasText) {
+    return busy && !hasText ? ComposerAction::Stop : ComposerAction::Send;
+}
+
+ComposerActionRecipe composerActionRecipe(ComposerAction action, bool enabled,
+                                          const InteractionState& state, Theme theme) {
+    ComposerActionRecipe recipe;
+    const bool hot = enabled && (state.hovered || state.pressed);
+    if (action == ComposerAction::Stop) {
+        recipe.background = token(hot ? u"text-secondary" : u"text-main", theme);
+        recipe.icon = token(u"page-bg", theme);
+    } else if (enabled) {
+        recipe.background = token(state.pressed   ? u"accent-active"
+                                  : state.hovered ? u"accent-hover"
+                                                  : u"accent",
+                                  theme);
+        recipe.icon = token(u"on-accent", theme);
+    } else {
+        recipe.background = token(u"surface-hover", theme);
+        recipe.icon = token(u"text-disabled", theme);
+    }
+    recipe.focusRing = enabled && state.focused ? token(u"focus-border", theme) : transparent();
+    recipe.size = profile().composerSendSize;
+    recipe.iconSize = profile().composerSendIconSize;
+    recipe.stopGlyph = profile().composerStopGlyph;
+    recipe.stopRadius = profile().composerStopGlyphRadius;
+    return recipe;
+}
+
+QVariantMap toVariantMap(const ComposerActionRecipe& r) {
+    return mapOf({{"background", r.background},
+                  {"icon", r.icon},
+                  {"focusRing", r.focusRing},
+                  {"size", r.size},
+                  {"iconSize", r.iconSize},
+                  {"stopGlyph", r.stopGlyph},
+                  {"stopRadius", r.stopRadius},
+                  {"opacity", r.opacity}});
+}
+
 UserMessageRecipe userMessageRecipe(Theme theme) {
     UserMessageRecipe recipe;
-    recipe.background = shade(token(u"accent", theme), profile().userBubbleShade);
-    recipe.text = token(u"on-accent", theme);
+    // A tinted bubble: the accent at full strength is too loud for a whole message.
+    recipe.background = token(u"accent-subtle", theme);
+    recipe.text = token(u"text-main", theme);
     recipe.radius = profile().userBubbleRadius;
     recipe.paddingInline = profile().userBubblePaddingInline;
     recipe.paddingBlock = profile().userBubblePaddingBlock;
@@ -252,8 +284,6 @@ QVariantMap toVariantMap(const ComposerRecipe& r) {
                   {"ring", r.ring},
                   {"text", r.text},
                   {"placeholder", r.placeholder},
-                  {"stopBackground", r.stopBackground},
-                  {"stopIcon", r.stopIcon},
                   {"shadowX", r.shadow.x},
                   {"shadowY", r.shadow.y},
                   {"shadowBlur", r.shadow.blur},
@@ -268,7 +298,6 @@ QVariantMap toVariantMap(const ComposerRecipe& r) {
                   {"minInputHeight", r.minInputHeight},
                   {"maxLines", r.maxLines},
                   {"sendSize", r.sendSize},
-                  {"stopIconSize", r.stopIconSize},
                   {"toolbarHeight", r.toolbarHeight},
                   {"toolbarGap", r.toolbarGap}});
 }
