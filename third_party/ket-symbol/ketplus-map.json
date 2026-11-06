@@ -347,6 +347,11 @@
       "status": "exact"
     },
     {
+      "lucide": "printer",
+      "code": "printer",
+      "status": "exact"
+    },
+    {
       "lucide": "refresh-cw",
       "code": "refresh",
       "status": "equivalent"

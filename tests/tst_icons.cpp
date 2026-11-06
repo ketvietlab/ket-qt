@@ -12,7 +12,7 @@ class IconsTest final : public QObject {
   private slots:
     void everyCodeHasEveryMasterAndWeight() {
         const QStringList codes = Icons::codes();
-        QCOMPARE(codes.size(), 93);
+        QCOMPARE(codes.size(), 94);
         // Touch the resources once; the qrc is registered on first use.
         (void)Icons::pixmap(codes.first(), 16, 1, Qt::black);
         for (const QString& code : codes) {

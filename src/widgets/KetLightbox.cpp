@@ -39,8 +39,7 @@ QString toolCode(LightboxTool tool) {
     case LightboxTool::Fullscreen:
         return QStringLiteral("fullscreen");
     case LightboxTool::Print:
-        // Két Symbol has no printer yet; a page stands in until it does.
-        return Icons::contains(u"print") ? QStringLiteral("print") : QStringLiteral("file-text");
+        return QStringLiteral("printer");
     }
     return {};
 }

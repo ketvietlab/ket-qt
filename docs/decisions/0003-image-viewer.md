@@ -32,8 +32,7 @@ system already defines the look and behaviour in `interactions/lightbox`.
   - `ket::Lightbox` prints its built-in picture itself.
   - `KetLightbox` only emits the tool, because the Quick layer has no print dialog. A
     `QApplication` host calls `ket::printImage(source, rotationAngle, title)`.
-  - Két Symbol has no printer icon yet, so `file-text` stands in until a `print` code
-    exists; both layers switch to it automatically.
+  - The tool draws Két Symbol `printer`, vendored for it from ket-art 518527ad.
 - The viewer is dark in both themes: light-theme `text-main` at 92 % behind light-theme
   `panel-bg` glyphs. The design system mixes the current theme's tokens, which makes the
   dark-theme viewer light; the kit does not copy that, and the difference is to be raised with

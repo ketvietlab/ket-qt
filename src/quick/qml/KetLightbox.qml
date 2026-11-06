@@ -161,10 +161,7 @@ Basic.Popup {
                         { tool: KetTheme.LightboxTool.Rotate, code: "restore", label: qsTr("Rotate") },
                         { tool: KetTheme.LightboxTool.Copy, code: "copy", label: qsTr("Copy image") },
                         { tool: KetTheme.LightboxTool.Download, code: "download", label: qsTr("Download") },
-                        // Két Symbol has no printer yet; a page stands in until it does.
-                        { tool: KetTheme.LightboxTool.Print,
-                          code: KetTheme.iconCodes.indexOf("print") >= 0 ? "print" : "file-text",
-                          label: qsTr("Print…") },
+                        { tool: KetTheme.LightboxTool.Print, code: "printer", label: qsTr("Print…") },
                         { tool: KetTheme.LightboxTool.Fullscreen, code: "fullscreen", label: qsTr("Full screen") }
                     ]
 
