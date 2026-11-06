@@ -214,7 +214,8 @@ SyntaxRecipe syntaxRecipe(Theme theme) {
     SyntaxRecipe recipe;
     recipe.keyword = Tokens::color(u"accent-text", theme);
     recipe.string = Tokens::color(u"chart-2", theme);
-    recipe.number = Tokens::color(u"chart-3", theme);
+    // chart-3 reads at 3.8:1 on a light panel; warning keeps the amber at 5.3:1 or more.
+    recipe.number = Tokens::color(u"warning", theme);
     recipe.type = Tokens::color(u"chart-5", theme);
     recipe.comment = Tokens::color(u"text-muted", theme);
     recipe.attribute = Tokens::color(u"chart-4", theme);
