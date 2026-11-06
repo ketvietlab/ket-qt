@@ -147,6 +147,7 @@ Profile Profile::designSystem() {
     p.composerSendIconSize = 16;
     p.composerStopGlyph = 10;
     p.composerStopGlyphRadius = 2;
+    p.composerAttachIconSize = 20;
     p.composerToolbarHeight = px(u"space-10");
     p.composerToolbarGap = px(u"space-2");
     p.readingPixels = px(u"text-md");

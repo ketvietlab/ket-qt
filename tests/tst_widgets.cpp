@@ -112,6 +112,9 @@ class WidgetsTest final : public QObject {
                  Tokens::color(u"text-secondary", Theme::Light).rgb());
         Appearance::instance().setZoom(1.25);
         QCOMPARE(button.sizeHint(), QSize(38, 38)); // round(30 * 1.25)
+        button.setGlyphSize(20);
+        QCOMPARE(button.recipe().iconSize, 20.0);
+        QCOMPARE(button.sizeHint(), QSize(38, 38)); // the glyph grows, not the button
     }
 
     void ketSymbolIconsFollowTheButtonRecipe() {

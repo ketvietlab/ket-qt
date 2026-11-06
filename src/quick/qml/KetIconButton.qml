@@ -15,6 +15,8 @@ Basic.Button {
     // A Két Symbol code drawn by KetIcon; icon.source still takes any other monochrome icon.
     property string iconName
     property int iconWeight: KetTheme.IconWeight.Light
+    // Scaled glyph side; the default is the size recipe's icon.
+    property real glyphSize: recipe.iconSize
     readonly property var recipe: previewState
         ? KetTheme.iconButtonRecipe(KetTheme.dark, KetTheme.zoom, controlSize,
                                     !!previewState.hovered, !!previewState.pressed,
@@ -28,8 +30,8 @@ Basic.Button {
     opacity: recipe.opacity
     hoverEnabled: true
     display: Basic.AbstractButton.IconOnly
-    icon.width: recipe.iconSize
-    icon.height: recipe.iconSize
+    icon.width: glyphSize
+    icon.height: glyphSize
     Accessible.name: text
 
     KetToolTip {
@@ -45,7 +47,7 @@ Basic.Button {
             visible: control.iconName !== ""
             name: control.iconName
             weight: control.iconWeight
-            box: control.recipe.iconSize
+            box: control.glyphSize
             color: control.recipe.text
         }
 
