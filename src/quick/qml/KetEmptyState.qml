@@ -16,7 +16,13 @@ Item {
 
     signal actionTriggered()
 
-    implicitWidth: column.implicitWidth
+    // The natural width comes from the children's natural widths, the message capped at the
+    // recipe's maximum, never from their laid-out widths: the message is laid out at the
+    // item's width, so measuring it here would make the width depend on itself.
+    implicitWidth: Math.max(icon.visible ? icon.implicitWidth : 0,
+                            heading.visible ? heading.implicitWidth : 0,
+                            body.visible ? Math.min(body.implicitWidth, recipe.messageMaxWidth) : 0,
+                            action.visible ? action.implicitWidth : 0)
     implicitHeight: column.implicitHeight
 
     Column {
@@ -26,6 +32,7 @@ Item {
         spacing: empty.recipe.spacing
 
         KetIcon {
+            id: icon
             anchors.horizontalCenter: parent.horizontalCenter
             visible: empty.iconName !== ""
             name: empty.iconName
@@ -34,6 +41,7 @@ Item {
         }
 
         Text {
+            id: heading
             anchors.horizontalCenter: parent.horizontalCenter
             visible: empty.title !== ""
             width: Math.min(implicitWidth, column.width)
@@ -49,9 +57,10 @@ Item {
         }
 
         Text {
+            id: body
             anchors.horizontalCenter: parent.horizontalCenter
             visible: empty.message !== ""
-            width: Math.min(implicitWidth, empty.recipe.messageMaxWidth)
+            width: Math.min(implicitWidth, empty.recipe.messageMaxWidth, empty.width)
             text: empty.message
             textFormat: Text.PlainText
             horizontalAlignment: Text.AlignHCenter
@@ -63,6 +72,7 @@ Item {
         }
 
         KetButton {
+            id: action
             anchors.horizontalCenter: parent.horizontalCenter
             visible: empty.actionText !== ""
             text: empty.actionText
