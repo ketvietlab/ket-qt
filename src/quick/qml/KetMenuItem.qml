@@ -4,17 +4,19 @@ import QtQuick.Controls.Basic as Basic
 import Ket
 
 // Menu command (`.desktop-context-menu button`); it draws ket::menuItemRecipe. `danger`
-// marks a destructive command; `description` adds the secondary line (`small`).
+// marks a destructive command and `warning` an elevated choice; `description` adds the secondary line (`small`).
 Basic.MenuItem {
     id: control
 
     property bool danger
+    property bool warning // an elevated choice, such as full access
+    readonly property int tone: danger ? 1 : warning ? 2 : 0
     property string description
     property string iconName
     property string shortcut
     readonly property bool reserveCheck: checkable || (menu && menu.hasCheckableItems === true)
     readonly property var recipe: KetTheme.menuItemRecipe(KetTheme.dark, KetTheme.zoom,
-                                                          highlighted, enabled, danger)
+                                                          highlighted, enabled, tone)
 
     implicitWidth: leftPadding + rightPadding + contentItem.implicitWidth
     implicitHeight: Math.max(recipe.height, contentItem.implicitHeight + 2 * recipe.paddingStart)
@@ -73,7 +75,8 @@ Basic.MenuItem {
                 readonly property real used: (control.reserveCheck ? control.recipe.checkSize + row.spacing : 0)
                     + (control.iconName !== "" ? control.recipe.iconSize + row.spacing : 0)
                     + (trailing.visible ? trailing.implicitWidth + 4 * row.spacing : 0)
-                width: Math.max(implicitWidth, row.width - used)
+                // The row's width, less the trailing column; long text wraps or elides.
+                width: Math.max(0, row.width - used)
                 spacing: control.recipe.descriptionGap
 
                 Text {
@@ -99,32 +102,35 @@ Basic.MenuItem {
                     font.pixelSize: control.recipe.descriptionPixels
                 }
             }
+        }
 
-            Item {
-                id: trailing
-                visible: control.shortcut !== "" || control.subMenu !== null
-                implicitWidth: control.subMenu ? control.recipe.iconSize : shortcutText.implicitWidth
-                width: implicitWidth
-                height: titleText.implicitHeight
+        Item {
+            id: trailing
+            // Right-aligned beside the title line, so shortcuts line up whatever the text.
+            anchors.right: parent.right
+            anchors.top: row.top
+            visible: control.shortcut !== "" || control.subMenu !== null
+            implicitWidth: control.subMenu ? control.recipe.iconSize : shortcutText.implicitWidth
+            width: implicitWidth
+            height: titleText.implicitHeight
 
-                Text {
-                    id: shortcutText
-                    anchors.right: parent.right
-                    visible: control.subMenu === null
-                    text: control.shortcut
-                    color: KetTheme.menuItemRecipe(KetTheme.dark, KetTheme.zoom,
-                                                   control.highlighted, control.enabled,
-                                                   false).description
-                    font: control.font
-                }
+            Text {
+                id: shortcutText
+                anchors.right: parent.right
+                visible: control.subMenu === null
+                text: control.shortcut
+                color: KetTheme.menuItemRecipe(KetTheme.dark, KetTheme.zoom,
+                                               control.highlighted, control.enabled,
+                                               0).description
+                font: control.font
+            }
 
-                KetIcon {
-                    anchors.centerIn: parent
-                    visible: control.subMenu !== null
-                    name: "chevron-right"
-                    box: control.recipe.iconSize
-                    color: control.recipe.text
-                }
+            KetIcon {
+                anchors.centerIn: parent
+                visible: control.subMenu !== null
+                name: "chevron-right"
+                box: control.recipe.iconSize
+                color: control.recipe.text
             }
         }
     }

@@ -44,6 +44,10 @@ void Style::setDanger(QAction* action, bool danger) {
     action->setProperty(kDangerProperty, danger);
 }
 
+void Style::setWarning(QAction* action, bool warning) {
+    action->setProperty(kWarningProperty, warning);
+}
+
 void Style::setDescription(QAction* action, const QString& description) {
     action->setProperty(kDescriptionProperty, description);
 }

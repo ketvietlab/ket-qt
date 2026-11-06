@@ -71,6 +71,7 @@ Profile Profile::ketPlus() {
     p.menuPadding = 6; // 5 px plus the border
     p.menuRadius = 7;
     p.menuItemHeight = 32;
+    p.menuSectionHeight = 24; // the composer's "Mode" heading
     p.menuItemRadius = 4;
     p.menuItemPaddingStart = 5;
     p.menuItemPaddingEnd = 12;

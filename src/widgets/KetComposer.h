@@ -19,9 +19,10 @@ namespace ket {
 class Button;
 
 // Message composer (`.composer`): a growing plain-text input with a send button, and a
-// toolbar row below it for the app's controls (attach, mode, model…). Enter sends and
-// Shift+Enter breaks the line. While busy a stop button joins the send button. Colours and
-// metrics come from ket::composerRecipe.
+// toolbar row below it for the app's controls (attach, mode, model…); the row hides while
+// both groups are empty, for apps that put their controls below the card. Enter sends and
+// Shift+Enter breaks the line. While busy and empty the action circle stops the turn. Colours
+// and metrics come from ket::composerRecipe.
 class Composer final : public QWidget {
     Q_OBJECT
   public:

@@ -27,6 +27,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QButtonGroup>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
 #include <QProgressBar>
@@ -278,6 +279,9 @@ class WidgetsTest final : public QObject {
         pin->setCheckable(true);
         Style::setDescription(pin, QStringLiteral("Keep it above recent conversations."));
         menu.addSeparator();
+        QAction* full = menu.addAction(QStringLiteral("Full access"));
+        Style::setWarning(full);
+        menu.insertSection(remove, QStringLiteral("Mode"));
         menu.ensurePolished();
         QVERIFY(menu.testAttribute(Qt::WA_TranslucentBackground));
         QVERIFY(menu.sizeHint().width() >= 210);
@@ -292,7 +296,10 @@ class WidgetsTest final : public QObject {
         option.text = QStringLiteral("Pin to sidebar");
         QVERIFY(detail::menuItemSize(&option, &menu).height() > 32);
         option.menuItemType = QStyleOptionMenuItem::Separator;
+        option.text.clear();
         QCOMPARE(detail::menuItemSize(&option, &menu).height(), 11);
+        option.text = QStringLiteral("Mode"); // QMenu::addSection
+        QCOMPARE(detail::menuItemSize(&option, &menu).height(), 24);
         QVERIFY(!menu.grab().isNull());
     }
 
@@ -403,6 +410,21 @@ class WidgetsTest final : public QObject {
         QCOMPARE(row.statusLabel(), QStringLiteral("Working"));
         row.setStatusLabel(QStringLiteral("Đang làm"));
         QCOMPARE(row.statusLabel(), QStringLiteral("Đang làm"));
+    }
+
+    void composerToolbarHidesWhileEmpty() {
+        Composer composer;
+        composer.resize(600, 200);
+        composer.show();
+        QCoreApplication::processEvents();
+        const int bare = composer.sizeHint().height();
+        auto* attach = new IconButton(Icons::icon(u"plus"), QStringLiteral("Add"));
+        composer.leadingTools()->addWidget(attach);
+        QCoreApplication::processEvents();
+        QVERIFY(composer.sizeHint().height() >= bare + 40);
+        delete attach;
+        QCoreApplication::processEvents();
+        QCOMPARE(composer.sizeHint().height(), bare);
     }
 
     void composersSendOnEnterAndGrow() {

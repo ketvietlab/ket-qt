@@ -31,6 +31,13 @@ Item {
             description: "Keep it above recent conversations."
         }
         KetMenuItem { text: "Archive"; enabled: false }
+        KetMenuSection { text: "Mode" }
+        KetMenuItem {
+            text: "Full access"
+            iconName: "shield"
+            warning: true
+            description: "Skip permission prompts"
+        }
         KetMenuSeparator {}
         KetMenuItem { text: "Delete"; iconName: "trash"; danger: true }
     }

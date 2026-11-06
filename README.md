@@ -25,7 +25,7 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
 - `KetQt::Quick`: the QML module `Ket` with `KetTheme`, `KetButton`, `KetIconButton`,
   `KetBadge`, `KetTag`, `KetIcon`, `KetTextField`, `KetSelect`, `KetCheckbox`, `KetRadio`,
   `KetChoice`, `KetFieldRow`, `KetBanner`, `KetToast`, `KetDialog`, `KetMenu`, `KetMenuItem`,
-  `KetMenuSeparator`, `KetToolTip`, `KetNavItem`, `KetKbd`, `KetSegmentedControl`, `KetTabBar`,
+  `KetMenuSeparator`, `KetMenuSection`, `KetToolTip`, `KetNavItem`, `KetKbd`, `KetSegmentedControl`, `KetTabBar`,
   `KetTabButton`, `KetProgressBar`, `KetActivityIndicator`, `KetEmptyState`,
   `KetConversationRow`, `KetComposer`, `KetUserMessage`, `KetAssistantMessage`, `KetReadingText`,
   `KetDayDivider`, `KetActivityRow`, `KetMarkdown`, `KetMarkdownText`, `KetCodeBlock`,

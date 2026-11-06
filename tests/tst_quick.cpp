@@ -197,6 +197,7 @@ class QuickTest final : public QObject {
             "Item { width: 900; height: 700\n"
             "  property alias banner: banner; property alias toast: toast\n"
             "  property alias dialog: dialog; property alias menu: menu; property alias tip: tip\n"
+            "  property alias section: section; property alias full: full\n"
             "  KetBanner { id: banner; width: 400; tone: KetTheme.BannerTone.Danger;"
             "              title: \"Sync failed\"; actionText: \"Retry\" }\n"
             "  KetToast { id: toast; text: \"Saved\" }\n"
@@ -204,7 +205,9 @@ class QuickTest final : public QObject {
             "    KetTextField {}\n"
             "    actions: [ KetButton { text: \"Save\" } ] }\n"
             "  KetMenu { id: menu\n"
+            "    KetMenuSection { id: section; text: \"Mode\" }\n"
             "    KetMenuItem { text: \"Open\" }\n"
+            "    KetMenuItem { id: full; text: \"Full access\"; warning: true }\n"
             "    KetMenuItem { text: \"Delete\"; danger: true }\n"
             "    KetMenuSeparator {}\n"
             "    KetMenuItem { text: \"Pin\"; checkable: true; description: \"Keep it on top.\" } "
@@ -224,6 +227,11 @@ class QuickTest final : public QObject {
         QObject* menu = root->property("menu").value<QObject*>();
         QVERIFY(menu->property("implicitWidth").toReal() >= 210);
         QCOMPARE(menu->property("hasCheckableItems").toBool(), true);
+        auto* section = root->property("section").value<QQuickItem*>();
+        QCOMPARE(section->implicitHeight(), 24.0);
+        QObject* full = root->property("full").value<QObject*>();
+        QCOMPARE(full->property("recipe").toMap().value("text").value<QColor>(),
+                 Tokens::color(u"warning", Theme::Light));
 
         QObject* tip = root->property("tip").value<QObject*>();
         auto* tipBackground = tip->property("background").value<QQuickItem*>();
@@ -282,6 +290,9 @@ class QuickTest final : public QObject {
             "  property int stops: 0; property string sent\n"
             "  KetComposer { id: composer; width: 600; onStopRequested: stops++;\n"
             "    onSubmitted: text => sent = text }\n"
+            "  property alias tooled: tooled\n"
+            "  KetComposer { id: tooled; width: 600\n"
+            "    leadingTools: [ KetIconButton { text: \"Add\"; iconName: \"plus\" } ] }\n"
             "  KetUserMessage { id: user; width: 700; text: \"Two lines please.\" }\n"
             "  KetAssistantMessage { width: 600; name: \"Claude\"; time: \"10:42\";"
             "                        text: \"Done.\" }\n"
@@ -299,7 +310,11 @@ class QuickTest final : public QObject {
                  userMessageRecipe(Theme::Light).background);
         QVERIFY(bubble->x() > 0);
         auto* composer = root->property("composer").value<QQuickItem*>();
-        QVERIFY(composer->implicitHeight() >= 48 + 40);
+        // Without tools the toolbar row hides; with one it adds its 40 px.
+        QVERIFY(composer->implicitHeight() >= 48);
+        QVERIFY(composer->implicitHeight() < 48 + 40);
+        auto* tooled = root->property("tooled").value<QQuickItem*>();
+        QVERIFY(tooled->implicitHeight() >= 48 + 40);
         // One action circle: it stops the turn while busy with nothing typed, then sends.
         auto* action = composer->property("actionButton").value<QQuickItem*>();
         QCOMPARE(action->width(), action->height());

@@ -39,8 +39,12 @@ QString descriptionOf(const QAction* action) {
     return action ? action->property(Style::kDescriptionProperty).toString() : QString();
 }
 
-bool isDanger(const QAction* action) {
-    return action && action->property(Style::kDangerProperty).toBool();
+MenuItemTone toneOf(const QAction* action) {
+    if (action && action->property(Style::kDangerProperty).toBool())
+        return MenuItemTone::Danger;
+    if (action && action->property(Style::kWarningProperty).toBool())
+        return MenuItemTone::Warning;
+    return MenuItemTone::Normal;
 }
 
 QFont itemFont(const QStyleOptionMenuItem* option, qreal pixels) {
@@ -90,10 +94,11 @@ void drawTooltipPanel(const QStyleOption* option, QPainter* painter, const QWidg
 QSize menuItemSize(const QStyleOptionMenuItem* option, const QWidget* widget) {
     const MenuRecipe menu = menuRecipe(theme());
     if (option->menuItemType == QStyleOptionMenuItem::Separator)
-        return {1, 1 + 2 * qRound(scaled(menu.separatorMargin))};
+        return option->text.isEmpty() ? QSize(1, 1 + 2 * qRound(scaled(menu.separatorMargin)))
+                                      : QSize(1, qRound(scaled(menu.sectionHeight)));
 
     const QAction* action = actionFor(option, widget, false);
-    const MenuItemRecipe r = menuItemRecipe(false, true, false, theme());
+    const MenuItemRecipe r = menuItemRecipe(false, true, MenuItemTone::Normal, theme());
     const QFontMetricsF titleMetrics(itemFont(option, r.fontPixels));
     const QString title = option->text.section(QLatin1Char('\t'), 0, 0);
     const QString shortcut = option->text.section(QLatin1Char('\t'), 1);
@@ -132,6 +137,17 @@ void drawMenuItem(const QStyleOptionMenuItem* option, QPainter* painter, const Q
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
 
+    if (option->menuItemType == QStyleOptionMenuItem::Separator && !option->text.isEmpty()) {
+        // QMenu::addSection: a muted heading aligned with the item titles.
+        const MenuRecipe menu = menuRecipe(theme());
+        const MenuItemRecipe item = menuItemRecipe(false, true, MenuItemTone::Normal, theme());
+        painter->setFont(itemFont(option, menu.sectionPixels));
+        painter->setPen(menu.sectionText);
+        painter->drawText(rect.adjusted(scaled(item.paddingStart), 0, -scaled(item.paddingEnd), 0),
+                          Qt::AlignLeft | Qt::AlignVCenter, option->text);
+        painter->restore();
+        return;
+    }
     if (option->menuItemType == QStyleOptionMenuItem::Separator) {
         const qreal y = qFloor(rect.center().y()) + 0.5;
         painter->setPen(QPen(menuRecipe(theme()).separator, 1));
@@ -147,7 +163,7 @@ void drawMenuItem(const QStyleOptionMenuItem* option, QPainter* painter, const Q
     const QAction* action = actionFor(option, widget, true);
     const bool enabled = option->state & QStyle::State_Enabled;
     const bool highlighted = option->state & QStyle::State_Selected;
-    const MenuItemRecipe r = menuItemRecipe(highlighted, enabled, isDanger(action), theme());
+    const MenuItemRecipe r = menuItemRecipe(highlighted, enabled, toneOf(action), theme());
     const qreal dpr = painter->device()->devicePixelRatioF();
     painter->setOpacity(r.opacity);
 
@@ -207,7 +223,8 @@ void drawMenuItem(const QStyleOptionMenuItem* option, QPainter* painter, const Q
     const QString shortcut = option->text.section(QLatin1Char('\t'), 1);
     painter->setFont(titleFont);
     if (!shortcut.isEmpty()) {
-        painter->setPen(menuItemRecipe(highlighted, enabled, false, theme()).description);
+        painter->setPen(
+            menuItemRecipe(highlighted, enabled, MenuItemTone::Normal, theme()).description);
         const qreal shortcutWidth = titleMetrics.horizontalAdvance(shortcut);
         painter->drawText(QRectF(textRight - shortcutWidth, titleCenter - titleMetrics.height() / 2,
                                  shortcutWidth, titleMetrics.height()),

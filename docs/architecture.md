@@ -102,8 +102,10 @@ search logic. The app filters the palette's groups as its query changes.
   Tab inside the card and rejects on Escape, the close button or a backdrop click.
   `KetDialog` is a modal `Dialog` in the window overlay.
 - **Menus are drawn by `ket::Style`**, so every `QMenu` and the `QComboBox` popup
-  (`SH_ComboBox_Popup`) look like `.desktop-context-menu`. `Style::setDanger()` and
-  `Style::setDescription()` mark a destructive command and add its secondary line. macOS
+  (`SH_ComboBox_Popup`) look like `.desktop-context-menu`. `Style::setDanger()`,
+  `Style::setWarning()` and `Style::setDescription()` mark a destructive command or an
+  elevated choice and add its secondary line; `QMenu::addSection()` draws a muted heading,
+  as `KetMenuSection` does. macOS
   hides shortcuts in context menus (`Qt::AA_DontShowShortcutsInContextMenus`); `KetMenuItem`
   shows its `shortcut` everywhere.
 - **Tooltips use the accent background**, like the native KetPlus `KetToolTip`.
