@@ -371,6 +371,19 @@ class TokensTest final : public QObject {
                  Tokens::color(u"warning", Theme::Light));
         QCOMPARE(conversationStatusLabel(ConversationStatus::Error),
                  QStringLiteral("Reply failed"));
+        // A finished turn that waits for the user is neither the tick nor the blocked pause.
+        const ConversationStatusRecipe awaiting =
+            conversationStatusRecipe(ConversationStatus::AwaitingReply, Theme::Dark);
+        QCOMPARE(awaiting.icon, QStringLiteral("help"));
+        QCOMPARE(awaiting.iconColor, Tokens::color(u"accent-text", Theme::Dark));
+        QCOMPARE(awaiting.labelColor, awaiting.iconColor);
+        QVERIFY(!awaiting.spinning);
+        QVERIFY(awaiting.icon !=
+                conversationStatusRecipe(ConversationStatus::Completed, Theme::Dark).icon);
+        QVERIFY(awaiting.icon !=
+                conversationStatusRecipe(ConversationStatus::NeedsInput, Theme::Dark).icon);
+        QCOMPARE(conversationStatusLabel(ConversationStatus::AwaitingReply),
+                 QStringLiteral("Waiting for you"));
 
         QCOMPARE(composerRecipe(false, Theme::Light).border,
                  Tokens::color(u"border-default", Theme::Light));

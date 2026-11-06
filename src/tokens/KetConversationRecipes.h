@@ -6,7 +6,17 @@
 namespace ket {
 
 // The states a conversation shows in the sidebar (K.conversationStatus in the mock).
-enum class ConversationStatus { NotStarted, Working, NeedsInput, Error, Completed, Stopped };
+// NeedsInput blocks a running turn (a question or a permission); AwaitingReply follows a
+// finished turn whose answer asks the user to approve or decide before the agent goes on.
+enum class ConversationStatus {
+    NotStarted,
+    Working,
+    NeedsInput,
+    Error,
+    Completed,
+    Stopped,
+    AwaitingReply
+};
 
 // A two-line sidebar conversation row: the title, then the number with tags or the status.
 struct ConversationRowRecipe {

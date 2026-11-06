@@ -91,6 +91,13 @@ ConversationStatusRecipe conversationStatusRecipe(ConversationStatus status, The
         recipe.icon = QStringLiteral("stop");
         recipe.iconColor = token(u"text-muted", theme);
         break;
+    case ConversationStatus::AwaitingReply:
+        // A finished turn that asks for the user: not the success tick, and not the warning
+        // pause of a blocked turn.
+        recipe.icon = QStringLiteral("help");
+        recipe.iconColor = token(u"accent-text", theme);
+        recipe.labelColor = recipe.iconColor;
+        break;
     }
     return recipe;
 }
@@ -109,6 +116,8 @@ QString conversationStatusLabel(ConversationStatus status) {
         return QStringLiteral("Completed");
     case ConversationStatus::Stopped:
         return QStringLiteral("Stopped");
+    case ConversationStatus::AwaitingReply:
+        return QStringLiteral("Waiting for you");
     }
     return {};
 }

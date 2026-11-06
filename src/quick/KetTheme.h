@@ -42,7 +42,15 @@ class QuickTheme final : public QObject {
     Q_ENUM(ToggleKind)
     enum class BannerTone { Info, Warning, Danger };
     Q_ENUM(BannerTone)
-    enum class ConversationStatus { NotStarted, Working, NeedsInput, Error, Completed, Stopped };
+    enum class ConversationStatus {
+        NotStarted,
+        Working,
+        NeedsInput,
+        Error,
+        Completed,
+        Stopped,
+        AwaitingReply
+    };
     Q_ENUM(ConversationStatus)
     enum class TaskStatus { Running, Stopping, Completed, Failed, Stopped };
     Q_ENUM(TaskStatus)
