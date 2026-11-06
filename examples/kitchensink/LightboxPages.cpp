@@ -17,7 +17,7 @@ namespace {
 
 constexpr LightboxTools kAllTools =
     LightboxTool::ZoomOut | LightboxTool::ZoomLevel | LightboxTool::ZoomIn | LightboxTool::Rotate |
-    LightboxTool::Copy | LightboxTool::Download | LightboxTool::Fullscreen;
+    LightboxTool::Copy | LightboxTool::Download | LightboxTool::Print | LightboxTool::Fullscreen;
 
 QWidget* toolkits(QWidget* widgets, QWidget* quick, QWidget* parent) {
     auto* host = new QWidget(parent);

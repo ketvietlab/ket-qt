@@ -69,7 +69,8 @@ class QuickTheme final : public QObject {
         Rotate = 0x8,
         Copy = 0x10,
         Download = 0x20,
-        Fullscreen = 0x40
+        Fullscreen = 0x40,
+        Print = 0x80
     };
     Q_ENUM(LightboxTool)
     enum class LightboxThumbSize { Small, Medium, Large };

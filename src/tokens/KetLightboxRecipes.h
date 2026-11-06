@@ -9,7 +9,8 @@ namespace ket {
 
 // Toolbar tools of the image viewer. ZoomOut and ZoomIn are the design system's; the rest
 // are for hosts that edit or keep images (a chat's photos, an editor's image files).
-// ZoomLevel shows the scale as a percentage and toggles fit and 100 % when clicked.
+// ZoomLevel shows the scale as a percentage and toggles fit and 100 % when clicked; Print
+// opens the system print dialog.
 enum class LightboxTool {
     ZoomOut = 0x1,
     ZoomLevel = 0x2,
@@ -18,14 +19,15 @@ enum class LightboxTool {
     Copy = 0x10,
     Download = 0x20,
     Fullscreen = 0x40,
+    Print = 0x80,
 };
 Q_DECLARE_FLAGS(LightboxTools, LightboxTool)
 Q_DECLARE_OPERATORS_FOR_FLAGS(LightboxTools)
 
 // The toolbar's order, left to right, in both layers; Close always ends the row.
 inline constexpr LightboxTool kLightboxToolOrder[] = {
-    LightboxTool::ZoomOut, LightboxTool::ZoomLevel, LightboxTool::ZoomIn,     LightboxTool::Rotate,
-    LightboxTool::Copy,    LightboxTool::Download,  LightboxTool::Fullscreen,
+    LightboxTool::ZoomOut, LightboxTool::ZoomLevel, LightboxTool::ZoomIn, LightboxTool::Rotate,
+    LightboxTool::Copy,    LightboxTool::Download,  LightboxTool::Print,  LightboxTool::Fullscreen,
 };
 
 // The thumbnail that opens the viewer (`[data-ui="lightbox-thumb"][data-size]`).

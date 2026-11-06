@@ -25,8 +25,15 @@ system already defines the look and behaviour in `interactions/lightbox`.
   then only emit `toolTriggered()`, and the host reports its scale with `setZoomLevel()`.
 - Beyond the design system's zoom-out, zoom-in and close, the toolbar can show:
   - ZoomLevel, a percentage that toggles fit and 100 %;
-  - Rotate, Copy, Download and Full screen.
+  - Rotate, Copy, Download, Print and Full screen.
   Copy, Download and Full screen are always host actions.
+- Print opens the system print dialog (`ket::printImage()`, Qt Print Support in
+  `KetQt::Widgets`), fitted to the page and never enlarged beyond 96 dpi.
+  - `ket::Lightbox` prints its built-in picture itself.
+  - `KetLightbox` only emits the tool, because the Quick layer has no print dialog. A
+    `QApplication` host calls `ket::printImage(source, rotationAngle, title)`.
+  - Két Symbol has no printer icon yet, so `file-text` stands in until a `print` code
+    exists; both layers switch to it automatically.
 - The viewer is dark in both themes: light-theme `text-main` at 92 % behind light-theme
   `panel-bg` glyphs. The design system mixes the current theme's tokens, which makes the
   dark-theme viewer light; the kit does not copy that, and the difference is to be raised with

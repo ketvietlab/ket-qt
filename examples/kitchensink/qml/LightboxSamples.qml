@@ -12,7 +12,8 @@ Item {
     readonly property real gap: KetTheme.px(KetTheme.t.space2, KetTheme.zoom)
     readonly property int allTools: KetTheme.LightboxTool.ZoomOut | KetTheme.LightboxTool.ZoomLevel
         | KetTheme.LightboxTool.ZoomIn | KetTheme.LightboxTool.Rotate | KetTheme.LightboxTool.Copy
-        | KetTheme.LightboxTool.Download | KetTheme.LightboxTool.Fullscreen
+        | KetTheme.LightboxTool.Download | KetTheme.LightboxTool.Print
+        | KetTheme.LightboxTool.Fullscreen
     readonly property var screenshots: ["sidebar", "editor", "settings", "dialog", "terminal"]
         .map(name => ({ source: "qrc:/kitchensink/images/screenshot-" + name + ".png",
                         caption: name + ".png" }))
@@ -123,14 +124,31 @@ Item {
                     required property int index
                     source: modelData.source
                     description: modelData.caption
-                    onClicked: liveViewer.openAt(index)
+                    onClicked: {
+                        viewerWindow.show()
+                        liveViewer.openAt(index)
+                    }
                 }
             }
 
-            KetLightbox {
-                id: liveViewer
-                tools: page.allTools
-                items: page.screenshots
+            // Its own window: the page's view is only as tall as the thumbnails.
+            Window {
+                id: viewerWindow
+                width: 960
+                height: 640
+                title: "Image viewer"
+                color: "transparent"
+
+                KetLightbox {
+                    id: liveViewer
+                    tools: page.allTools
+                    items: page.screenshots
+                    onClosed: viewerWindow.close()
+                    onToolTriggered: tool => {
+                        if (tool === KetTheme.LightboxTool.Print && item)
+                            KitchenSinkHost.printImage(item.source, rotationAngle, item.caption)
+                    }
+                }
             }
         }
     }

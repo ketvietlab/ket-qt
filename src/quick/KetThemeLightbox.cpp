@@ -12,6 +12,7 @@ using detail::scaleLengths;
 using detail::themeOf;
 
 static_assert(int(QuickTheme::LightboxTool::Fullscreen) == int(ket::LightboxTool::Fullscreen));
+static_assert(int(QuickTheme::LightboxTool::Print) == int(ket::LightboxTool::Print));
 static_assert(int(QuickTheme::LightboxTool::ZoomLevel) == int(ket::LightboxTool::ZoomLevel));
 static_assert(int(QuickTheme::LightboxThumbSize::Large) == int(ket::LightboxThumbSize::Large));
 

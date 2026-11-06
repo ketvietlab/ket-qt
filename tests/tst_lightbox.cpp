@@ -5,6 +5,7 @@
 #include "KetLightboxButton.h"
 #include "KetLightboxRecipes.h"
 #include "KetLightboxThumb.h"
+#include "KetPrint.h"
 #include "KetTokens.h"
 
 #include <QAbstractButton>
@@ -218,6 +219,41 @@ class LightboxTest final : public QObject {
         QCOMPARE(level.sizeHint(), QSize(64, 40));
         Appearance::instance().setZoom(1.5);
         QCOMPARE(button.sizeHint(), QSize(60, 60));
+    }
+
+    // Print sends the whole picture as rotated, fitted to the page and never enlarged
+    // beyond its size at 96 dpi. The dialog itself is the system's and is not opened here.
+    void printSendsTheRotatedPicture() {
+        const QRect page(100, 100, 4800, 6600); // 600 dpi, inside the margins
+        QCOMPARE(printedImageRect(QSize(2000, 1000), page, 600), QRect(100, 2200, 4800, 2400));
+        QCOMPARE(printedImageRect(QSize(400, 300), page, 600), QRect(1250, 2462, 2500, 1875));
+        QVERIFY(printedImageRect(QSize(), page, 600).isNull());
+
+        QWidget window;
+        window.resize(1000, 700);
+        auto* lightbox = new Lightbox(&window);
+        lightbox->setItems(threeItems());
+        lightbox->setTools(lightbox->tools() | LightboxTool::Rotate | LightboxTool::Print);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        lightbox->open(0);
+        QVERIFY(lightbox->toolButton(LightboxTool::Print)->isVisible());
+        QVERIFY(lightbox->toolButton(LightboxTool::Print)->isEnabled());
+        // Print sits between Download's place and Close: right of Rotate here.
+        QVERIFY(lightbox->toolButton(LightboxTool::Print)->x() >
+                lightbox->toolButton(LightboxTool::Rotate)->x());
+        QCOMPARE(lightbox->printableImage().size(), QSize(2000, 1000));
+        lightbox->rotate();
+        QCOMPARE(lightbox->printableImage().size(), QSize(1000, 2000));
+        lightbox->setStage(new QWidget);
+        QVERIFY(lightbox->printableImage().isNull()); // a host stage prints its own picture
+
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("wide.png"));
+        QVERIFY(picture(300, 100).toImage().save(path));
+        QCOMPARE(printableImage(QUrl::fromLocalFile(path), 90).size(), QSize(100, 300));
+        QCOMPARE(printableImage(QUrl::fromLocalFile(path), 0).size(), QSize(300, 100));
+        QVERIFY(printableImage(QUrl(QStringLiteral("https://example.com/a.png")), 0).isNull());
     }
 
     // The Quick twin fits, zooms and steps as ket::Lightbox does at the same size.

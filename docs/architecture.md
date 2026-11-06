@@ -141,7 +141,9 @@ search logic. The app filters the palette's groups as its query changes.
   emits `activated(index)` and the app opens its own preview.
 - **The image viewer** (`ket::Lightbox`, `KetLightbox`) follows the design system's lightbox
   (decision 0003). It stays dark in both themes, where the design system's colour mix turns
-  it light in the dark theme. Hosts add Rotate, Copy, Download and Full screen tools, and a
+  it light in the dark theme. Hosts add Rotate, Copy, Download, Print and Full screen tools; Print
+  opens the system dialog through `ket::printImage()`, so `KetQt::Widgets` needs Qt Print
+  Support. A
   Widgets host can put its own image engine on the stage. The Quick thumbnail masks its
   picture with `MultiEffect` from `QtQuick.Effects`, the one effect in the kit: a Canvas
   crop is not sharp at 2×.

@@ -26,8 +26,9 @@ struct LightboxItem {
 //
 // A host with its own image engine (for example ket::imageviewer::ImageViewer) passes it
 // to setStage(): it fills the stage, the view tools only emit toolTriggered(), and the
-// host reports its scale with setZoomLevel(). Copy, Download and Fullscreen are always
-// host actions. Colours and metrics come from ket::lightboxRecipe.
+// host reports its scale with setZoomLevel(). Print sends the built-in picture, as rotated,
+// to the system print dialog; with a host stage it is the host's, like Copy, Download and
+// Fullscreen always are. Colours and metrics come from ket::lightboxRecipe.
 class Lightbox final : public QWidget {
     Q_OBJECT
   public:
@@ -65,6 +66,8 @@ class Lightbox final : public QWidget {
     [[nodiscard]] qreal maximumZoom() const;
     [[nodiscard]] QRectF pictureRect() const; // in lightbox coordinates, at the current view
     [[nodiscard]] QRect stageRect() const;
+    // The built-in picture as Print sends it: the whole image at the current rotation.
+    [[nodiscard]] QImage printableImage() const;
 
     [[nodiscard]] bool isOpen() const { return isVisible(); }
     [[nodiscard]] QAbstractButton* toolButton(LightboxTool tool) const;
@@ -82,6 +85,7 @@ class Lightbox final : public QWidget {
     void fit();
     void toggleActualSize();
     void rotate();
+    void print(); // opens the system print dialog for the built-in picture
 
   signals:
     void currentChanged(int index);

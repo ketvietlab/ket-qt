@@ -4,6 +4,7 @@
 #include "KetAppearance.h"
 #include "KetIcons.h"
 #include "KetLightboxButton.h"
+#include "KetPrint.h"
 
 #include <QAbstractButton>
 #include <QAccessible>
@@ -37,6 +38,9 @@ QString toolCode(LightboxTool tool) {
         return QStringLiteral("download");
     case LightboxTool::Fullscreen:
         return QStringLiteral("fullscreen");
+    case LightboxTool::Print:
+        // Két Symbol has no printer yet; a page stands in until it does.
+        return Icons::contains(u"print") ? QStringLiteral("print") : QStringLiteral("file-text");
     }
     return {};
 }
@@ -57,6 +61,8 @@ QString toolLabel(LightboxTool tool) {
         return Lightbox::tr("Download");
     case LightboxTool::Fullscreen:
         return Lightbox::tr("Full screen");
+    case LightboxTool::Print:
+        return Lightbox::tr("Print…");
     }
     return {};
 }
@@ -356,6 +362,9 @@ void Lightbox::trigger(LightboxTool tool) {
     case LightboxTool::Rotate:
         rotate();
         break;
+    case LightboxTool::Print:
+        print();
+        break;
     default:
         break; // Copy, Download and Fullscreen belong to the host
     }
@@ -388,6 +397,21 @@ void Lightbox::toggleActualSize() {
         fit();
     else
         setView(zoomedAt(actual, stageCentre() + from.pan, from), true);
+}
+
+QImage Lightbox::printableImage() const {
+    const LightboxItem* item = current();
+    if (!builtIn() || !item || item->image.isNull())
+        return {};
+    return item->image.toImage().transformed(QTransform().rotate(rotation()));
+}
+
+void Lightbox::print() {
+    const LightboxItem* item = current();
+    const QImage image = printableImage();
+    if (!image.isNull())
+        printImage(image, item->description.isEmpty() ? item->caption : item->description,
+                   window());
 }
 
 void Lightbox::rotate() {

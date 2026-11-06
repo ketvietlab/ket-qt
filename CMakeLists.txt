@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Qt 6.8 is the oldest Qt a consumer ships (KétChat); KetPlus uses 6.11.
 set(ketqt_qt_components Core Gui Svg)
 if(KETQT_BUILD_WIDGETS)
-    list(APPEND ketqt_qt_components Widgets)
+    list(APPEND ketqt_qt_components Widgets PrintSupport)
 endif()
 if(KETQT_BUILD_QUICK)
     list(APPEND ketqt_qt_components Qml Quick QuickControls2)
@@ -128,13 +128,15 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetLightboxButton.h src/widgets/KetLightboxButton.cpp
         src/widgets/KetLightboxThumb.h src/widgets/KetLightboxThumb.cpp
         src/widgets/KetLightbox.h src/widgets/KetLightbox.cpp src/widgets/KetLightboxInput.cpp
+        src/widgets/KetPrint.h src/widgets/KetPrint.cpp
     )
     add_library(KetQt::Widgets ALIAS ketqt_widgets)
     target_include_directories(ketqt_widgets PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/widgets>"
         "$<INSTALL_INTERFACE:include/KetQt>"
     )
-    target_link_libraries(ketqt_widgets PUBLIC KetQt::Tokens KetQt::Icons Qt6::Widgets)
+    target_link_libraries(ketqt_widgets PUBLIC KetQt::Tokens KetQt::Icons Qt6::Widgets
+                                            Qt6::PrintSupport)
     set_target_properties(ketqt_widgets PROPERTIES EXPORT_NAME Widgets)
     ketqt_warnings(ketqt_widgets)
 endif()
@@ -287,6 +289,7 @@ if(KETQT_BUILD_WIDGETS)
                   src/widgets/KetLightboxButton.h
                   src/widgets/KetLightboxThumb.h
                   src/widgets/KetLightbox.h
+                  src/widgets/KetPrint.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 endif()
 install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)
