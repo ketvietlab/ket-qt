@@ -175,6 +175,10 @@ search logic. The app filters the palette's groups as its query changes.
 - `cmake --install` also installs `KetQt::Tokens`, `KetQt::Icons` and `KetQt::Widgets`, with the
   Két Symbol notice and licence, as a CMake package
   (`find_package(KetQt)`). The static QML module is not installed yet.
+- `KETQT_INSTALL` (on only when KetQt is the top-level project) controls those install
+  rules. An app that builds the kit with FetchContent or `add_subdirectory()` links it
+  statically and leaves it off, so `cmake --install` of the app does not copy KetQt's
+  headers, archives and package into the app's install tree.
 
 ## Fonts
 

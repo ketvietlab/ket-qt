@@ -6,6 +6,9 @@ option(KETQT_BUILD_WIDGETS "Build KetQt::Widgets" ON)
 option(KETQT_BUILD_QUICK "Build the Ket QML module (KetQt::Quick)" ON)
 option(KETQT_BUILD_TESTS "Build KetQt tests" ${PROJECT_IS_TOP_LEVEL})
 option(KETQT_BUILD_EXAMPLES "Build the KetQt kitchensink" ${PROJECT_IS_TOP_LEVEL})
+# An app that builds the kit with FetchContent or add_subdirectory links it statically and must
+# not install its headers, archives and CMake package into the app's install tree.
+option(KETQT_INSTALL "Install KetQt as a CMake package" ${PROJECT_IS_TOP_LEVEL})
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -235,76 +238,78 @@ if(KETQT_BUILD_EXAMPLES AND KETQT_BUILD_WIDGETS AND KETQT_BUILD_QUICK)
     add_subdirectory(examples/kitchensink)
 endif()
 
-# Install Tokens and Widgets as a CMake package. The static QML module is consumed with
-# add_subdirectory for now (docs/architecture.md, "Consuming KetQt").
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-set(ketqt_install_targets ketqt_tokens ketqt_icons)
-if(KETQT_BUILD_WIDGETS)
-    list(APPEND ketqt_install_targets ketqt_widgets)
-endif()
-install(TARGETS ${ketqt_install_targets} EXPORT KetQtTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt
-)
-install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRecipes.h
-              src/tokens/KetProfile.h src/tokens/KetConversationRecipes.h
-              src/tokens/KetRichRecipes.h src/tokens/KetMarkdown.h src/tokens/KetSyntax.h
-              src/tokens/KetSurfaceRecipes.h
-              src/tokens/KetControlRecipes.h
-              src/tokens/KetChatRecipes.h
-              src/tokens/KetLightboxRecipes.h
-              src/icons/KetIcons.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
-if(KETQT_BUILD_WIDGETS)
-    install(FILES src/widgets/KetStyle.h src/widgets/KetButton.h src/widgets/KetBadge.h
-                  src/widgets/KetTag.h src/widgets/KetIcon.h src/widgets/KetTextField.h
-                  src/widgets/KetSelect.h src/widgets/KetToggle.h src/widgets/KetChoice.h
-                  src/widgets/KetFieldRow.h src/widgets/KetBanner.h src/widgets/KetToast.h
-                  src/widgets/KetDialog.h src/widgets/KetNavItem.h
-                  src/widgets/KetSegmentedControl.h src/widgets/KetActivityIndicator.h
-                  src/widgets/KetEmptyState.h src/widgets/KetConversationRow.h
-                  src/widgets/KetComposer.h src/widgets/KetTranscript.h
-                  src/widgets/KetActivityRow.h src/widgets/KetMarkdownView.h
-                  src/widgets/KetMentionPicker.h
-                  src/widgets/KetThemeCard.h
-                  src/widgets/KetUpdateCard.h
-                  src/widgets/KetTaskBar.h
-                  src/widgets/KetDiffView.h
-                  src/widgets/KetChangedFiles.h
-                  src/widgets/KetFileRow.h
-                  src/widgets/KetCommandPalette.h
-                  src/widgets/KetChrome.h
-                  src/widgets/KetRouteTabs.h
-                  src/widgets/KetTreeItem.h
-                  src/widgets/KetAvatar.h
-                  src/widgets/KetStepSlider.h
-                  src/widgets/KetGallery.h
-                  src/widgets/KetActivityGroup.h
-                  src/widgets/KetQuestionCard.h
-                  src/widgets/KetSuggestion.h
-                  src/widgets/KetAttachmentChip.h
-                  src/widgets/KetMeter.h
-                  src/widgets/KetPopover.h
-                  src/widgets/KetLightboxButton.h
-                  src/widgets/KetLightboxThumb.h
-                  src/widgets/KetLightbox.h
-                  src/widgets/KetPrint.h
+if(KETQT_INSTALL)
+    # Install Tokens and Widgets as a CMake package. The static QML module is consumed with
+    # add_subdirectory for now (docs/architecture.md, "Consuming KetQt").
+    include(GNUInstallDirs)
+    include(CMakePackageConfigHelpers)
+    set(ketqt_install_targets ketqt_tokens ketqt_icons)
+    if(KETQT_BUILD_WIDGETS)
+        list(APPEND ketqt_install_targets ketqt_widgets)
+    endif()
+    install(TARGETS ${ketqt_install_targets} EXPORT KetQtTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt
+    )
+    install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRecipes.h
+                  src/tokens/KetProfile.h src/tokens/KetConversationRecipes.h
+                  src/tokens/KetRichRecipes.h src/tokens/KetMarkdown.h src/tokens/KetSyntax.h
+                  src/tokens/KetSurfaceRecipes.h
+                  src/tokens/KetControlRecipes.h
+                  src/tokens/KetChatRecipes.h
+                  src/tokens/KetLightboxRecipes.h
+                  src/icons/KetIcons.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
+    if(KETQT_BUILD_WIDGETS)
+        install(FILES src/widgets/KetStyle.h src/widgets/KetButton.h src/widgets/KetBadge.h
+                      src/widgets/KetTag.h src/widgets/KetIcon.h src/widgets/KetTextField.h
+                      src/widgets/KetSelect.h src/widgets/KetToggle.h src/widgets/KetChoice.h
+                      src/widgets/KetFieldRow.h src/widgets/KetBanner.h src/widgets/KetToast.h
+                      src/widgets/KetDialog.h src/widgets/KetNavItem.h
+                      src/widgets/KetSegmentedControl.h src/widgets/KetActivityIndicator.h
+                      src/widgets/KetEmptyState.h src/widgets/KetConversationRow.h
+                      src/widgets/KetComposer.h src/widgets/KetTranscript.h
+                      src/widgets/KetActivityRow.h src/widgets/KetMarkdownView.h
+                      src/widgets/KetMentionPicker.h
+                      src/widgets/KetThemeCard.h
+                      src/widgets/KetUpdateCard.h
+                      src/widgets/KetTaskBar.h
+                      src/widgets/KetDiffView.h
+                      src/widgets/KetChangedFiles.h
+                      src/widgets/KetFileRow.h
+                      src/widgets/KetCommandPalette.h
+                      src/widgets/KetChrome.h
+                      src/widgets/KetRouteTabs.h
+                      src/widgets/KetTreeItem.h
+                      src/widgets/KetAvatar.h
+                      src/widgets/KetStepSlider.h
+                      src/widgets/KetGallery.h
+                      src/widgets/KetActivityGroup.h
+                      src/widgets/KetQuestionCard.h
+                      src/widgets/KetSuggestion.h
+                      src/widgets/KetAttachmentChip.h
+                      src/widgets/KetMeter.h
+                      src/widgets/KetPopover.h
+                      src/widgets/KetLightboxButton.h
+                      src/widgets/KetLightboxThumb.h
+                      src/widgets/KetLightbox.h
+                      src/widgets/KetPrint.h
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
+    endif()
+    install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)
+    configure_package_config_file(cmake/KetQtConfig.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/KetQtConfig.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)
+    write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/KetQtConfigVersion.cmake"
+        COMPATIBILITY SameMinorVersion)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/KetQtConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/KetQtConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)
+    install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt)
+    install(FILES third_party/ket-design-system/LICENSE
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt RENAME LICENSE.ket-design-system)
+    install(FILES third_party/ket-symbol/NOTICE
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt RENAME NOTICE.ket-symbol)
+    install(FILES third_party/ket-symbol/LICENSES/CC-BY-4.0.txt
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt RENAME LICENSE.ket-symbol)
 endif()
-install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)
-configure_package_config_file(cmake/KetQtConfig.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/KetQtConfig.cmake"
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)
-write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/KetQtConfigVersion.cmake"
-    COMPATIBILITY SameMinorVersion)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/KetQtConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/KetQtConfigVersion.cmake"
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)
-install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt)
-install(FILES third_party/ket-design-system/LICENSE
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt RENAME LICENSE.ket-design-system)
-install(FILES third_party/ket-symbol/NOTICE
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt RENAME NOTICE.ket-symbol)
-install(FILES third_party/ket-symbol/LICENSES/CC-BY-4.0.txt
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/KetQt RENAME LICENSE.ket-symbol)
