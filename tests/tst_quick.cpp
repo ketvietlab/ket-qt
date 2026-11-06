@@ -11,6 +11,7 @@
 #include <QQuickItem>
 #include <QTest>
 #include <QtQml/qqmlextensionplugin.h>
+#include <cmath>
 
 Q_IMPORT_QML_PLUGIN(KetPlugin)
 
@@ -350,6 +351,31 @@ class QuickTest final : public QObject {
         QCOMPARE(root->property("sent").toString(), QStringLiteral("Also check Linux"));
         QCOMPARE(root->property("stops").toInt(), 1);
         QCOMPARE(root->property("step").value<QQuickItem*>()->implicitHeight(), 32.0);
+    }
+
+    // The placeholder starts where the caret and the first typed line do, and that line sits
+    // in the middle of its line box, as in CSS.
+    void composerPlaceholderSitsOnTheCaretLine() {
+        std::unique_ptr<QObject> root = create(
+            QByteArrayLiteral("import QtQuick\nimport Ket\n"
+                              "Item { width: 600; height: 200; property alias composer: composer\n"
+                              "  KetComposer { id: composer; width: 600 } }\n"));
+        QVERIFY(root);
+        auto* composer = root->property("composer").value<QQuickItem*>();
+        auto* input = composer->findChild<QQuickItem*>(QStringLiteral("composerInput"));
+        auto* placeholder = composer->findChild<QQuickItem*>(QStringLiteral("composerPlaceholder"));
+        QVERIFY(input && placeholder);
+        QVERIFY(placeholder->isVisible());
+        QTRY_COMPARE(placeholder->y(), input->property("cursorRectangle").toRectF().y());
+        const QRectF empty = input->property("cursorRectangle").toRectF();
+        QCOMPARE(placeholder->height(), empty.height());
+        const ComposerRecipe recipe = composerRecipe(false, Theme::Light);
+        const qreal lineBox = std::floor(recipe.textPixels * recipe.lineHeight);
+        QVERIFY(qAbs(empty.center().y() - (recipe.textPaddingBlock + lineBox / 2)) <= 1.0);
+        input->setProperty("text", QStringLiteral("Make it so"));
+        input->setProperty("cursorPosition", 0);
+        QVERIFY(!placeholder->isVisible());
+        QCOMPARE(input->property("cursorRectangle").toRectF().y(), empty.y());
     }
 
     void richTranscriptBlocksLoad() {
