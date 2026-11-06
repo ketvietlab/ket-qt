@@ -115,6 +115,13 @@ class QuickTheme final : public QObject {
     // Gives every block of a TextEdit's document a CSS line box of `pixels` (font size × line
     // height); Qt's proportional height would scale the font's line spacing instead.
     Q_INVOKABLE void applyLineHeight(QQuickTextDocument* document, qreal pixels) const;
+    // Syntax colours for a code TextEdit in the fence's language (ket::SyntaxHighlighter,
+    // kept on the document); call again when the theme changes.
+    Q_INVOKABLE void highlightCode(QQuickTextDocument* document, const QString& language,
+                                   bool dark) const;
+    // Each line of `code` as rich text with syntax colours, for a Text item per line.
+    Q_INVOKABLE QStringList highlightedLines(const QString& code, const QString& language,
+                                             bool dark) const;
     Q_INVOKABLE QVariantMap markdownRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap codeBlockRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap mentionPickerRecipe(bool dark, qreal zoom) const;

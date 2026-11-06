@@ -7,6 +7,7 @@
 #include "KetMarkdown.h"
 #include "KetParagraph.h"
 #include "KetProfile.h"
+#include "KetSyntax.h"
 
 #include <QBoxLayout>
 #include <QClipboard>
@@ -53,6 +54,7 @@ void CodeBlock::setCode(const QString& code) {
 void CodeBlock::setLanguage(const QString& language) {
     language_ = language;
     setAccessibleName(language.isEmpty() ? tr("Code") : tr("%1 code").arg(language));
+    update();
 }
 
 QFont CodeBlock::codeFont() const {
@@ -99,6 +101,17 @@ void CodeBlock::paintEvent(QPaintEvent*) {
     painter.setBrush(r.background);
     painter.drawRoundedRect(surface.adjusted(0.5, 0.5, -0.5, -0.5), radius, radius);
     detail::Paragraph paragraph(code_, codeFont(), r.lineHeight);
+    // Syntax colours in the fence's language, from ket::syntaxRecipe.
+    const SyntaxRecipe syntax = syntaxRecipe(theme());
+    QList<QTextLayout::FormatRange> formats;
+    for (const SyntaxSpan& span : highlightCode(code_, language_)) {
+        QTextLayout::FormatRange range;
+        range.start = int(span.start);
+        range.length = int(span.length);
+        range.format.setForeground(syntaxColor(syntax, span.role));
+        formats.append(range);
+    }
+    paragraph.setFormats(formats);
     paragraph.layout(qMax<qreal>(1, width() - 2 * padding - copy_->sizeHint().width()));
     painter.setPen(r.text);
     paragraph.draw(painter, surface.topLeft() + QPointF(padding, padding));

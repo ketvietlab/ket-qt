@@ -46,6 +46,7 @@ class Paragraph final {
         const qreal size = font.pixelSize() > 0 ? font.pixelSize() : font.pointSizeF();
         return qFloor(size * lineHeight_);
     }
+    void setFormats(const QList<QTextLayout::FormatRange>& formats) { layout_.setFormats(formats); }
     void draw(QPainter& painter, const QPointF& origin) const { layout_.draw(&painter, origin); }
 
   private:

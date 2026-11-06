@@ -9,6 +9,7 @@
 #include "KetProfile.h"
 #include "KetRecipes.h"
 #include "KetRichRecipes.h"
+#include "KetSyntax.h"
 
 #include <QFontDatabase>
 #include <QGuiApplication>
@@ -356,6 +357,24 @@ void QuickTheme::applyLineHeight(QQuickTextDocument* document, qreal pixels) con
     QTextCursor cursor(document->textDocument());
     cursor.select(QTextCursor::Document);
     cursor.mergeBlockFormat(format);
+}
+
+void QuickTheme::highlightCode(QQuickTextDocument* document, const QString& language,
+                               bool dark) const {
+    QTextDocument* text = document ? document->textDocument() : nullptr;
+    if (!text)
+        return;
+    auto* highlighter =
+        text->findChild<ket::SyntaxHighlighter*>(QString(), Qt::FindDirectChildrenOnly);
+    if (!highlighter)
+        highlighter = new ket::SyntaxHighlighter(text);
+    highlighter->setLanguage(language);
+    highlighter->setRecipe(ket::syntaxRecipe(themeOf(dark)));
+}
+
+QStringList QuickTheme::highlightedLines(const QString& code, const QString& language,
+                                         bool dark) const {
+    return ket::highlightedLines(code, language, ket::syntaxRecipe(themeOf(dark)));
 }
 
 QVariantMap QuickTheme::markdownRecipe(bool dark, qreal zoom) const {
