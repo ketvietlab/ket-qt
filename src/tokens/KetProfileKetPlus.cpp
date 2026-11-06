@@ -451,6 +451,26 @@ Profile Profile::ketPlus() {
     p.themeLabelPaddingInline = 13;
     p.accentSwatchRadius = 6; // `.accent-swatch`
     p.accentSwatchBorder = 3;
+    // The image viewer, as the design system's (KetPlus has no mock of its own).
+    p.lightboxBackdropOpacity = 0.92; // `[data-ui="lightbox-backdrop"]` text-main 92%
+    p.lightboxToolSize = 40;          // `[data-ui="lightbox-tool"]` 2.5rem
+    p.lightboxToolIconSize = 20;
+    p.lightboxToolOpacity = 0.12; // panel-bg 12%
+    p.lightboxToolHoverOpacity = 0.24;
+    p.lightboxDisabledOpacity = 0.4;
+    p.lightboxZoomLevelWidth = 64;
+    p.lightboxNarrowWidth = 767; // `max-width: 47.9375rem`
+    p.lightboxPlaceholderIconSize = 48;
+    p.lightboxPlaceholderOpacity = 0.64;
+    p.lightboxMaxZoom = 4; // index.tsx MAX_ZOOM
+    p.lightboxZoomStep = 0.5;
+    p.lightboxTapZoom = 2;
+    p.lightboxWheelStep = 1.15;
+    p.lightboxSwipeDistance = 60;
+    p.lightboxTransitionMs = 160; // `transition: transform 160ms ease-out`
+    p.lightboxThumbSmall = 40;    // `--lightbox-thumb-size` 2.5rem, 5.5rem and 9rem
+    p.lightboxThumbMedium = 88;
+    p.lightboxThumbLarge = 144;
     return p;
 }
 

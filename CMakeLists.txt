@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Qt 6.8 is the oldest Qt a consumer ships (KétChat); KetPlus uses 6.11.
 set(ketqt_qt_components Core Gui Svg)
 if(KETQT_BUILD_WIDGETS)
-    list(APPEND ketqt_qt_components Widgets)
+    list(APPEND ketqt_qt_components Widgets PrintSupport)
 endif()
 if(KETQT_BUILD_QUICK)
     list(APPEND ketqt_qt_components Qml Quick QuickControls2)
@@ -49,6 +49,7 @@ add_library(ketqt_tokens STATIC
     src/tokens/KetChatRecipes.h src/tokens/KetChatRecipes.cpp
     src/tokens/KetControlRecipes.h src/tokens/KetControlRecipes.cpp
     src/tokens/KetSurfaceRecipes.h src/tokens/KetSurfaceRecipes.cpp
+    src/tokens/KetLightboxRecipes.h src/tokens/KetLightboxRecipes.cpp
     src/tokens/KetProfile.h src/tokens/KetProfile.cpp
     src/tokens/KetProfileDesignSystem.cpp src/tokens/KetProfileKetPlus.cpp
 )
@@ -124,13 +125,18 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetAttachmentChip.h src/widgets/KetAttachmentChip.cpp
         src/widgets/KetMeter.h src/widgets/KetMeter.cpp
         src/widgets/KetPopover.h src/widgets/KetPopover.cpp
+        src/widgets/KetLightboxButton.h src/widgets/KetLightboxButton.cpp
+        src/widgets/KetLightboxThumb.h src/widgets/KetLightboxThumb.cpp
+        src/widgets/KetLightbox.h src/widgets/KetLightbox.cpp src/widgets/KetLightboxInput.cpp
+        src/widgets/KetPrint.h src/widgets/KetPrint.cpp
     )
     add_library(KetQt::Widgets ALIAS ketqt_widgets)
     target_include_directories(ketqt_widgets PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/widgets>"
         "$<INSTALL_INTERFACE:include/KetQt>"
     )
-    target_link_libraries(ketqt_widgets PUBLIC KetQt::Tokens KetQt::Icons Qt6::Widgets)
+    target_link_libraries(ketqt_widgets PUBLIC KetQt::Tokens KetQt::Icons Qt6::Widgets
+                                            Qt6::PrintSupport)
     set_target_properties(ketqt_widgets PROPERTIES EXPORT_NAME Widgets)
     ketqt_warnings(ketqt_widgets)
 endif()
@@ -145,7 +151,7 @@ if(KETQT_BUILD_QUICK)
         PLUGIN_TARGET ketqt_quickplugin
         OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/qml/Ket
         CLASS_NAME KetPlugin
-        SOURCES src/quick/KetTheme.h src/quick/KetTheme.cpp src/quick/KetThemeDetail.h src/quick/KetThemeSurfaces.cpp src/quick/KetThemeControls.cpp src/quick/KetThemeChat.cpp
+        SOURCES src/quick/KetTheme.h src/quick/KetTheme.cpp src/quick/KetThemeDetail.h src/quick/KetThemeSurfaces.cpp src/quick/KetThemeControls.cpp src/quick/KetThemeChat.cpp src/quick/KetThemeLightbox.cpp
         QML_FILES src/quick/qml/KetButton.qml src/quick/qml/KetIconButton.qml
                   src/quick/qml/KetBadge.qml src/quick/qml/KetTag.qml src/quick/qml/KetIcon.qml
                   src/quick/qml/KetTextField.qml src/quick/qml/KetSelect.qml
@@ -197,6 +203,9 @@ if(KETQT_BUILD_QUICK)
                   src/quick/qml/KetPopoverDivider.qml
                   src/quick/qml/KetPopoverText.qml
                   src/quick/qml/KetPopover.qml
+                  src/quick/qml/KetLightboxButton.qml
+                  src/quick/qml/KetLightboxThumb.qml
+                  src/quick/qml/KetLightbox.qml
         RESOURCE_PREFIX /qt/qml
     )
     foreach(file KetButton KetIconButton KetBadge KetTag KetIcon KetTextField KetSelect
@@ -205,7 +214,7 @@ if(KETQT_BUILD_QUICK)
                  KetNavItem KetKbd KetSegmentedControl KetTabBar KetTabButton KetProgressBar
                  KetActivityIndicator KetEmptyState KetConversationRow KetComposer
                  KetReadingText KetUserMessage KetAssistantMessage KetDayDivider KetActivityRow
-                 KetMarkdownText KetCodeBlock KetMarkdown KetMentionPicker KetUsageRing KetCommandPalette KetCommandResult KetFileRow KetChangedFiles KetDiffView KetTaskRow KetTaskBar KetUpdateCard KetUpdatePill KetThemeCard KetAccentSwatch KetPaneHeader KetBreadcrumb KetStatusBar KetStatusItem KetRouteTabs KetGroupHeader KetTreeItem KetAvatar KetStepSlider KetSlider KetGallery KetActivityGroup KetQuestionCard KetSuggestion KetAttachmentChip KetMeter KetPopoverDivider KetPopoverText KetPopover)
+                 KetMarkdownText KetCodeBlock KetMarkdown KetMentionPicker KetUsageRing KetCommandPalette KetCommandResult KetFileRow KetChangedFiles KetDiffView KetTaskRow KetTaskBar KetUpdateCard KetUpdatePill KetThemeCard KetAccentSwatch KetPaneHeader KetBreadcrumb KetStatusBar KetStatusItem KetRouteTabs KetGroupHeader KetTreeItem KetAvatar KetStepSlider KetSlider KetGallery KetActivityGroup KetQuestionCard KetSuggestion KetAttachmentChip KetMeter KetPopoverDivider KetPopoverText KetPopover KetLightboxButton KetLightboxThumb KetLightbox)
         set_source_files_properties(src/quick/qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
     endforeach()
     add_library(KetQt::Quick ALIAS ketqt_quick)
@@ -244,6 +253,7 @@ install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRe
               src/tokens/KetSurfaceRecipes.h
               src/tokens/KetControlRecipes.h
               src/tokens/KetChatRecipes.h
+              src/tokens/KetLightboxRecipes.h
               src/icons/KetIcons.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 if(KETQT_BUILD_WIDGETS)
@@ -276,6 +286,10 @@ if(KETQT_BUILD_WIDGETS)
                   src/widgets/KetAttachmentChip.h
                   src/widgets/KetMeter.h
                   src/widgets/KetPopover.h
+                  src/widgets/KetLightboxButton.h
+                  src/widgets/KetLightboxThumb.h
+                  src/widgets/KetLightbox.h
+                  src/widgets/KetPrint.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KetQt)
 endif()
 install(EXPORT KetQtTargets NAMESPACE KetQt:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KetQt)

@@ -2,6 +2,6 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(Qt6 6.8 COMPONENTS Core Gui Svg Widgets)
+find_dependency(Qt6 6.8 COMPONENTS Core Gui Svg Widgets PrintSupport)
 include("${CMAKE_CURRENT_LIST_DIR}/KetQtTargets.cmake")
 check_required_components(KetQt)

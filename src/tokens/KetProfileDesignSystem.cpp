@@ -442,6 +442,26 @@ Profile Profile::designSystem() {
     p.themeLabelPaddingInline = px(u"space-3");
     p.accentSwatchRadius = px(u"radius-md");
     p.accentSwatchBorder = 3;
+    // The image viewer: interactions/lightbox/styles.css and index.tsx.
+    p.lightboxBackdropOpacity = 0.92;
+    p.lightboxToolSize = px(u"space-10");
+    p.lightboxToolIconSize = 20;
+    p.lightboxToolOpacity = 0.12;
+    p.lightboxToolHoverOpacity = 0.24;
+    p.lightboxDisabledOpacity = 0.4;
+    p.lightboxZoomLevelWidth = px(u"space-16");
+    p.lightboxNarrowWidth = 767;
+    p.lightboxPlaceholderIconSize = px(u"space-12");
+    p.lightboxPlaceholderOpacity = 0.64;
+    p.lightboxMaxZoom = 4;
+    p.lightboxZoomStep = 0.5;
+    p.lightboxTapZoom = 2;
+    p.lightboxWheelStep = 1.15;
+    p.lightboxSwipeDistance = 60;
+    p.lightboxTransitionMs = 160;
+    p.lightboxThumbSmall = px(u"space-10");
+    p.lightboxThumbMedium = px(u"space-16") + px(u"space-6");
+    p.lightboxThumbLarge = 144;
     return p;
 }
 

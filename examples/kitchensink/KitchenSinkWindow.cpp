@@ -9,6 +9,7 @@
 #include "FoundationPages.h"
 #include "KetAppearance.h"
 #include "KitchenSinkCommon.h"
+#include "LightboxPages.h"
 #include "NavigationPages.h"
 #include "OverlayPages.h"
 #include "RichPages.h"
@@ -51,6 +52,7 @@ const PageEntry kPages[] = {
     {"chat", "Components", "Chat extras", chatPage},
     {"controls", "Components", "Controls and chrome", controlPage},
     {"surfaces", "Components", "Surfaces", surfacePage},
+    {"lightbox", "Components", "Image viewer", lightboxPage},
 };
 
 Theme theme() { return Appearance::instance().theme(); }
