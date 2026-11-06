@@ -61,6 +61,19 @@ class QuickTheme final : public QObject {
     Q_ENUM(ConversationStatus)
     enum class TaskStatus { Running, Stopping, Completed, Failed, Stopped };
     Q_ENUM(TaskStatus)
+    // Flags: combine with `|` for KetLightbox.tools.
+    enum class LightboxTool {
+        ZoomOut = 0x1,
+        ZoomLevel = 0x2,
+        ZoomIn = 0x4,
+        Rotate = 0x8,
+        Copy = 0x10,
+        Download = 0x20,
+        Fullscreen = 0x40
+    };
+    Q_ENUM(LightboxTool)
+    enum class LightboxThumbSize { Small, Medium, Large };
+    Q_ENUM(LightboxThumbSize)
 
     explicit QuickTheme(QObject* parent = nullptr);
     static QuickTheme* create(QQmlEngine*, QJSEngine*);
@@ -201,6 +214,13 @@ class QuickTheme final : public QObject {
                                             bool hovered, bool pressed, bool enabled,
                                             bool focused) const;
     Q_INVOKABLE QVariantMap accentSwatchRecipe(bool dark, qreal zoom) const;
+
+    // The image viewer (KetLightboxRecipes).
+    Q_INVOKABLE QVariantMap lightboxRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap lightboxToolRecipe(bool dark, qreal zoom, bool hovered, bool pressed,
+                                               bool enabled, bool focused) const;
+    Q_INVOKABLE QVariantMap lightboxThumbRecipe(bool dark, qreal zoom, int size,
+                                                bool focused) const;
 
     qreal animationClock() const { return animationClock_; }
     // A running indicator holds the clock and releases it when it stops.

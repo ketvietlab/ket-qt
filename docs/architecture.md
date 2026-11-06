@@ -88,7 +88,7 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery, Slider and step slider, Avatar, Tree item, Group header, Route tabs, Pane header, Breadcrumb, Status bar, Command palette, File explorer row, Changed files, Diff lines, Background tasks, Update card and pill, Theme card, Accent swatch (pill tabs are the Segmented control; the search field is a TextField with a leading icon) | None: every component of the mock is in the kit |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery, Slider and step slider, Avatar, Tree item, Group header, Route tabs, Pane header, Breadcrumb, Status bar, Command palette, File explorer row, Changed files, Diff lines, Background tasks, Update card and pill, Theme card, Accent swatch, Image viewer (lightbox, thumbnail, round tool; from the design system's `interactions/lightbox`) (pill tabs are the Segmented control; the search field is a TextField with a leading icon) | None: every component of the mock is in the kit |
 
 The surfaces only present data. `ket::DiffView` and `KetDiffView` draw lines that the app
 supplies (`parseUnified()` only reads a unified diff's hunks and line numbers); the file
@@ -139,6 +139,12 @@ search logic. The app filters the palette's groups as its query changes.
   when the header is hovered or focused.
 - **Activity groups** hold any rows, including a `ket::Gallery` of screenshots; the gallery
   emits `activated(index)` and the app opens its own preview.
+- **The image viewer** (`ket::Lightbox`, `KetLightbox`) follows the design system's lightbox
+  (decision 0003). It stays dark in both themes, where the design system's colour mix turns
+  it light in the dark theme. Hosts add Rotate, Copy, Download and Full screen tools, and a
+  Widgets host can put its own image engine on the stage. The Quick thumbnail masks its
+  picture with `MultiEffect` from `QtQuick.Effects`, the one effect in the kit: a Canvas
+  crop is not sharp at 2×.
 - **Line heights are CSS line boxes**, font size × line height in whole pixels. Qt's
   proportional line height scales the font's line spacing instead, so both layers use fixed
   line boxes (`QTextBlockFormat::FixedHeight`, `Text.FixedHeight`).

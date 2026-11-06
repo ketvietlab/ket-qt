@@ -19,7 +19,8 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
   `ket::StepSlider`, `ket::Avatar`, `ket::TreeItem`, `ket::GroupHeader`, `ket::RouteTabs`,
   `ket::StatusBar`, `ket::Breadcrumb`, `ket::PaneHeader`, `ket::CommandPalette`,
   `ket::FileRow`, `ket::ChangedFiles`, `ket::DiffView`, `ket::TaskBar`, `ket::TaskRow`,
-  `ket::UpdateCard`, `ket::UpdatePill`, `ket::ThemeCard`, `ket::AccentSwatch`;
+  `ket::UpdateCard`, `ket::UpdatePill`, `ket::ThemeCard`, `ket::AccentSwatch`,
+  `ket::Lightbox`, `ket::LightboxThumb`, `ket::LightboxButton`;
   `ket::Style` also draws every `QMenu`, the select popup, `QToolTip`, top
   `QTabBar`s, horizontal `QProgressBar`s and horizontal `QSlider`s.
 - `KetQt::Quick`: the QML module `Ket` with `KetTheme`, `KetButton`, `KetIconButton`,
@@ -35,7 +36,7 @@ app looks the same in both toolkits and on macOS, Windows and Linux.
   `KetRouteTabs`, `KetStatusBar`, `KetStatusItem`, `KetBreadcrumb`, `KetPaneHeader`,
   `KetCommandPalette`, `KetCommandResult`, `KetFileRow`, `KetChangedFiles`, `KetDiffView`,
   `KetTaskBar`, `KetTaskRow`, `KetUpdateCard`, `KetUpdatePill`, `KetThemeCard`,
-  `KetAccentSwatch`.
+  `KetAccentSwatch`, `KetLightbox`, `KetLightboxThumb`, `KetLightboxButton`.
 
 Components follow the new KetPlus desktop mock and are added in the order KetPlus uses
 them; see [docs/architecture.md](docs/architecture.md#component-scope-and-source).

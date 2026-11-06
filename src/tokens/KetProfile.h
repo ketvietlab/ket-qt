@@ -503,6 +503,26 @@ struct Profile {
     qreal themeLabelPaddingInline = 0;
     qreal accentSwatchRadius = 0;
     qreal accentSwatchBorder = 0;
+    // The image viewer (`interactions/lightbox`).
+    qreal lightboxBackdropOpacity = 0;
+    qreal lightboxToolSize = 0;
+    qreal lightboxToolIconSize = 0;
+    qreal lightboxToolOpacity = 0; // the glyph colour over the backdrop
+    qreal lightboxToolHoverOpacity = 0;
+    qreal lightboxDisabledOpacity = 0;
+    qreal lightboxZoomLevelWidth = 0;
+    qreal lightboxNarrowWidth = 0;
+    qreal lightboxPlaceholderIconSize = 0;
+    qreal lightboxPlaceholderOpacity = 0;
+    qreal lightboxMaxZoom = 0;
+    qreal lightboxZoomStep = 0;
+    qreal lightboxTapZoom = 0;
+    qreal lightboxWheelStep = 0;
+    qreal lightboxSwipeDistance = 0;
+    int lightboxTransitionMs = 0;
+    qreal lightboxThumbSmall = 0;
+    qreal lightboxThumbMedium = 0;
+    qreal lightboxThumbLarge = 0;
 
     [[nodiscard]] static Profile designSystem();
     [[nodiscard]] static Profile ketPlus();
