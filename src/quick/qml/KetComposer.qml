@@ -12,13 +12,17 @@ Item {
 
     property alias text: input.text
     property alias cursorPosition: input.cursorPosition
-    property alias placeholderText: input.placeholderText
+    property string placeholderText: qsTr("Ask for follow-up changes")
     property bool busy: false
     property alias leadingTools: leading.data
     property alias trailingTools: trailing.data
     readonly property bool focused: input.activeFocus
     readonly property var recipe: KetTheme.composerRecipe(KetTheme.dark, KetTheme.zoom, focused)
     readonly property real lineBox: Math.floor(recipe.textPixels * recipe.lineHeight)
+    // A fixed-height line sets its glyphs low in the box (baseline at four fifths); CSS
+    // centres them. The field's padding moves the difference below the text.
+    property real leadingShift: 0
+    onLineBoxChanged: Qt.callLater(input.reformat)
 
     // `@agent/` completion: answer mentionQuery(query) by setting mentionItems
     // ([{ number, title, place }]), which opens the picker; null closes it.
@@ -36,6 +40,11 @@ Item {
     // Attachments (`.attachment-chips`) above the input: [{ name, icon }]. Removing a chip
     // drops it from the list and emits attachmentRemoved().
     property var attachments: []
+
+    // Puts the caret in the message field.
+    function focusInput() {
+        input.forceActiveFocus()
+    }
 
     function removeAttachment(index) {
         if (index < 0 || index >= attachments.length)
@@ -189,15 +198,15 @@ Item {
 
                 Basic.TextArea {
                     id: input
+                    objectName: "composerInput"
                     wrapMode: TextEdit.Wrap
                     textFormat: TextEdit.PlainText
                     leftPadding: composer.recipe.textPaddingInline
                     rightPadding: composer.recipe.textPaddingInline
-                    topPadding: composer.recipe.textPaddingBlock
-                    bottomPadding: composer.recipe.textPaddingBlock
+                    topPadding: composer.recipe.textPaddingBlock - composer.leadingShift
+                    bottomPadding: composer.recipe.textPaddingBlock + composer.leadingShift
                     color: composer.recipe.text
-                    placeholderText: qsTr("Ask for follow-up changes")
-                    placeholderTextColor: composer.recipe.placeholder
+                    Accessible.description: composer.placeholderText
                     font.family: KetTheme.fontFamily
                     font.pixelSize: composer.recipe.textPixels
                     background: null
@@ -223,15 +232,38 @@ Item {
                     // TextEdit has no line height; the document's blocks carry the recipe's.
                     // Formatting changes the text again, hence the guard.
                     property bool formatting: false
-                    onTextChanged: {
-                        if (formatting)
-                            return
+                    function reformat() {
                         formatting = true
                         KetTheme.applyLineHeight(textDocument, composer.lineBox)
                         formatting = false
+                        // The caret rectangle changes here without a notification.
+                        const line = positionToRectangle(0)
+                        composer.leadingShift = line.y - topPadding
+                                                - (composer.lineBox - line.height) / 2
+                        placeholder.y = positionToRectangle(0).y
+                    }
+                    onTextChanged: {
+                        if (formatting)
+                            return
+                        reformat()
                         composer.updateMention()
                     }
-                    Component.onCompleted: KetTheme.applyLineHeight(textDocument, composer.lineBox)
+                    onWidthChanged: Qt.callLater(reformat)
+                    Component.onCompleted: reformat()
+
+                    // Basic's placeholder ignores the document's line height and sits above the
+                    // first line; this one starts where the caret does (see reformat()).
+                    Text {
+                        id: placeholder
+                        objectName: "composerPlaceholder"
+                        x: input.leftPadding
+                        width: input.width - input.leftPadding - input.rightPadding
+                        text: composer.placeholderText
+                        color: composer.recipe.placeholder
+                        font: input.font
+                        elide: Text.ElideRight
+                        visible: !input.length && !input.preeditText
+                    }
                 }
             }
 
