@@ -361,6 +361,7 @@ class TokensTest final : public QObject {
         const ConversationRowRecipe selected = conversationRowRecipe(true, {}, Theme::Light);
         QCOMPARE(selected.background, Tokens::color(u"surface-hover", Theme::Light));
         QCOMPARE(selected.titleWeight, 500);
+        QCOMPARE(row.metaWeight, 400);
         QCOMPARE(row.tagMaxWidth, 84.0);
 
         const ConversationStatusRecipe working =

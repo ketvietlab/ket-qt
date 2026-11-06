@@ -36,6 +36,7 @@ struct ConversationRowRecipe {
     int titleWeight = 400;
     qreal numberPixels = 0;
     qreal metaPixels = 0;
+    int metaWeight = 400; // the status label on the meta line
     qreal metaHeight = 0;
     qreal metaGap = 0; // between the number and the tags or status
     qreal tagGap = 0;

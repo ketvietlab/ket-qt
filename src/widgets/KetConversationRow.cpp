@@ -215,7 +215,7 @@ void ConversationRow::paintEvent(QPaintEvent*) {
                 QFontMetricsF(tagFont).elidedText(chip.text, Qt::ElideRight, label.width()));
         }
     } else {
-        const QFont metaFont = font(r.metaPixels);
+        const QFont metaFont = font(r.metaPixels, r.metaWeight);
         painter.setFont(metaFont);
         painter.setPen(s.labelColor);
         painter.drawText(

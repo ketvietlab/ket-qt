@@ -48,6 +48,7 @@ ConversationRowRecipe conversationRowRecipe(bool selected, const InteractionStat
         selected ? profile().conversationSelectedTitleWeight : profile().conversationTitleWeight;
     recipe.numberPixels = profile().conversationNumberPixels;
     recipe.metaPixels = profile().conversationMetaPixels;
+    recipe.metaWeight = profile().conversationMetaWeight;
     recipe.metaHeight = profile().conversationMetaHeight;
     recipe.metaGap = profile().conversationMetaGap;
     recipe.tagGap = profile().conversationTagGap;
@@ -271,6 +272,7 @@ QVariantMap toVariantMap(const ConversationRowRecipe& r) {
                   {"titleWeight", r.titleWeight},
                   {"numberPixels", r.numberPixels},
                   {"metaPixels", r.metaPixels},
+                  {"metaWeight", r.metaWeight},
                   {"metaHeight", r.metaHeight},
                   {"metaGap", r.metaGap},
                   {"tagGap", r.tagGap},

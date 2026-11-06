@@ -132,6 +132,7 @@ Profile Profile::ketPlus() {
     p.conversationTitleLineHeight = 17;
     p.conversationTitleWeight = 400;
     p.conversationSelectedTitleWeight = 500;
+    p.conversationMetaWeight = 400;
     p.conversationNumberPixels = 13; // `.conversation-number`, mono
     p.conversationMetaPixels = 12;
     p.conversationMetaHeight = 18;
