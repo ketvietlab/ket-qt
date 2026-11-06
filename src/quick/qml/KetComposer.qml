@@ -249,10 +249,12 @@ Item {
                 hoverEnabled: true
                 Accessible.name: look.stop ? qsTr("Stop turn")
                                  : composer.busy ? qsTr("Send guidance") : qsTr("Send request")
-                Basic.ToolTip.visible: hovered
-                Basic.ToolTip.delay: 600
-                Basic.ToolTip.text: Accessible.name
                 onClicked: look.stop ? composer.stopRequested() : composer.submit()
+
+                KetToolTip {
+                    visible: send.hovered
+                    text: send.Accessible.name
+                }
 
                 background: Rectangle {
                     radius: width / 2
