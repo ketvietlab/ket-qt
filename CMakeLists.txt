@@ -154,6 +154,7 @@ if(KETQT_BUILD_QUICK)
                   src/quick/qml/KetBanner.qml src/quick/qml/KetToast.qml
                   src/quick/qml/KetDialog.qml src/quick/qml/KetMenu.qml
                   src/quick/qml/KetMenuItem.qml src/quick/qml/KetMenuSeparator.qml
+                  src/quick/qml/KetMenuSection.qml
                   src/quick/qml/KetToolTip.qml src/quick/qml/KetNavItem.qml
                   src/quick/qml/KetKbd.qml src/quick/qml/KetSegmentedControl.qml
                   src/quick/qml/KetTabBar.qml src/quick/qml/KetTabButton.qml
@@ -199,7 +200,7 @@ if(KETQT_BUILD_QUICK)
     )
     foreach(file KetButton KetIconButton KetBadge KetTag KetIcon KetTextField KetSelect
                  KetToggleIndicator KetCheckbox KetRadio KetChoice KetFieldRow KetShadow
-                 KetBanner KetToast KetDialog KetMenu KetMenuItem KetMenuSeparator KetToolTip
+                 KetBanner KetToast KetDialog KetMenu KetMenuItem KetMenuSeparator KetMenuSection KetToolTip
                  KetNavItem KetKbd KetSegmentedControl KetTabBar KetTabButton KetProgressBar
                  KetActivityIndicator KetEmptyState KetConversationRow KetComposer
                  KetReadingText KetUserMessage KetAssistantMessage KetDayDivider KetActivityRow

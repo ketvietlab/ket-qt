@@ -125,6 +125,9 @@ Composer::Composer(QWidget* parent)
     column->addWidget(chips_);
     column->addLayout(input_);
     column->addWidget(toolbar_);
+    // Apps that keep their controls below the card leave both groups empty.
+    toolbar_->hide();
+    toolbar_->installEventFilter(this);
 
     connect(editor_, &QTextEdit::textChanged, this, [this] {
         static_cast<ActionButton*>(send_)->sync();
@@ -382,6 +385,13 @@ bool Composer::handleMentionKey(QKeyEvent* key) {
 }
 
 bool Composer::eventFilter(QObject* watched, QEvent* event) {
+    if (watched == toolbar_ &&
+        (event->type() == QEvent::ChildAdded || event->type() == QEvent::ChildRemoved)) {
+        // ChildAdded arrives before the layout takes the widget, so count afterwards.
+        QMetaObject::invokeMethod(
+            this, [this] { toolbar_->setVisible(leading_->count() + trailing_->count() > 0); },
+            Qt::QueuedConnection);
+    }
     if (watched == editor_) {
         if (event->type() == QEvent::FocusIn || event->type() == QEvent::FocusOut) {
             focused_ = event->type() == QEvent::FocusIn;

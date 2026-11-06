@@ -286,15 +286,21 @@ class TokensTest final : public QObject {
         const MenuRecipe menu = menuRecipe(Theme::Light);
         QCOMPARE(menu.minWidth, 210.0);
         QCOMPARE(menu.border, Tokens::color(u"border-strong", Theme::Light));
-        const MenuItemRecipe idle = menuItemRecipe(false, true, false, Theme::Light);
+        const MenuItemRecipe idle = menuItemRecipe(false, true, MenuItemTone::Normal, Theme::Light);
         QCOMPARE(idle.background.alpha(), 0);
         QCOMPARE(idle.height, 32.0);
-        const MenuItemRecipe hot = menuItemRecipe(true, true, false, Theme::Light);
+        const MenuItemRecipe hot = menuItemRecipe(true, true, MenuItemTone::Normal, Theme::Light);
         QCOMPARE(hot.background, Tokens::color(u"accent-subtle", Theme::Light));
         QCOMPARE(hot.text, Tokens::color(u"accent-text", Theme::Light));
-        QCOMPARE(menuItemRecipe(true, true, true, Theme::Light).text,
+        QCOMPARE(menuItemRecipe(true, true, MenuItemTone::Danger, Theme::Light).text,
                  Tokens::color(u"danger", Theme::Light));
-        const MenuItemRecipe off = menuItemRecipe(true, false, false, Theme::Light);
+        const MenuItemRecipe elevated =
+            menuItemRecipe(false, true, MenuItemTone::Warning, Theme::Light);
+        QCOMPARE(elevated.text, Tokens::color(u"warning", Theme::Light));
+        QCOMPARE(elevated.description, elevated.text);
+        QCOMPARE(menu.sectionText, Tokens::color(u"text-muted", Theme::Light));
+        QCOMPARE(menu.sectionHeight, 24.0);
+        const MenuItemRecipe off = menuItemRecipe(true, false, MenuItemTone::Normal, Theme::Light);
         QCOMPARE(off.background.alpha(), 0);
         QCOMPARE(off.opacity, 0.65);
 

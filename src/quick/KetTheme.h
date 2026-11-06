@@ -79,8 +79,9 @@ class QuickTheme final : public QObject {
     Q_INVOKABLE QVariantMap toastRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap dialogRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap menuRecipe(bool dark, qreal zoom) const;
+    // `tone` is a ket::MenuItemTone: 0 normal, 1 danger, 2 warning.
     Q_INVOKABLE QVariantMap menuItemRecipe(bool dark, qreal zoom, bool highlighted, bool enabled,
-                                           bool danger) const;
+                                           int tone) const;
     Q_INVOKABLE QVariantMap tooltipRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap navItemRecipe(bool dark, qreal zoom, bool selected, bool hovered,
                                           bool pressed, bool enabled, bool focused) const;

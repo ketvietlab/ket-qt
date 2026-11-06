@@ -73,6 +73,10 @@ QMenu* sampleMenu(QWidget* parent) {
     pin->setChecked(true);
     Style::setDescription(pin, QStringLiteral("Keep it above recent conversations."));
     menu->addAction(QStringLiteral("Archive"))->setEnabled(false);
+    menu->addSection(QStringLiteral("Mode"));
+    QAction* full = menu->addAction(Icons::icon(u"shield"), QStringLiteral("Full access"));
+    Style::setWarning(full);
+    Style::setDescription(full, QStringLiteral("Skip permission prompts"));
     menu->addSeparator();
     Style::setDanger(menu->addAction(Icons::icon(u"trash"), QStringLiteral("Delete")));
     return menu;

@@ -169,15 +169,16 @@ QVariantMap QuickTheme::dialogRecipe(bool dark, qreal zoom) const {
 QVariantMap QuickTheme::menuRecipe(bool dark, qreal zoom) const {
     QVariantMap recipe = toVariantMap(ket::menuRecipe(themeOf(dark)));
     scaleLengths(recipe, zoom,
-                 {u"minWidth", u"maxWidth", u"padding", u"radius", u"separatorMargin"});
+                 {u"minWidth", u"maxWidth", u"padding", u"radius", u"separatorMargin",
+                  u"sectionHeight", u"sectionPixels"});
     scaleLengths(recipe, zoom, kShadowLengths);
     return recipe;
 }
 
 QVariantMap QuickTheme::menuItemRecipe(bool dark, qreal zoom, bool highlighted, bool enabled,
-                                       bool danger) const {
-    QVariantMap recipe =
-        toVariantMap(ket::menuItemRecipe(highlighted, enabled, danger, themeOf(dark)));
+                                       int tone) const {
+    QVariantMap recipe = toVariantMap(
+        ket::menuItemRecipe(highlighted, enabled, ket::MenuItemTone(tone), themeOf(dark)));
     scaleLengths(recipe, zoom,
                  {u"height", u"radius", u"paddingStart", u"paddingEnd", u"spacing", u"checkSize",
                   u"iconSize", u"fontPixels", u"descriptionPixels", u"descriptionGap"});

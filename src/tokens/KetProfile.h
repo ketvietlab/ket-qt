@@ -94,6 +94,7 @@ struct Profile {
     qreal menuPadding = 0;
     qreal menuRadius = 0;
     qreal menuItemHeight = 0;
+    qreal menuSectionHeight = 0; // a group heading row
     qreal menuItemRadius = 0;
     qreal menuItemPaddingStart = 0;
     qreal menuItemPaddingEnd = 0;

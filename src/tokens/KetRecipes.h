@@ -201,12 +201,15 @@ struct MenuRecipe {
     QColor background;
     QColor border;
     QColor separator;
+    QColor sectionText; // a group heading such as "Mode"
     Shadow shadow;
     qreal minWidth = 0;
     qreal maxWidth = 0;
     qreal padding = 0;
     qreal radius = 0;
     qreal separatorMargin = 0;
+    qreal sectionHeight = 0;
+    qreal sectionPixels = 0;
 };
 
 struct MenuItemRecipe {
@@ -365,8 +368,10 @@ struct EmptyStateRecipe {
 [[nodiscard]] ToastRecipe toastRecipe(Theme theme);
 [[nodiscard]] DialogRecipe dialogRecipe(Theme theme);
 [[nodiscard]] MenuRecipe menuRecipe(Theme theme);
-// `highlighted` is hover or keyboard selection; `danger` is a destructive command.
-[[nodiscard]] MenuItemRecipe menuItemRecipe(bool highlighted, bool enabled, bool danger,
+// Danger is a destructive command; Warning is an elevated choice such as full access.
+enum class MenuItemTone { Normal, Danger, Warning };
+// `highlighted` is hover or keyboard selection.
+[[nodiscard]] MenuItemRecipe menuItemRecipe(bool highlighted, bool enabled, MenuItemTone tone,
                                             Theme theme);
 [[nodiscard]] TooltipRecipe tooltipRecipe(Theme theme);
 

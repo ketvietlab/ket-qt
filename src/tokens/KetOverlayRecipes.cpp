@@ -112,26 +112,36 @@ MenuRecipe menuRecipe(Theme theme) {
     recipe.background = token(u"panel-bg", theme);
     recipe.border = token(u"border-strong", theme);
     recipe.separator = token(u"panel-border", theme);
+    recipe.sectionText = token(u"text-muted", theme);
     recipe.shadow = shadowToken(u"shadow-md", theme);
     recipe.minWidth = profile().menuMinWidth;
     recipe.maxWidth = profile().menuMaxWidth;
     recipe.padding = profile().menuPadding;
     recipe.radius = profile().menuRadius;
     recipe.separatorMargin = profile().menuPadding - 1;
+    recipe.sectionHeight = profile().menuSectionHeight;
+    recipe.sectionPixels = Tokens::px(u"text-2xs");
     return recipe;
 }
 
-MenuItemRecipe menuItemRecipe(bool highlighted, bool enabled, bool danger, Theme theme) {
+MenuItemRecipe menuItemRecipe(bool highlighted, bool enabled, MenuItemTone tone, Theme theme) {
     MenuItemRecipe recipe;
     const bool live = enabled && highlighted;
     recipe.background = live ? token(u"accent-subtle", theme) : transparent();
     if (!enabled)
         recipe.text = token(u"text-muted", theme);
-    else if (danger)
+    else if (tone == MenuItemTone::Danger)
         recipe.text = token(u"danger", theme);
+    else if (tone == MenuItemTone::Warning)
+        recipe.text = token(u"warning", theme);
     else
         recipe.text = token(live ? u"accent-text" : u"text-main", theme);
-    recipe.description = live && !danger ? recipe.text : token(u"text-muted", theme);
+    // A warning keeps its colour on both lines, so the elevated choice reads at a glance.
+    if (enabled && tone == MenuItemTone::Warning)
+        recipe.description = recipe.text;
+    else
+        recipe.description =
+            live && tone == MenuItemTone::Normal ? recipe.text : token(u"text-muted", theme);
     recipe.height = profile().menuItemHeight;
     recipe.radius = profile().menuItemRadius;
     recipe.paddingStart = profile().menuItemPaddingStart;
@@ -240,7 +250,10 @@ QVariantMap toVariantMap(const MenuRecipe& r) {
                   {"maxWidth", r.maxWidth},
                   {"padding", r.padding},
                   {"radius", r.radius},
-                  {"separatorMargin", r.separatorMargin}});
+                  {"separatorMargin", r.separatorMargin},
+                  {"sectionText", r.sectionText},
+                  {"sectionHeight", r.sectionHeight},
+                  {"sectionPixels", r.sectionPixels}});
 }
 
 QVariantMap toVariantMap(const MenuItemRecipe& r) {

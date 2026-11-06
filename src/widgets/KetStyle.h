@@ -19,10 +19,13 @@ class Style final : public QProxyStyle {
     Style();
 
     // QAction properties read by the menu painter: a destructive command drawn in the
-    // danger colour, and a secondary line under the title (`.desktop-context-menu small`).
+    // danger colour, an elevated choice drawn in the warning colour, and a secondary line
+    // under the title (`.desktop-context-menu small`). QMenu::addSection draws a heading.
     static constexpr char kDangerProperty[] = "ketDanger";
+    static constexpr char kWarningProperty[] = "ketWarning";
     static constexpr char kDescriptionProperty[] = "ketDescription";
     static void setDanger(QAction* action, bool danger = true);
+    static void setWarning(QAction* action, bool warning = true);
     static void setDescription(QAction* action, const QString& description);
 
     static void install(QApplication& application);

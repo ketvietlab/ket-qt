@@ -281,9 +281,11 @@ Item {
             }
         }
 
+        // Hidden while both groups are empty: apps may keep their controls below the card.
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: composer.recipe.toolbarHeight
+            visible: leading.children.length + trailing.children.length > 0
             spacing: composer.recipe.toolbarGap
 
             Row { id: leading; spacing: composer.recipe.toolbarGap }

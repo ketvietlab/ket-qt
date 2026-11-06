@@ -66,6 +66,7 @@ Profile Profile::designSystem() {
     p.menuPadding = px(u"space-1");
     p.menuRadius = px(u"radius-md");
     p.menuItemHeight = px(u"control-height-md");
+    p.menuSectionHeight = px(u"space-6");
     p.menuItemRadius = px(u"radius-sm");
     p.menuItemPaddingStart = px(u"space-2");
     p.menuItemPaddingEnd = px(u"space-3");
