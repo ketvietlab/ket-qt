@@ -288,6 +288,12 @@ class QuickTest final : public QObject {
         QMetaObject::invokeMethod(segments, "select", Q_ARG(QVariant, 1));
         QCOMPARE(segments->property("currentIndex").toInt(), 1);
         QCOMPARE(root->property("tabs").value<QQuickItem*>()->implicitHeight(), 41.0);
+        // Overflowing tabs scroll inside the bar instead of drawing over the tools beside it.
+        auto* tabList = root->property("tabs")
+                            .value<QQuickItem*>()
+                            ->property("contentItem")
+                            .value<QQuickItem*>();
+        QVERIFY(tabList && tabList->clip());
         QCOMPARE(root->property("progress").value<QQuickItem*>()->implicitHeight(), 6.0);
         auto* activity = root->property("activity").value<QQuickItem*>();
         QCOMPARE(activity->implicitWidth(), 15.0);
@@ -376,6 +382,33 @@ class QuickTest final : public QObject {
         input->setProperty("cursorPosition", 0);
         QVERIFY(!placeholder->isVisible());
         QCOMPARE(input->property("cursorRectangle").toRectF().y(), empty.y());
+    }
+
+    // Looping indicators step on one shared clock that runs only while one of them is
+    // showing, so an idle window does not redraw at the display rate.
+    void loopingIndicatorsShareOneClock() {
+        std::unique_ptr<QObject> root = create(
+            QByteArrayLiteral("import QtQuick\nimport Ket\n"
+                              "Item { property alias row: row; property alias bars: bars\n"
+                              "  property real clock: KetTheme.animationClock\n"
+                              "  KetConversationRow { id: row; width: 320; text: \"Navigation\"\n"
+                              "    status: KetTheme.ConversationStatus.Working }\n"
+                              "  KetActivityIndicator { id: bars }\n"
+                              "}\n"));
+        QVERIFY(root);
+        auto* row = root->property("row").value<QQuickItem*>();
+        auto* bars = root->property("bars").value<QQuickItem*>();
+        QVERIFY(row->property("holdsClock").toBool());
+        QVERIFY(bars->property("holdsClock").toBool());
+        const qreal start = root->property("clock").toReal();
+        QTRY_VERIFY(root->property("clock").toReal() > start);
+        row->setVisible(false);
+        bars->setProperty("running", false);
+        QVERIFY(!row->property("holdsClock").toBool());
+        QVERIFY(!bars->property("holdsClock").toBool());
+        const qreal stopped = root->property("clock").toReal();
+        QTest::qWait(400);
+        QCOMPARE(root->property("clock").toReal(), stopped);
     }
 
     void richTranscriptBlocksLoad() {

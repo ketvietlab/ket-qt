@@ -168,6 +168,7 @@ struct Profile {
     qreal conversationTitleLineHeight = 0; // pixels
     int conversationTitleWeight = 400;
     int conversationSelectedTitleWeight = 400;
+    int conversationMetaWeight = 400;
     qreal conversationNumberPixels = 0;
     qreal conversationMetaPixels = 0;
     qreal conversationMetaHeight = 0;
@@ -228,6 +229,8 @@ struct Profile {
     qreal markdownHeading3Pixels = 0;
     qreal markdownHeadingLineHeight = 1.0;
     qreal markdownHeadingSpacingAfter = 0;
+    qreal markdownHeadingTracking = 0; // em, h1 and h2
+    qreal markdownTableCellPadding = 0;
     qreal markdownParagraphSpacing = 0;
     qreal markdownListIndent = 0;
     qreal markdownListItemGap = 0;

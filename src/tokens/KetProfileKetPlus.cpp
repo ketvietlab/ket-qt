@@ -132,6 +132,7 @@ Profile Profile::ketPlus() {
     p.conversationTitleLineHeight = 17;
     p.conversationTitleWeight = 400;
     p.conversationSelectedTitleWeight = 500;
+    p.conversationMetaWeight = 400;
     p.conversationNumberPixels = 13; // `.conversation-number`, mono
     p.conversationMetaPixels = 12;
     p.conversationMetaHeight = 18;
@@ -189,6 +190,8 @@ Profile Profile::ketPlus() {
     p.markdownHeading3Pixels = 20; // `.answer h3`
     p.markdownHeadingLineHeight = 1.4;
     p.markdownHeadingSpacingAfter = 7;
+    p.markdownHeadingTracking = -0.02; // not in the mock: tightens the two display sizes
+    p.markdownTableCellPadding = 8;
     p.markdownParagraphSpacing = 16; // `.answer p, .answer ul`
     p.markdownListIndent = 17;       // `.answer ul` padding-left
     p.markdownListItemGap = 5;

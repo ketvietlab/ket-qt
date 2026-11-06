@@ -2,9 +2,11 @@
 #pragma once
 
 #include <QColor>
+#include <QElapsedTimer>
 #include <QObject>
 #include <QQuickTextDocument>
 #include <QStringList>
+#include <QTimer>
 #include <QVariantMap>
 #include <QtQml/qqmlregistration.h>
 
@@ -28,6 +30,11 @@ class QuickTheme final : public QObject {
     Q_PROPERTY(QString monoFontFamily READ monoFontFamily CONSTANT)
     Q_PROPERTY(QString source READ source CONSTANT)
     Q_PROPERTY(QStringList iconCodes READ iconCodes CONSTANT)
+    // Milliseconds on one stepped clock shared by the looping indicators (the working
+    // spinner and the activity bars). It ticks only while an indicator holds it, and a few
+    // times a second rather than every frame: a Qt Quick animation redraws the whole
+    // window at the display rate, which kept an idle window busy.
+    Q_PROPERTY(qreal animationClock READ animationClock NOTIFY animationClockChanged)
   public:
     // Same order as ket::ButtonVariant, ket::ControlSize and ket::BadgeTone.
     enum class ButtonVariant { Primary, Secondary, Ghost, Danger, GhostDanger };
@@ -42,7 +49,15 @@ class QuickTheme final : public QObject {
     Q_ENUM(ToggleKind)
     enum class BannerTone { Info, Warning, Danger };
     Q_ENUM(BannerTone)
-    enum class ConversationStatus { NotStarted, Working, NeedsInput, Error, Completed, Stopped };
+    enum class ConversationStatus {
+        NotStarted,
+        Working,
+        NeedsInput,
+        Error,
+        Completed,
+        Stopped,
+        AwaitingReply
+    };
     Q_ENUM(ConversationStatus)
     enum class TaskStatus { Running, Stopping, Completed, Failed, Stopped };
     Q_ENUM(TaskStatus)
@@ -115,6 +130,13 @@ class QuickTheme final : public QObject {
     // Gives every block of a TextEdit's document a CSS line box of `pixels` (font size × line
     // height); Qt's proportional height would scale the font's line spacing instead.
     Q_INVOKABLE void applyLineHeight(QQuickTextDocument* document, qreal pixels) const;
+    // Syntax colours for a code TextEdit in the fence's language (ket::SyntaxHighlighter,
+    // kept on the document); call again when the theme changes.
+    Q_INVOKABLE void highlightCode(QQuickTextDocument* document, const QString& language,
+                                   bool dark) const;
+    // Each line of `code` as rich text with syntax colours, for a Text item per line.
+    Q_INVOKABLE QStringList highlightedLines(const QString& code, const QString& language,
+                                             bool dark) const;
     Q_INVOKABLE QVariantMap markdownRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap codeBlockRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap mentionPickerRecipe(bool dark, qreal zoom) const;
@@ -180,12 +202,23 @@ class QuickTheme final : public QObject {
                                             bool focused) const;
     Q_INVOKABLE QVariantMap accentSwatchRecipe(bool dark, qreal zoom) const;
 
+    qreal animationClock() const { return animationClock_; }
+    // A running indicator holds the clock and releases it when it stops.
+    Q_INVOKABLE void holdAnimationClock(bool hold);
+
   signals:
     void themeChanged();
     void zoomChanged();
+    void animationClockChanged();
 
   private:
+    void updateAnimationClock();
+
     QVariantMap tokens_;
+    QTimer animationTimer_;
+    QElapsedTimer animationElapsed_;
+    qreal animationClock_ = 0;
+    int animationHolds_ = 0;
 };
 
 } // namespace ket

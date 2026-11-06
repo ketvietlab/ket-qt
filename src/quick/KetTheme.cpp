@@ -9,6 +9,7 @@
 #include "KetProfile.h"
 #include "KetRecipes.h"
 #include "KetRichRecipes.h"
+#include "KetSyntax.h"
 
 #include <QFontDatabase>
 #include <QGuiApplication>
@@ -31,6 +32,8 @@ static_assert(int(QuickTheme::ToggleKind::Radio) == int(ket::ToggleKind::Radio))
 static_assert(int(QuickTheme::BannerTone::Danger) == int(ket::BannerTone::Danger));
 static_assert(int(QuickTheme::ConversationStatus::Stopped) ==
               int(ket::ConversationStatus::Stopped));
+static_assert(int(QuickTheme::ConversationStatus::AwaitingReply) ==
+              int(ket::ConversationStatus::AwaitingReply));
 
 } // namespace
 
@@ -42,6 +45,30 @@ QuickTheme::QuickTheme(QObject* parent) : QObject(parent) {
         emit themeChanged();
     });
     connect(&appearance, &Appearance::zoomChanged, this, &QuickTheme::zoomChanged);
+    animationElapsed_.start();
+    connect(&animationTimer_, &QTimer::timeout, this, [this] {
+        animationClock_ = qreal(animationElapsed_.elapsed());
+        emit animationClockChanged();
+    });
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this,
+            &QuickTheme::updateAnimationClock);
+}
+
+void QuickTheme::holdAnimationClock(bool hold) {
+    animationHolds_ = qMax(0, animationHolds_ + (hold ? 1 : -1));
+    updateAnimationClock();
+}
+
+// 20 steps a second in front, 4 behind another application: enough to read as moving.
+void QuickTheme::updateAnimationClock() {
+    if (animationHolds_ == 0) {
+        animationTimer_.stop();
+        return;
+    }
+    const bool active = QGuiApplication::applicationState() == Qt::ApplicationActive;
+    animationTimer_.setInterval(active ? 50 : 250);
+    if (!animationTimer_.isActive())
+        animationTimer_.start();
 }
 
 QuickTheme* QuickTheme::create(QQmlEngine*, QJSEngine*) { return new QuickTheme; }
@@ -356,6 +383,24 @@ void QuickTheme::applyLineHeight(QQuickTextDocument* document, qreal pixels) con
     QTextCursor cursor(document->textDocument());
     cursor.select(QTextCursor::Document);
     cursor.mergeBlockFormat(format);
+}
+
+void QuickTheme::highlightCode(QQuickTextDocument* document, const QString& language,
+                               bool dark) const {
+    QTextDocument* text = document ? document->textDocument() : nullptr;
+    if (!text)
+        return;
+    auto* highlighter =
+        text->findChild<ket::SyntaxHighlighter*>(QString(), Qt::FindDirectChildrenOnly);
+    if (!highlighter)
+        highlighter = new ket::SyntaxHighlighter(text);
+    highlighter->setLanguage(language);
+    highlighter->setRecipe(ket::syntaxRecipe(themeOf(dark)));
+}
+
+QStringList QuickTheme::highlightedLines(const QString& code, const QString& language,
+                                         bool dark) const {
+    return ket::highlightedLines(code, language, ket::syntaxRecipe(themeOf(dark)));
 }
 
 QVariantMap QuickTheme::markdownRecipe(bool dark, qreal zoom) const {

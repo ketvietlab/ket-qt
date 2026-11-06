@@ -126,6 +126,7 @@ Profile Profile::designSystem() {
     p.conversationTitleLineHeight = px(u"space-5");
     p.conversationTitleWeight = qRound(Tokens::number(u"weight-normal"));
     p.conversationSelectedTitleWeight = qRound(Tokens::number(u"weight-medium"));
+    p.conversationMetaWeight = qRound(Tokens::number(u"weight-normal"));
     p.conversationNumberPixels = px(u"text-sm");
     p.conversationMetaPixels = px(u"text-xs");
     p.conversationMetaHeight = px(u"space-5");
@@ -180,6 +181,8 @@ Profile Profile::designSystem() {
     p.markdownHeading3Pixels = px(u"text-xl");
     p.markdownHeadingLineHeight = 1.3;
     p.markdownHeadingSpacingAfter = px(u"space-2");
+    p.markdownHeadingTracking = -0.02; // no DS token; tightens the two display sizes
+    p.markdownTableCellPadding = px(u"space-2");
     p.markdownParagraphSpacing = px(u"space-4");
     p.markdownListIndent = px(u"space-5");
     p.markdownListItemGap = px(u"space-1");
