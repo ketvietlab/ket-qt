@@ -322,6 +322,36 @@ class LightboxTest final : public QObject {
             lightbox->moreMenu()->close();
         }
 
+        // An open menu follows the host's tool state and closes with the viewer.
+        {
+            QWidget window;
+            window.resize(420, 700);
+            auto* lightbox = new Lightbox(&window);
+            lightbox->setStage(new QWidget);
+            lightbox->setTools(all);
+            lightbox->setItems(threeItems());
+            window.show();
+            lightbox->open();
+            QVERIFY(QTest::qWaitForWindowExposed(&window));
+            QVERIFY(!lightbox->overflowTools().isEmpty());
+            const LightboxTool tool = lightbox->overflowTools().last();
+            QSignalSpy triggered(lightbox, &Lightbox::toolTriggered);
+            lightbox->moreButton()->click();
+            QTRY_VERIFY(lightbox->moreMenu()->isVisible());
+            QAction* action = lightbox->moreMenu()->actions().last();
+            QVERIFY(action->isEnabled());
+            lightbox->setToolEnabled(tool, false);
+            QVERIFY(!action->isEnabled());
+            action->setEnabled(true); // a stale action must still not reach a disabled tool
+            action->trigger();
+            QCOMPARE(triggered.size(), 0);
+            lightbox->setToolEnabled(tool, true);
+            QVERIFY(action->isEnabled());
+            lightbox->close();
+            QVERIFY(!lightbox->isVisible());
+            QVERIFY(!lightbox->moreMenu()->isVisible());
+        }
+
         QWidget wide;
         wide.resize(1600, 700);
         auto* roomy = new Lightbox(&wide);

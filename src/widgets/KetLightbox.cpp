@@ -114,10 +114,14 @@ Lightbox::Lightbox(QWidget* anchor) : QWidget(anchor->window()) {
     connect(more_, &QAbstractButton::clicked, this, [this] {
         moreMenu_->clear();
         for (LightboxTool tool : std::as_const(overflow_)) {
-            QAction* action =
-                moreMenu_->addAction(toolLabel(tool), this, [this, tool] { trigger(tool); });
-            action->setEnabled(buttons_.value(int(tool))->isEnabled());
+            QAction* action = moreMenu_->addAction(toolLabel(tool), this, [this, tool] {
+                // The host may have changed the tools while the menu was open.
+                if (overflow_.contains(tool) && buttons_.value(int(tool))->isEnabled())
+                    trigger(tool);
+            });
+            action->setData(int(tool));
         }
+        syncMoreMenu();
         moreMenu_->popup(more_->mapToGlobal(QPoint(0, more_->height())));
     });
     connect(close_, &QAbstractButton::clicked, this, &QWidget::close);
@@ -328,6 +332,12 @@ void Lightbox::open(int index) {
     emit opened();
 }
 
+void Lightbox::hideEvent(QHideEvent* event) {
+    QWidget::hideEvent(event);
+    if (moreMenu_)
+        moreMenu_->close();
+}
+
 void Lightbox::closeEvent(QCloseEvent* event) {
     QWidget::closeEvent(event);
     animation_.stop();
@@ -471,7 +481,23 @@ void Lightbox::refresh() {
     if (item)
         setAccessibleName(item->description.isEmpty() ? item->caption : item->description);
     place();
+    syncMoreMenu();
     update();
+}
+
+// Keep an open More menu in step with the buttons it stands in for.
+void Lightbox::syncMoreMenu() {
+    if (!moreMenu_)
+        return;
+    if (overflow_.isEmpty()) {
+        moreMenu_->close();
+        return;
+    }
+    for (QAction* action : moreMenu_->actions()) {
+        const auto tool = LightboxTool(action->data().toInt());
+        action->setVisible(overflow_.contains(tool));
+        action->setEnabled(buttons_.value(int(tool))->isEnabled());
+    }
 }
 
 void Lightbox::place() {

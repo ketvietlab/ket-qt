@@ -105,6 +105,7 @@ class Lightbox final : public QWidget {
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
@@ -124,6 +125,7 @@ class Lightbox final : public QWidget {
     void trigger(LightboxTool tool);
     void place();
     void refresh();
+    void syncMoreMenu();
     void resetView();
     void setView(View view, bool animated);
     [[nodiscard]] View zoomedAt(qreal zoom, QPointF anchor) const {
