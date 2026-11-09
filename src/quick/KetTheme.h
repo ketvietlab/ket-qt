@@ -222,6 +222,9 @@ class QuickTheme final : public QObject {
                                                bool enabled, bool focused) const;
     Q_INVOKABLE QVariantMap lightboxThumbRecipe(bool dark, qreal zoom, int size,
                                                 bool focused) const;
+    // ket::lightboxShownToolCount() for KetLightbox's toolbar, in the caller's pixels.
+    Q_INVOKABLE int lightboxShownToolCount(const QVariantList& widths, qreal roundWidth, qreal gap,
+                                           qreal available) const;
 
     qreal animationClock() const { return animationClock_; }
     // A running indicator holds the clock and releases it when it stops.

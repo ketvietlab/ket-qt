@@ -46,4 +46,12 @@ QVariantMap QuickTheme::lightboxThumbRecipe(bool dark, qreal zoom, int size, boo
     return recipe;
 }
 
+int QuickTheme::lightboxShownToolCount(const QVariantList& widths, qreal roundWidth, qreal gap,
+                                       qreal available) const {
+    QList<qreal> lengths;
+    for (const QVariant& width : widths)
+        lengths.append(width.toReal());
+    return ket::lightboxShownToolCount(lengths, roundWidth, gap, available);
+}
+
 } // namespace ket
