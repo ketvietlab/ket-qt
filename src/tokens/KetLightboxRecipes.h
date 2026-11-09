@@ -68,6 +68,12 @@ struct LightboxRecipe {
 };
 [[nodiscard]] LightboxRecipe lightboxRecipe(Theme theme);
 [[nodiscard]] QVariantMap toVariantMap(const LightboxRecipe& recipe);
+// How many of the toolbar's tools show in `available` width (the toolbar less its inline
+// padding and the counter). `widths` are the requested tools' widths in toolbar order and
+// `roundWidth` the Close and More tools'. Tools that do not fit go, last first, into a More
+// menu beside Close, which always shows.
+[[nodiscard]] int lightboxShownToolCount(const QList<qreal>& widths, qreal roundWidth, qreal gap,
+                                         qreal available);
 
 // The round toolbar and previous/next buttons (`[data-ui="lightbox-tool"]`).
 struct LightboxToolRecipe {

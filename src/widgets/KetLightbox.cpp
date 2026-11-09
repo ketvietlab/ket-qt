@@ -9,6 +9,7 @@
 #include <QAbstractButton>
 #include <QAccessible>
 #include <QApplication>
+#include <QMenu>
 #include <QPainter>
 #include <QPainterPath>
 #include <QTextLayout>
@@ -108,6 +109,21 @@ Lightbox::Lightbox(QWidget* anchor) : QWidget(anchor->window()) {
         buttons_.insert(int(tool), button);
     }
     close_ = add(QStringLiteral("close"), tr("Close"));
+    more_ = add(QStringLiteral("more"), tr("More tools"));
+    moreMenu_ = new QMenu(this);
+    connect(more_, &QAbstractButton::clicked, this, [this] {
+        moreMenu_->clear();
+        for (LightboxTool tool : std::as_const(overflow_)) {
+            QAction* action = moreMenu_->addAction(toolLabel(tool), this, [this, tool] {
+                // The host may have changed the tools while the menu was open.
+                if (overflow_.contains(tool) && buttons_.value(int(tool))->isEnabled())
+                    trigger(tool);
+            });
+            action->setData(int(tool));
+        }
+        syncMoreMenu();
+        moreMenu_->popup(more_->mapToGlobal(QPoint(0, more_->height())));
+    });
     connect(close_, &QAbstractButton::clicked, this, &QWidget::close);
     previous_ = add(QStringLiteral("chevron-left"), tr("Previous image"));
     connect(previous_, &QAbstractButton::clicked, this, &Lightbox::previous);
@@ -316,6 +332,12 @@ void Lightbox::open(int index) {
     emit opened();
 }
 
+void Lightbox::hideEvent(QHideEvent* event) {
+    QWidget::hideEvent(event);
+    if (moreMenu_)
+        moreMenu_->close();
+}
+
 void Lightbox::closeEvent(QCloseEvent* event) {
     QWidget::closeEvent(event);
     animation_.stop();
@@ -459,7 +481,23 @@ void Lightbox::refresh() {
     if (item)
         setAccessibleName(item->description.isEmpty() ? item->caption : item->description);
     place();
+    syncMoreMenu();
     update();
+}
+
+// Keep an open More menu in step with the buttons it stands in for.
+void Lightbox::syncMoreMenu() {
+    if (!moreMenu_)
+        return;
+    if (overflow_.isEmpty()) {
+        moreMenu_->close();
+        return;
+    }
+    for (QAction* action : moreMenu_->actions()) {
+        const auto tool = LightboxTool(action->data().toInt());
+        action->setVisible(overflow_.contains(tool));
+        action->setEnabled(buttons_.value(int(tool))->isEnabled());
+    }
 }
 
 void Lightbox::place() {
@@ -470,6 +508,25 @@ void Lightbox::place() {
     const int paddingInline = qRound(scaled(r.toolbarPaddingInline));
     const int paddingBlock = qRound(scaled(r.toolbarPaddingBlock));
     const int gap = qRound(scaled(r.toolbarGap));
+    // The requested tools that fit show; the rest, last first, move into the More menu.
+    QList<LightboxTool> requested;
+    QList<qreal> widths;
+    for (LightboxTool tool : kLightboxToolOrder) {
+        if (tools_.testFlag(tool)) {
+            requested.append(tool);
+            widths.append(buttons_.value(int(tool))->sizeHint().width());
+        }
+    }
+    qreal available = width() - 2 * paddingInline;
+    if (count() > 1) {
+        const QFontMetricsF counter(textFont(font(), r.counterPixels, true));
+        available -= counter.horizontalAdvance(tr("%1 / %2").arg(index_ + 1).arg(count())) + gap;
+    }
+    const int shown = lightboxShownToolCount(widths, close_->sizeHint().width(), gap, available);
+    overflow_ = requested.mid(shown);
+    for (int i = 0; i < requested.size(); ++i)
+        buttons_.value(int(requested.at(i)))->setVisible(i < shown);
+    more_->setVisible(!overflow_.isEmpty());
     int x = width() - paddingInline;
     auto placeRight = [&](QAbstractButton* button) {
         const QSize size = button->sizeHint();
@@ -478,6 +535,8 @@ void Lightbox::place() {
         x -= gap;
     };
     placeRight(close_);
+    if (more_->isVisibleTo(this))
+        placeRight(more_);
     for (auto it = std::rbegin(kLightboxToolOrder); it != std::rend(kLightboxToolOrder); ++it) {
         QAbstractButton* button = buttons_.value(int(*it));
         if (button->isVisibleTo(this))

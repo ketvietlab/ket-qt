@@ -9,8 +9,11 @@
 #include "KetTokens.h"
 
 #include <QAbstractButton>
+#include <QAction>
 #include <QApplication>
+#include <QFontMetricsF>
 #include <QImage>
+#include <QMenu>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQuickItem>
@@ -257,6 +260,152 @@ class LightboxTest final : public QObject {
     }
 
     // The Quick twin fits, zooms and steps as ket::Lightbox does at the same size.
+    // A narrow window keeps every tool reachable: those that do not fit, last first, move
+    // into a More menu beside Close, and none crosses the counter or the window's edge.
+    void narrowToolbarMovesToolsIntoMore() {
+        QCOMPARE(lightboxShownToolCount({40, 72, 40}, 40, 8, 1000), 3);
+        QCOMPARE(lightboxShownToolCount({40, 72, 40}, 40, 8, 40 + 3 * 8 + 152), 3);
+        QCOMPARE(lightboxShownToolCount({40, 72, 40}, 40, 8, 40 + 3 * 8 + 151), 1);
+        QCOMPARE(lightboxShownToolCount({40, 72, 40}, 40, 8, 88), 0);
+
+        const LightboxTools all = LightboxTool::ZoomOut | LightboxTool::ZoomLevel |
+                                  LightboxTool::ZoomIn | LightboxTool::Rotate | LightboxTool::Copy |
+                                  LightboxTool::Download | LightboxTool::Print |
+                                  LightboxTool::Fullscreen;
+        Appearance::instance().setZoom(1.5);
+        const LightboxRecipe r = lightboxRecipe(Theme::Light);
+        const qreal padding = r.toolbarPaddingInline * 1.5;
+        const qreal counterRight = [&] {
+            QFont font;
+            font.setPixelSize(qRound(r.counterPixels * 1.5));
+            return padding + QFontMetricsF(font).horizontalAdvance(QStringLiteral("1 / 3"));
+        }();
+
+        for (const int width : {420, 600}) {
+            QWidget window;
+            window.resize(width, 700);
+            auto* lightbox = new Lightbox(&window);
+            lightbox->setTools(all);
+            lightbox->setItems(threeItems());
+            window.show();
+            lightbox->open();
+            QVERIFY(QTest::qWaitForWindowExposed(&window));
+            QVERIFY(!lightbox->overflowTools().isEmpty());
+            QVERIFY(lightbox->moreButton()->isVisible());
+            QList<LightboxTool> shown;
+            for (LightboxTool tool :
+                 {LightboxTool::ZoomOut, LightboxTool::ZoomLevel, LightboxTool::ZoomIn,
+                  LightboxTool::Rotate, LightboxTool::Copy, LightboxTool::Download,
+                  LightboxTool::Print, LightboxTool::Fullscreen}) {
+                QAbstractButton* button = lightbox->toolButton(tool);
+                if (!button->isVisible())
+                    continue;
+                shown.append(tool);
+                QVERIFY2(button->geometry().left() >= counterRight,
+                         qPrintable(QStringLiteral("%1 px: tool at %2")
+                                        .arg(width)
+                                        .arg(button->geometry().left())));
+            }
+            QCOMPARE(shown.size() + lightbox->overflowTools().size(), 8);
+            QVERIFY(lightbox->moreButton()->geometry().left() >= counterRight);
+            QVERIFY(lightbox->closeButton()->geometry().right() <= width);
+            // The menu lists the hidden tools and triggers them.
+            QSignalSpy triggered(lightbox, &Lightbox::toolTriggered);
+            lightbox->moreButton()->click();
+            QTRY_VERIFY(lightbox->moreMenu()->isVisible());
+            const QList<QAction*> actions = lightbox->moreMenu()->actions();
+            QCOMPARE(actions.size(), lightbox->overflowTools().size());
+            actions.last()->trigger();
+            QCOMPARE(triggered.size(), 1);
+            QCOMPARE(triggered.first().first().value<LightboxTool>(),
+                     lightbox->overflowTools().last());
+            lightbox->moreMenu()->close();
+        }
+
+        // An open menu follows the host's tool state and closes with the viewer.
+        {
+            QWidget window;
+            window.resize(420, 700);
+            auto* lightbox = new Lightbox(&window);
+            lightbox->setStage(new QWidget);
+            lightbox->setTools(all);
+            lightbox->setItems(threeItems());
+            window.show();
+            lightbox->open();
+            QVERIFY(QTest::qWaitForWindowExposed(&window));
+            QVERIFY(!lightbox->overflowTools().isEmpty());
+            const LightboxTool tool = lightbox->overflowTools().last();
+            QSignalSpy triggered(lightbox, &Lightbox::toolTriggered);
+            lightbox->moreButton()->click();
+            QTRY_VERIFY(lightbox->moreMenu()->isVisible());
+            QAction* action = lightbox->moreMenu()->actions().last();
+            QVERIFY(action->isEnabled());
+            lightbox->setToolEnabled(tool, false);
+            QVERIFY(!action->isEnabled());
+            action->setEnabled(true); // a stale action must still not reach a disabled tool
+            action->trigger();
+            QCOMPARE(triggered.size(), 0);
+            lightbox->setToolEnabled(tool, true);
+            QVERIFY(action->isEnabled());
+            lightbox->close();
+            QVERIFY(!lightbox->isVisible());
+            QVERIFY(!lightbox->moreMenu()->isVisible());
+        }
+
+        QWidget wide;
+        wide.resize(1600, 700);
+        auto* roomy = new Lightbox(&wide);
+        roomy->setTools(all);
+        roomy->setItems(threeItems());
+        wide.show();
+        roomy->open();
+        QVERIFY(roomy->overflowTools().isEmpty());
+        QVERIFY(!roomy->moreButton()->isVisible());
+
+        // The Qt Quick viewer makes the same choice.
+        QQmlEngine engine;
+        QQmlComponent component(&engine);
+        component.setData(QByteArrayLiteral("import QtQuick\nimport Ket\n"
+                                            "Window { width: 420; height: 700; visible: true\n"
+                                            "  property alias box: box\n"
+                                            "  property int triggered: 0\n"
+                                            "  KetLightbox { id: box; tools: 0xff\n"
+                                            "    onToolTriggered: tool => triggered = tool } }\n"),
+                          QUrl());
+        std::unique_ptr<QObject> root(component.create());
+        QVERIFY2(root, qPrintable(component.errorString()));
+        auto* window = qobject_cast<QQuickWindow*>(root.get());
+        QVERIFY(QTest::qWaitForWindowExposed(window));
+        QObject* box = root->property("box").value<QObject*>();
+        QVariantList items;
+        for (int i = 0; i < 3; ++i)
+            items.append(QVariantMap{{QStringLiteral("source"), QString()}});
+        box->setProperty("items", items);
+        QMetaObject::invokeMethod(box, "openAt", Q_ARG(QVariant, 0));
+        QTRY_VERIFY(box->property("opened").toBool());
+        const QVariantList overflow = box->property("overflowTools").toList();
+        QVERIFY(!overflow.isEmpty());
+        QCOMPARE(box->property("shownToolCount").toInt() + overflow.size(), 8);
+        auto* more = qvariant_cast<QQuickItem*>(box->property("moreButton"));
+        QVERIFY(more && more->isVisible());
+        for (int tool = 1; tool <= 0x80; tool <<= 1) {
+            QQuickItem* button =
+                findItem(window->contentItem(), QStringLiteral("lightboxTool%1").arg(tool));
+            QVERIFY(button);
+            if (button->isVisible())
+                QVERIFY(button->mapToScene(QPointF()).x() >= counterRight);
+        }
+        QVERIFY(more->mapToScene(QPointF()).x() >= counterRight);
+        QMetaObject::invokeMethod(more, "clicked");
+        const int last = overflow.last().toMap().value(QStringLiteral("tool")).toInt();
+        QQuickItem* item = nullptr;
+        QTRY_VERIFY((item = findItem(window->contentItem(),
+                                     QStringLiteral("lightboxMoreItem%1").arg(last))));
+        QMetaObject::invokeMethod(item, "triggered");
+        QCOMPARE(root->property("triggered").toInt(), last);
+        Appearance::instance().setZoom(1.0);
+    }
+
     void quickViewerMatchesWidgets() {
         QTemporaryDir dir;
         QVERIFY(dir.isValid());

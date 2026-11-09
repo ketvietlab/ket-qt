@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 import QtQuick
+import QtQml.Models
 import QtQuick.Controls.Basic as Basic
 import Ket
 
@@ -32,6 +33,32 @@ Basic.Popup {
     readonly property alias ready: stage.ready
     readonly property alias image: picture
     readonly property alias closeButton: closeTool
+    readonly property alias moreButton: moreTool
+    // The requested tools in toolbar order; those past `shownToolCount` live in the More menu.
+    readonly property var requestedTools: toolModel.filter(entry => (tools & entry.tool) !== 0)
+    readonly property int shownToolCount: {
+        const widths = [];
+        for (let i = 0; i < toolRepeater.count; ++i) {
+            const button = toolRepeater.itemAt(i);
+            if (button && (tools & button.modelData.tool) !== 0)
+                widths.push(button.implicitWidth);
+        }
+        const counterRoom = counter.visible ? counter.implicitWidth + recipe.toolbarGap : 0;
+        return KetTheme.lightboxShownToolCount(widths, closeTool.implicitWidth, recipe.toolbarGap,
+                                               toolbar.width - 2 * recipe.toolbarPaddingInline - counterRoom);
+    }
+    readonly property var overflowTools: requestedTools.slice(shownToolCount)
+    readonly property var toolModel: [
+        { tool: KetTheme.LightboxTool.ZoomOut, code: "zoom-out", label: qsTr("Zoom out") },
+        { tool: KetTheme.LightboxTool.ZoomLevel, code: "", label: qsTr("Fit or actual size") },
+        { tool: KetTheme.LightboxTool.ZoomIn, code: "zoom-in", label: qsTr("Zoom in") },
+        // Két Symbol draws `restore` anticlockwise; mirrored it turns clockwise.
+        { tool: KetTheme.LightboxTool.Rotate, code: "restore", label: qsTr("Rotate") },
+        { tool: KetTheme.LightboxTool.Copy, code: "copy", label: qsTr("Copy image") },
+        { tool: KetTheme.LightboxTool.Download, code: "download", label: qsTr("Download") },
+        { tool: KetTheme.LightboxTool.Print, code: "printer", label: qsTr("Print…") },
+        { tool: KetTheme.LightboxTool.Fullscreen, code: "fullscreen", label: qsTr("Full screen") }
+    ]
 
     signal toolTriggered(int tool)
 
@@ -72,6 +99,15 @@ Basic.Popup {
         stage.turns = (stage.turns + 1) % 4
         stage.show({ zoom: 1, x: 0, y: 0 }, false)
     }
+    function toolEnabled(tool) {
+        if (tool === KetTheme.LightboxTool.Fullscreen)
+            return true
+        if (tool === KetTheme.LightboxTool.ZoomOut)
+            return stage.ready && stage.zoom > 1 + 1e-3
+        if (tool === KetTheme.LightboxTool.ZoomIn)
+            return stage.ready && stage.zoom < stage.maximumZoom - 1e-3
+        return stage.ready
+    }
     function trigger(tool) {
         toolTriggered(tool)
         if (tool === KetTheme.LightboxTool.ZoomOut)
@@ -99,6 +135,7 @@ Basic.Popup {
     font.family: KetTheme.fontFamily
     onCurrentIndexChanged: stage.reset()
     onOpened: closeTool.forceActiveFocus()
+    onClosed: moreMenu.close()
 
     background: Rectangle {
         color: lightbox.recipe.backdrop
@@ -134,6 +171,7 @@ Basic.Popup {
             height: lightbox.toolSize + 2 * lightbox.recipe.toolbarPaddingBlock
 
             Text {
+                id: counter
                 x: lightbox.recipe.toolbarPaddingInline
                 anchors.verticalCenter: parent.verticalCenter
                 visible: lightbox.count > 1
@@ -153,38 +191,51 @@ Basic.Popup {
                 spacing: lightbox.recipe.toolbarGap
 
                 Repeater {
-                    model: [
-                        { tool: KetTheme.LightboxTool.ZoomOut, code: "zoom-out", label: qsTr("Zoom out") },
-                        { tool: KetTheme.LightboxTool.ZoomLevel, code: "", label: qsTr("Fit or actual size") },
-                        { tool: KetTheme.LightboxTool.ZoomIn, code: "zoom-in", label: qsTr("Zoom in") },
-                        // Két Symbol draws `restore` anticlockwise; mirrored it turns clockwise.
-                        { tool: KetTheme.LightboxTool.Rotate, code: "restore", label: qsTr("Rotate") },
-                        { tool: KetTheme.LightboxTool.Copy, code: "copy", label: qsTr("Copy image") },
-                        { tool: KetTheme.LightboxTool.Download, code: "download", label: qsTr("Download") },
-                        { tool: KetTheme.LightboxTool.Print, code: "printer", label: qsTr("Print…") },
-                        { tool: KetTheme.LightboxTool.Fullscreen, code: "fullscreen", label: qsTr("Full screen") }
-                    ]
+                    id: toolRepeater
+                    model: lightbox.toolModel
 
                     KetLightboxButton {
                         required property var modelData
                         objectName: "lightboxTool" + modelData.tool
                         visible: (lightbox.tools & modelData.tool) !== 0
+                                 && lightbox.requestedTools.findIndex(entry => entry.tool === modelData.tool)
+                                    < lightbox.shownToolCount
                         code: modelData.code
                         flipped: modelData.tool === KetTheme.LightboxTool.Rotate
                         label: modelData.label
                         text: modelData.tool === KetTheme.LightboxTool.ZoomLevel
                               ? (stage.ready ? Math.round(stage.fitScale * stage.zoom * 100) + "%" : "—")
                               : ""
-                        enabled: {
-                            if (modelData.tool === KetTheme.LightboxTool.Fullscreen)
-                                return true
-                            if (modelData.tool === KetTheme.LightboxTool.ZoomOut)
-                                return stage.ready && stage.zoom > 1 + 1e-3
-                            if (modelData.tool === KetTheme.LightboxTool.ZoomIn)
-                                return stage.ready && stage.zoom < stage.maximumZoom - 1e-3
-                            return stage.ready
-                        }
+                        enabled: lightbox.toolEnabled(modelData.tool)
                         onClicked: lightbox.trigger(modelData.tool)
+                    }
+                }
+
+                // The tools a narrow window cannot fit, in toolbar order.
+                KetLightboxButton {
+                    id: moreTool
+                    objectName: "lightboxMore"
+                    visible: lightbox.overflowTools.length > 0
+                    code: "more"
+                    label: qsTr("More tools")
+                    onClicked: moreMenu.popup(moreTool, 0, moreTool.height)
+
+                    KetMenu {
+                        id: moreMenu
+                        objectName: "lightboxMoreMenu"
+
+                        Instantiator {
+                            model: lightbox.overflowTools
+                            delegate: KetMenuItem {
+                                required property var modelData
+                                objectName: "lightboxMoreItem" + modelData.tool
+                                text: modelData.label
+                                enabled: lightbox.toolEnabled(modelData.tool)
+                                onTriggered: lightbox.trigger(modelData.tool)
+                            }
+                            onObjectAdded: (index, object) => moreMenu.insertItem(index, object)
+                            onObjectRemoved: (index, object) => moreMenu.removeItem(object)
+                        }
                     }
                 }
 

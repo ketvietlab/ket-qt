@@ -11,6 +11,8 @@
 
 class QAbstractButton;
 
+class QMenu;
+
 namespace ket {
 
 struct LightboxItem {
@@ -72,6 +74,11 @@ class Lightbox final : public QWidget {
     [[nodiscard]] bool isOpen() const { return isVisible(); }
     [[nodiscard]] QAbstractButton* toolButton(LightboxTool tool) const;
     [[nodiscard]] QAbstractButton* closeButton() const { return close_; }
+    // Beside Close when the window is too narrow for every tool; it opens moreMenu().
+    [[nodiscard]] QAbstractButton* moreButton() const { return more_; }
+    [[nodiscard]] QMenu* moreMenu() const { return moreMenu_; }
+    // The requested tools the toolbar cannot fit, in toolbar order.
+    [[nodiscard]] QList<LightboxTool> overflowTools() const { return overflow_; }
     [[nodiscard]] QAbstractButton* previousButton() const { return previous_; }
     [[nodiscard]] QAbstractButton* nextButton() const { return next_; }
     [[nodiscard]] LightboxRecipe recipe() const;
@@ -98,6 +105,7 @@ class Lightbox final : public QWidget {
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
@@ -117,6 +125,7 @@ class Lightbox final : public QWidget {
     void trigger(LightboxTool tool);
     void place();
     void refresh();
+    void syncMoreMenu();
     void resetView();
     void setView(View view, bool animated);
     [[nodiscard]] View zoomedAt(qreal zoom, QPointF anchor) const {
@@ -145,6 +154,9 @@ class Lightbox final : public QWidget {
     QVariantAnimation animation_;
     QHash<int, QAbstractButton*> buttons_;
     QAbstractButton* close_ = nullptr;
+    QAbstractButton* more_ = nullptr;
+    QMenu* moreMenu_ = nullptr;
+    QList<LightboxTool> overflow_;
     QAbstractButton* previous_ = nullptr;
     QAbstractButton* next_ = nullptr;
     QPointer<QWidget> restoreFocus_;

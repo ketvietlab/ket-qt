@@ -27,6 +27,10 @@ system already defines the look and behaviour in `interactions/lightbox`.
   - ZoomLevel, a percentage that toggles fit and 100 %;
   - Rotate, Copy, Download, Print and Full screen.
   Copy, Download and Full screen are always host actions.
+- When the window is too narrow for every requested tool beside the counter, the tools that
+  do not fit move, last first, into a More menu (Két Symbol `more`) beside Close.
+  `ket::lightboxShownToolCount()` makes that choice for both layers. Close always shows, and
+  every tool stays reachable.
 - Print opens the system print dialog (`ket::printImage()`, Qt Print Support in
   `KetQt::Widgets`), fitted to the page and never enlarged beyond 96 dpi.
   - `ket::Lightbox` prints its built-in picture itself.

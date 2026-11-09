@@ -155,4 +155,18 @@ QVariantMap toVariantMap(const LightboxThumbRecipe& r) {
                   {"focusOffset", r.focusOffset}});
 }
 
+int lightboxShownToolCount(const QList<qreal>& widths, qreal roundWidth, qreal gap,
+                           qreal available) {
+    qreal all = roundWidth; // Close
+    for (const qreal width : widths)
+        all += width + gap;
+    if (all <= available)
+        return int(widths.size());
+    qreal used = 2 * roundWidth + gap; // More and Close
+    int shown = 0;
+    while (shown < widths.size() && used + widths.at(shown) + gap <= available)
+        used += widths.at(shown++) + gap;
+    return shown;
+}
+
 } // namespace ket
