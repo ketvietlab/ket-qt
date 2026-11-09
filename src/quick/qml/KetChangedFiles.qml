@@ -7,12 +7,15 @@ import Ket
 // it: a heading with the totals, one row per file and a footer for actions and a note.
 // `files` is a list of { name, path, added, removed, known }; a click emits fileActivated(index).
 // A file with `known: false` has no line counts to show, and the heading shows no totals then.
+// Set `complete` to false when `files` lists only part of the change: the heading then shows
+// no totals either, since they would count only the listed files.
 Item {
     id: card
 
     property var files: []
     property string title
     property string note
+    property bool complete: true
     property alias footer: footerRow.data
     readonly property var recipe: KetTheme.changedFilesRecipe(KetTheme.dark, KetTheme.zoom)
     readonly property int addedTotal: files.reduce((sum, file) => sum + (file.added || 0), 0)
@@ -110,7 +113,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 added: card.addedTotal
                 removed: card.removedTotal
-                known: card.countsKnown
+                known: card.countsKnown && card.complete
             }
         }
 

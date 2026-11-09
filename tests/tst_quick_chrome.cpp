@@ -148,6 +148,15 @@ class QuickChromeTest final : public QObject {
         QVERIFY(!changes->property("countsKnown").toBool());
         QTRY_COMPARE(totals->implicitWidth(), 0.0);
         QTRY_VERIFY(countWidths().contains(0.0));
+        // Nor are totals over a list that is not complete.
+        changes->setProperty("files", QVariantList{QVariantMap{{"name", "a"}, {"added", 2}}});
+        QTRY_VERIFY(totals->implicitWidth() > 0);
+        changes->setProperty("complete", false);
+        QTRY_COMPARE(totals->implicitWidth(), 0.0);
+        changes->setProperty("complete", true);
+        changes->setProperty("files", QVariantList{QVariantMap{{"name", "a"}, {"added", 2}},
+                                                   QVariantMap{{"name", "b"}, {"known", false}}});
+        QTRY_VERIFY(countWidths().contains(0.0));
         const auto widths = countWidths();
         QCOMPARE(
             std::count_if(widths.cbegin(), widths.cend(), [](qreal width) { return width > 0; }),
