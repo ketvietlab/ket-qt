@@ -9,6 +9,7 @@
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQuickItem>
+#include <QSignalSpy>
 #include <QTest>
 #include <QtQml/qqmlextensionplugin.h>
 #include <cmath>
@@ -445,6 +446,13 @@ class QuickTest final : public QObject {
         QVERIFY(bars->property("holdsClock").toBool());
         const qreal start = root->property("clock").toReal();
         QTRY_VERIFY(root->property("clock").toReal() > start);
+        // A visible window behind another application keeps the same steps, so its
+        // spinners do not stutter.
+        QVERIFY(QGuiApplication::applicationState() != Qt::ApplicationActive);
+        QSignalSpy steps(root.get(), SIGNAL(clockChanged()));
+        QTest::qWait(500);
+        QVERIFY2(steps.size() >= 7,
+                 qPrintable(QStringLiteral("%1 steps in 500 ms").arg(steps.size())));
         row->setVisible(false);
         bars->setProperty("running", false);
         QVERIFY(!row->property("holdsClock").toBool());

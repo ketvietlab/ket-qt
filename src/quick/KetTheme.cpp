@@ -50,8 +50,6 @@ QuickTheme::QuickTheme(QObject* parent) : QObject(parent) {
         animationClock_ = qreal(animationElapsed_.elapsed());
         emit animationClockChanged();
     });
-    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this,
-            &QuickTheme::updateAnimationClock);
 }
 
 void QuickTheme::holdAnimationClock(bool hold) {
@@ -59,14 +57,15 @@ void QuickTheme::holdAnimationClock(bool hold) {
     updateAnimationClock();
 }
 
-// 20 steps a second in front, 4 behind another application: enough to read as moving.
+// 20 steps a second, in front or behind another application: a visible window behind
+// another app is still watched, and fewer steps make spinners stutter. Holders release
+// the clock when hidden, minimized or under reduced motion.
 void QuickTheme::updateAnimationClock() {
     if (animationHolds_ == 0) {
         animationTimer_.stop();
         return;
     }
-    const bool active = QGuiApplication::applicationState() == Qt::ApplicationActive;
-    animationTimer_.setInterval(active ? 50 : 250);
+    animationTimer_.setInterval(50);
     if (!animationTimer_.isActive())
         animationTimer_.start();
 }
