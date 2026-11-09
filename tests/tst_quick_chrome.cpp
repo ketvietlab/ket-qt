@@ -10,6 +10,8 @@
 #include <QQuickItem>
 #include <QTest>
 #include <QtQml/qqmlextensionplugin.h>
+#include <algorithm>
+#include <functional>
 
 Q_IMPORT_QML_PLUGIN(KetPlugin)
 
@@ -124,6 +126,41 @@ class QuickChromeTest final : public QObject {
         auto* changes = root->property("changes").value<QQuickItem*>();
         QCOMPARE(changes->property("addedTotal").toInt(), 5);
         QCOMPARE(changes->property("removedTotal").toInt(), 1);
+        QVERIFY(changes->property("countsKnown").toBool());
+        // Repeater rows are visual children, not QObject children.
+        const auto countWidths = [changes] {
+            QList<qreal> widths;
+            std::function<void(QQuickItem*)> visit = [&](QQuickItem* item) {
+                if (item->objectName() == QLatin1String("changedFileCounts"))
+                    widths.append(item->implicitWidth());
+                for (auto* child : item->childItems())
+                    visit(child);
+            };
+            visit(changes);
+            return widths;
+        };
+        auto* totals = changes->findChild<QQuickItem*>("changedFilesTotals");
+        QVERIFY(totals && totals->implicitWidth() > 0);
+        QCOMPARE(countWidths().size(), 2);
+        // Unknown counts are not shown as numbers, neither on the row nor as totals.
+        changes->setProperty("files", QVariantList{QVariantMap{{"name", "a"}, {"added", 2}},
+                                                   QVariantMap{{"name", "b"}, {"known", false}}});
+        QVERIFY(!changes->property("countsKnown").toBool());
+        QTRY_COMPARE(totals->implicitWidth(), 0.0);
+        QTRY_VERIFY(countWidths().contains(0.0));
+        // Nor are totals over a list that is not complete.
+        changes->setProperty("files", QVariantList{QVariantMap{{"name", "a"}, {"added", 2}}});
+        QTRY_VERIFY(totals->implicitWidth() > 0);
+        changes->setProperty("complete", false);
+        QTRY_COMPARE(totals->implicitWidth(), 0.0);
+        changes->setProperty("complete", true);
+        changes->setProperty("files", QVariantList{QVariantMap{{"name", "a"}, {"added", 2}},
+                                                   QVariantMap{{"name", "b"}, {"known", false}}});
+        QTRY_VERIFY(countWidths().contains(0.0));
+        const auto widths = countWidths();
+        QCOMPARE(
+            std::count_if(widths.cbegin(), widths.cend(), [](qreal width) { return width > 0; }),
+            1);
 
         auto* diff = root->property("diff").value<QQuickItem*>();
         QVariant lines;

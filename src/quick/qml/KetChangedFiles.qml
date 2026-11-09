@@ -5,17 +5,22 @@ import Ket
 
 // The changed-files card under an agent turn (`.changed-files`), as ket::ChangedFiles draws
 // it: a heading with the totals, one row per file and a footer for actions and a note.
-// `files` is a list of { name, path, added, removed }; a click emits fileActivated(index).
+// `files` is a list of { name, path, added, removed, known }; a click emits fileActivated(index).
+// A file with `known: false` has no line counts to show, and the heading shows no totals then.
+// Set `complete` to false when `files` lists only part of the change: the heading then shows
+// no totals either, since they would count only the listed files.
 Item {
     id: card
 
     property var files: []
     property string title
     property string note
+    property bool complete: true
     property alias footer: footerRow.data
     readonly property var recipe: KetTheme.changedFilesRecipe(KetTheme.dark, KetTheme.zoom)
     readonly property int addedTotal: files.reduce((sum, file) => sum + (file.added || 0), 0)
     readonly property int removedTotal: files.reduce((sum, file) => sum + (file.removed || 0), 0)
+    readonly property bool countsKnown: files.every(file => file.known !== false)
 
     signal fileActivated(int index)
 
@@ -27,9 +32,11 @@ Item {
     component Counts: Row {
         property int added
         property int removed
+        property bool known: true
         spacing: KetTheme.t.space15
 
         Text {
+            visible: parent.known
             text: "+" + parent.added
             color: card.recipe.added
             font.family: KetTheme.fontFamily
@@ -37,6 +44,7 @@ Item {
         }
 
         Text {
+            visible: parent.known
             text: "−" + parent.removed
             color: card.recipe.removed
             font.family: KetTheme.fontFamily
@@ -99,11 +107,13 @@ Item {
 
             Counts {
                 id: totals
+                objectName: "changedFilesTotals"
                 anchors.right: parent.right
                 anchors.rightMargin: card.recipe.paddingInline
                 anchors.verticalCenter: parent.verticalCenter
                 added: card.addedTotal
                 removed: card.removedTotal
+                known: card.countsKnown && card.complete
             }
         }
 
@@ -124,8 +134,10 @@ Item {
                 text: modelData.name
                 Accessible.role: Accessible.Button
                 Accessible.name: modelData.name
-                Accessible.description: qsTr("%1, %2 added, %3 removed").arg(modelData.path || "")
-                                        .arg(modelData.added || 0).arg(modelData.removed || 0)
+                Accessible.description: modelData.known === false
+                    ? qsTr("%1, line counts unknown").arg(modelData.path || "")
+                    : qsTr("%1, %2 added, %3 removed").arg(modelData.path || "")
+                          .arg(modelData.added || 0).arg(modelData.removed || 0)
                 onClicked: card.fileActivated(index)
 
                 background: Rectangle {
@@ -182,11 +194,13 @@ Item {
 
                     Counts {
                         id: counts
+                        objectName: "changedFileCounts"
                         anchors.right: arrow.left
                         anchors.rightMargin: card.recipe.rowGap
                         anchors.verticalCenter: parent.verticalCenter
                         added: row.modelData.added || 0
                         removed: row.modelData.removed || 0
+                        known: row.modelData.known !== false
                     }
 
                     KetIcon {
