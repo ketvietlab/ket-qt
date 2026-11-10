@@ -4,6 +4,7 @@
 #include "KetAppearance.h"
 #include "KetIcons.h"
 
+#include <QLineEdit>
 #include <QPainter>
 
 namespace ket {
@@ -66,13 +67,55 @@ void Select::paintEvent(QPaintEvent*) {
     const qreal box = appearance.scaled(r.iconSize);
     painter.drawPixmap(QPointF(width() - padding - box, (height() - box) / 2.0),
                        Icons::pixmap(u"chevron-down", box, devicePixelRatioF(), r.icon));
-    const QRectF textRect(padding, 0, width() - 2 * padding - box - appearance.scaled(r.spacing),
-                          height());
+    // Editable, the line edit draws the text; drawing it here too doubled it (ket-qt#43).
+    if (isEditable()) {
+        placeLineEdit(r);
+        return;
+    }
+    const QRectF text = textRect(r);
     painter.setFont(fieldFont());
     painter.setPen(r.text);
-    painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter,
-                     QFontMetrics(painter.font())
-                         .elidedText(currentText(), Qt::ElideRight, int(textRect.width())));
+    painter.drawText(
+        text, Qt::AlignLeft | Qt::AlignVCenter,
+        QFontMetrics(painter.font()).elidedText(currentText(), Qt::ElideRight, int(text.width())));
+}
+
+QRectF Select::textRect(const FieldRecipe& r) const {
+    const Appearance& appearance = Appearance::instance();
+    const qreal padding = appearance.scaled(r.paddingInline);
+    const qreal box = appearance.scaled(r.iconSize);
+    return {padding, 0, width() - 2 * padding - box - appearance.scaled(r.spacing),
+            qreal(height())};
+}
+
+void Select::resizeEvent(QResizeEvent* event) {
+    QComboBox::resizeEvent(event);
+    if (isEditable())
+        placeLineEdit(recipe());
+}
+
+void Select::placeLineEdit(const FieldRecipe& r) {
+    QLineEdit* edit = lineEdit();
+    if (edit == nullptr)
+        return;
+    const QRect target = textRect(r).toAlignedRect();
+    if (edit->geometry() != target)
+        edit->setGeometry(target);
+    if (edit->hasFrame())
+        edit->setFrame(false);
+    const QFont font = fieldFont();
+    if (edit->font() != font)
+        edit->setFont(font);
+    QPalette palette = edit->palette();
+    if (palette.color(QPalette::Text) != r.text ||
+        palette.color(QPalette::Base) != Qt::transparent) {
+        palette.setColor(QPalette::Text, r.text);
+        palette.setColor(QPalette::Base, Qt::transparent);
+        palette.setColor(QPalette::Window, Qt::transparent);
+        edit->setPalette(palette);
+    }
+    edit->setTextMargins(0, 0, 0, 0);
+    edit->setAutoFillBackground(false);
 }
 
 } // namespace ket

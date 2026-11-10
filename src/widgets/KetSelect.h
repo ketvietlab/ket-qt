@@ -22,9 +22,13 @@ class Select final : public QComboBox {
 
   protected:
     void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
   private:
     [[nodiscard]] QFont fieldFont() const;
+    [[nodiscard]] QRectF textRect(const FieldRecipe& recipe) const;
+    // An editable select leaves its text to the line edit, placed in the recipe's text rect.
+    void placeLineEdit(const FieldRecipe& recipe);
 
     std::optional<InteractionState> preview_;
 };
