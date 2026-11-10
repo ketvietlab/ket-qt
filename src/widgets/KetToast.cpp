@@ -8,6 +8,7 @@
 #include <QAccessible>
 #include <QEvent>
 #include <QPainter>
+#include <QTextLayout>
 #include <QtMath>
 
 namespace ket {
@@ -76,6 +77,29 @@ QMargins Toast::margins() const {
     return {qCeil(m.left()), qCeil(m.top()), qCeil(m.right()), qCeil(m.bottom())};
 }
 
+namespace {
+
+// Lays the message out in lines no wider than width. Words break at spaces, and a run without
+// one (a URL, a path) breaks anywhere, so the text never runs past the card.
+QSizeF layoutText(QTextLayout& layout, const qreal width) {
+    QTextOption option;
+    option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    layout.setTextOption(option);
+    layout.beginLayout();
+    qreal height = 0;
+    qreal widest = 0;
+    for (QTextLine line = layout.createLine(); line.isValid(); line = layout.createLine()) {
+        line.setLineWidth(width);
+        line.setPosition(QPointF(0, height));
+        height += line.height();
+        widest = qMax(widest, line.naturalTextWidth());
+    }
+    layout.endLayout();
+    return {widest, height};
+}
+
+} // namespace
+
 QRectF Toast::textBox() const {
     const ToastRecipe r = recipe();
     const Appearance& appearance = Appearance::instance();
@@ -84,9 +108,8 @@ QRectF Toast::textBox() const {
     qreal card = appearance.scaled(r.maxWidth);
     if (const QWidget* window = parentWidget())
         card = qMin(card, window->width() - 2 * appearance.scaled(r.sideMargin));
-    const qreal available = qMax<qreal>(1, card - chrome);
-    return QFontMetricsF(toastFont())
-        .boundingRect(QRectF(0, 0, available, 1e6), Qt::TextWordWrap, text_);
+    QTextLayout layout(text_, toastFont());
+    return {QPointF(0, 0), layoutText(layout, qMax<qreal>(1, card - chrome))};
 }
 
 QSize Toast::sizeHint() const {
@@ -140,8 +163,9 @@ void Toast::paintEvent(QPaintEvent*) {
     painter.setFont(toastFont());
     painter.setPen(r.text);
     const qreal textLeft = x + iconBox + appearance.scaled(r.spacing);
-    painter.drawText(QRectF(textLeft, card.top(), card.right() - textLeft, card.height()),
-                     Qt::AlignLeft | Qt::AlignVCenter | Qt::TextWordWrap, text_);
+    QTextLayout layout(text_, toastFont());
+    const QSizeF text = layoutText(layout, card.right() - textLeft);
+    layout.draw(&painter, QPointF(textLeft, card.top() + (card.height() - text.height()) / 2));
 }
 
 } // namespace ket

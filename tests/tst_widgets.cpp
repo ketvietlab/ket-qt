@@ -245,14 +245,20 @@ class WidgetsTest final : public QObject {
         const QString longText = QStringLiteral("Unable to fork the conversation because the "
                                                 "worktree changed while the request was pending. "
                                                 "Try again from the conversation menu.");
-        for (const int width : {800, 320}) {
-            window.resize(width, 600);
-            Toast* toast = Toast::showMessage(&window, longText, ToastTone::Neutral);
-            const QRect card = toast->geometry(); // with its shadow
-            QVERIFY2(card.left() >= 0 && card.right() < width, qPrintable(QString::number(width)));
-            QVERIFY(toast->height() >
-                    Toast::showMessage(&window, QStringLiteral("Saved"))->height());
-        }
+        // A URL or path has no space to break at, and still breaks inside the card.
+        const QString unbroken =
+            QStringLiteral("https://relay.ketplus.example/v2/conversations/") + QString(96, u'a') +
+            QStringLiteral("/fork?worktree=/Users/someone/dev/a-very-long-worktree-name");
+        for (const QString& text : {longText, unbroken})
+            for (const int width : {800, 320}) {
+                window.resize(width, 600);
+                Toast* toast = Toast::showMessage(&window, text, ToastTone::Neutral);
+                const QRect card = toast->geometry(); // with its shadow
+                QVERIFY2(card.left() >= 0 && card.right() < width,
+                         qPrintable(QStringLiteral("%1 at %2").arg(text.left(8)).arg(width)));
+                QVERIFY(toast->height() >
+                        Toast::showMessage(&window, QStringLiteral("Saved"))->height());
+            }
     }
 
     void dialogsCoverTheWindowAndTrapFocus() {
