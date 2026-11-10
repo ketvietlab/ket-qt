@@ -450,6 +450,28 @@ class WidgetsTest final : public QObject {
         QVERIFY(kbd.sizeHint().width() > 0);
     }
 
+    void navItemsRingOnlyForKeyboardFocus() {
+        QWidget window;
+        auto* first = new NavItem(QStringLiteral("Storage"), QStringLiteral("layers"), &window);
+        auto* second = new NavItem(QStringLiteral("Updates"), QStringLiteral("download"), &window);
+        second->move(0, 40);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowActive(&window));
+        first->setFocus(Qt::MouseFocusReason);
+        QTRY_VERIFY(first->hasFocus());
+        QCOMPARE(first->recipe().focusRing.alpha(), 0); // a click selects without a ring
+        first->setFocus(Qt::OtherFocusReason);
+        QCOMPARE(first->recipe().focusRing.alpha(), 0); // nor does a window opening on it
+        second->setFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(second->hasFocus());
+        QVERIFY(second->recipe().focusRing.alpha() > 0);
+        QCOMPARE(first->recipe().focusRing.alpha(), 0);
+        first->setFocus(Qt::BacktabFocusReason);
+        QTRY_VERIFY(first->hasFocus());
+        QVERIFY(first->recipe().focusRing.alpha() > 0);
+        QCOMPARE(second->recipe().focusRing.alpha(), 0);
+    }
+
     void segmentedControlsMoveWithKeys() {
         SegmentedControl control(
             {QStringLiteral("Claude"), QStringLiteral("Codex"), QStringLiteral("Cursor")});
