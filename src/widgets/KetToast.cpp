@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetToast.h"
+#include "KetNativeOverlay.h"
 
 #include "KetAppearance.h"
 #include "KetIcons.h"
@@ -54,6 +55,17 @@ void Toast::setText(const QString& text) {
 
 void Toast::popup(int durationMs) {
     place();
+    // Above a window container the toast is a native child, drawing the window beneath its
+    // shadow from a snapshot.
+    underlay_ = {};
+    if (detail::hasNativeChildren(parentWidget(), this)) {
+        const QPixmap window = detail::windowSnapshot(parentWidget());
+        const qreal dpr = window.devicePixelRatio();
+        underlay_ =
+            window.copy(QRectF(QRectF(geometry()).topLeft() * dpr, QSizeF(size()) * dpr).toRect());
+        underlay_.setDevicePixelRatio(dpr);
+        detail::makeNativeOverlay(this);
+    }
     show();
     raise();
     QAccessibleEvent event(this, QAccessible::Alert);
@@ -145,6 +157,8 @@ void Toast::paintEvent(QPaintEvent*) {
     const QRectF card = QRectF(rect()).marginsRemoved(QMarginsF(margins()));
     const qreal radius = appearance.scaled(r.radius);
     QPainter painter(this);
+    if (!underlay_.isNull())
+        painter.drawPixmap(rect(), underlay_);
     painter.setRenderHint(QPainter::Antialiasing);
     detail::paintShadow(painter, card, radius, detail::scaled(r.shadow));
     painter.setPen(QPen(r.border, 1));

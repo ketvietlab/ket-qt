@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetDialog.h"
+#include "KetNativeOverlay.h"
 
 #include "KetAppearance.h"
 #include "KetButton.h"
@@ -172,6 +173,13 @@ void Dialog::place() {
 
 void Dialog::open() {
     restoreFocus_ = QApplication::focusWidget();
+    // Above a window container (the Agent Workspace's QQuickView) the dialog is a native child
+    // too; it draws what the window showed as it opened beneath its translucent backdrop.
+    underlay_ = {};
+    if (detail::hasNativeChildren(parentWidget(), this)) {
+        underlay_ = detail::windowSnapshot(parentWidget());
+        detail::makeNativeOverlay(this);
+    }
     place();
     show();
     raise();
@@ -215,6 +223,8 @@ void Dialog::finish(bool accepted) {
 void Dialog::paintEvent(QPaintEvent*) {
     const DialogRecipe r = recipe();
     QPainter painter(this);
+    if (!underlay_.isNull() && underlay_.deviceIndependentSize().toSize() == size())
+        painter.drawPixmap(rect(), underlay_);
     painter.fillRect(rect(), r.backdrop);
     detail::paintShadow(painter, QRectF(card_->geometry()), Appearance::instance().scaled(r.radius),
                         detail::scaled(r.shadow));

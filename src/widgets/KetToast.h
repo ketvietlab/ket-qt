@@ -3,6 +3,7 @@
 
 #include "KetRecipes.h"
 
+#include <QPixmap>
 #include <QPointer>
 #include <QTimer>
 #include <QWidget>
@@ -47,6 +48,7 @@ class Toast final : public QWidget {
     QString text_;
     ToastTone tone_;
     QTimer timer_;
+    QPixmap underlay_; // the window beneath, when the toast is above native children
 };
 
 } // namespace ket
