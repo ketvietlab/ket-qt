@@ -17,12 +17,14 @@
 #include "KetNavItem.h"
 #include "KetSegmentedControl.h"
 #include "KetSelect.h"
+
 #include "KetStyle.h"
 #include "KetTag.h"
 #include "KetTextField.h"
 #include "KetToast.h"
 #include "KetToggle.h"
 #include "KetTranscript.h"
+#include <QLineEdit>
 
 #include <QAction>
 #include <QApplication>
@@ -170,6 +172,24 @@ class WidgetsTest final : public QObject {
         QCOMPARE(select.sizeHint().height(), 34);
         select.resize(select.sizeHint());
         QVERIFY(!select.grab().isNull());
+
+        // ket-qt#43: editable, the line edit alone draws the text, inside the text rect.
+        Select editable;
+        editable.addItems({QStringLiteral("feature/offline-cache")});
+        editable.setEditable(true);
+        editable.resize(240, editable.sizeHint().height());
+        editable.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&editable));
+        QVERIFY(!editable.grab().isNull());
+        auto* edit = editable.lineEdit();
+        QVERIFY(edit != nullptr);
+        QVERIFY(!edit->hasFrame());
+        QCOMPARE(edit->text(), QStringLiteral("feature/offline-cache"));
+        const int padding = qRound(Appearance::instance().scaled(editable.recipe().paddingInline));
+        QCOMPARE(edit->x(), padding);
+        QVERIFY(edit->geometry().right() < editable.width() - padding);
+        QCOMPARE(edit->palette().color(QPalette::Base), QColor(Qt::transparent));
+        QCOMPARE(edit->palette().color(QPalette::Text), editable.recipe().text);
 
         Checkbox check(QStringLiteral("Follow system appearance"));
         QVERIFY(!check.isChecked());
