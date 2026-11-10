@@ -11,7 +11,8 @@ namespace ket {
 
 // Sidebar navigation row (`.nav-item`): a Két icon, a label and an optional trailing count
 // (`.nav-count`) or shortcut (`kbd`). It is checkable; put rows in a QButtonGroup to keep
-// one selected. Colours and metrics come from ket::navItemRecipe.
+// one selected. Colours and metrics come from ket::navItemRecipe. The focus ring follows
+// keyboard focus only (Tab, Backtab or a shortcut), as KetNavItem.qml's visualFocus does.
 class NavItem final : public QAbstractButton {
     Q_OBJECT
   public:
@@ -36,6 +37,8 @@ class NavItem final : public QAbstractButton {
     void paintEvent(QPaintEvent* event) override;
     void enterEvent(QEnterEvent* event) override;
     void leaveEvent(QEvent* event) override;
+    void focusInEvent(QFocusEvent* event) override;
+    void focusOutEvent(QFocusEvent* event) override;
 
   private:
     [[nodiscard]] QFont labelFont(const NavItemRecipe& r) const;
@@ -46,6 +49,8 @@ class NavItem final : public QAbstractButton {
     std::optional<int> count_;
     QString shortcutText_;
     bool hovered_ = false;
+    // Like Qt Quick's visualFocus: the ring shows for keyboard focus, not after a click.
+    bool visualFocus_ = false;
     std::optional<InteractionState> preview_;
 };
 

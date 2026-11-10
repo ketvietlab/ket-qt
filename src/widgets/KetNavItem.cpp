@@ -4,6 +4,7 @@
 #include "KetAppearance.h"
 #include "KetIcons.h"
 
+#include <QFocusEvent>
 #include <QPainter>
 #include <QtMath>
 
@@ -43,8 +44,9 @@ void NavItem::setPreviewState(std::optional<InteractionState> state) {
 }
 
 NavItemRecipe NavItem::recipe() const {
-    const InteractionState state = preview_.value_or(InteractionState{
-        hovered_, isDown(), isEnabled(), hasFocus() && focusPolicy() != Qt::NoFocus});
+    const InteractionState state = preview_.value_or(
+        InteractionState{hovered_, isDown(), isEnabled(),
+                         visualFocus_ && hasFocus() && focusPolicy() != Qt::NoFocus});
     return navItemRecipe(isChecked(), state, Appearance::instance().theme());
 }
 
@@ -149,6 +151,29 @@ void NavItem::leaveEvent(QEvent* event) {
     hovered_ = false;
     update();
     QAbstractButton::leaveEvent(event);
+}
+
+void NavItem::focusInEvent(QFocusEvent* event) {
+    switch (event->reason()) {
+    case Qt::TabFocusReason:
+    case Qt::BacktabFocusReason:
+    case Qt::ShortcutFocusReason:
+        visualFocus_ = true;
+        break;
+    case Qt::ActiveWindowFocusReason:
+    case Qt::PopupFocusReason:
+        break; // focus returns to the row; keep how it was shown
+    default:
+        visualFocus_ = false;
+        break;
+    }
+    QAbstractButton::focusInEvent(event);
+}
+
+void NavItem::focusOutEvent(QFocusEvent* event) {
+    if (event->reason() != Qt::ActiveWindowFocusReason && event->reason() != Qt::PopupFocusReason)
+        visualFocus_ = false;
+    QAbstractButton::focusOutEvent(event);
 }
 
 Kbd::Kbd(const QString& text, QWidget* parent) : QWidget(parent), text_(text) {
