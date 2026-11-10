@@ -191,6 +191,9 @@ class WidgetsTest final : public QObject {
         QCOMPARE(edit->x(), padding);
         QVERIFY(edit->geometry().right() < editable.width() - padding);
         QCOMPARE(edit->palette().color(QPalette::Base), QColor(Qt::transparent));
+        // Inside the border, with its own transparent style sheet over any app style sheet.
+        QVERIFY(edit->y() >= 1 && edit->geometry().bottom() < editable.height() - 1);
+        QVERIFY(edit->styleSheet().contains(QStringLiteral("transparent")));
         QCOMPARE(edit->palette().color(QPalette::Text), editable.recipe().text);
 
         Checkbox check(QStringLiteral("Follow system appearance"));

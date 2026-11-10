@@ -7,6 +7,8 @@
 #include <QLineEdit>
 #include <QPainter>
 
+#include <cmath>
+
 namespace ket {
 
 Select::Select(QWidget* parent) : QComboBox(parent) {
@@ -98,7 +100,9 @@ void Select::placeLineEdit(const FieldRecipe& r) {
     QLineEdit* edit = lineEdit();
     if (edit == nullptr)
         return;
-    const QRect target = textRect(r).toAlignedRect();
+    // Inside the border, so an app style sheet's line edit background cannot cover it.
+    const qreal border = std::ceil(r.borderWidth);
+    const QRect target = textRect(r).adjusted(0, border, 0, -border).toAlignedRect();
     if (edit->geometry() != target)
         edit->setGeometry(target);
     if (edit->hasFrame())
@@ -114,6 +118,11 @@ void Select::placeLineEdit(const FieldRecipe& r) {
         palette.setColor(QPalette::Window, Qt::transparent);
         edit->setPalette(palette);
     }
+    // A widget style sheet outranks the app's, which may give every line edit a background.
+    static const QString transparent =
+        QStringLiteral("QLineEdit { background: transparent; border: 0; padding: 0; margin: 0; }");
+    if (edit->styleSheet() != transparent)
+        edit->setStyleSheet(transparent);
     edit->setTextMargins(0, 0, 0, 0);
     edit->setAutoFillBackground(false);
 }
