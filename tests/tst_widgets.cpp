@@ -230,6 +230,31 @@ class WidgetsTest final : public QObject {
         QTRY_VERIFY(first.isNull()); // the earlier toast is replaced
     }
 
+    void toastsKeepTheirToneAndFitTheWindow() {
+        QWidget window;
+        window.resize(800, 600);
+        // A failure is not shown as a success.
+        Toast* neutral =
+            Toast::showMessage(&window, QStringLiteral("Unable to fork"), ToastTone::Neutral);
+        QCOMPARE(neutral->recipe().iconName, QStringLiteral("info"));
+        QCOMPARE(neutral->recipe().border, Tokens::color(u"panel-border", Theme::Light));
+        QCOMPARE(Toast::showMessage(&window, QStringLiteral("Saved"))->recipe().iconName,
+                 QStringLiteral("success"));
+
+        // A long message wraps inside the card's widest width and the window's margins.
+        const QString longText = QStringLiteral("Unable to fork the conversation because the "
+                                                "worktree changed while the request was pending. "
+                                                "Try again from the conversation menu.");
+        for (const int width : {800, 320}) {
+            window.resize(width, 600);
+            Toast* toast = Toast::showMessage(&window, longText, ToastTone::Neutral);
+            const QRect card = toast->geometry(); // with its shadow
+            QVERIFY2(card.left() >= 0 && card.right() < width, qPrintable(QString::number(width)));
+            QVERIFY(toast->height() >
+                    Toast::showMessage(&window, QStringLiteral("Saved"))->height());
+        }
+    }
+
     void dialogsCoverTheWindowAndTrapFocus() {
         QWidget window;
         window.resize(900, 700);

@@ -172,6 +172,12 @@ struct ToastRecipe {
     qreal iconSize = 0;
     qreal fontPixels = 0;
     qreal bottomOffset = 0;
+    // The card's widest width, and its least distance from the window's sides; longer text
+    // wraps onto more lines.
+    qreal maxWidth = 0;
+    qreal sideMargin = 0;
+    // The Két symbol before the text.
+    QString iconName;
     int durationMs = 0;
 };
 
@@ -365,7 +371,10 @@ struct EmptyStateRecipe {
 [[nodiscard]] ChoiceRecipe choiceRecipe(bool checked, const InteractionState& state, Theme theme);
 [[nodiscard]] FieldRowRecipe fieldRowRecipe(Theme theme);
 [[nodiscard]] BannerRecipe bannerRecipe(BannerTone tone, Theme theme);
-[[nodiscard]] ToastRecipe toastRecipe(Theme theme);
+// Success confirms a finished action; Neutral carries any other message, failures included,
+// without claiming success.
+enum class ToastTone { Success, Neutral };
+[[nodiscard]] ToastRecipe toastRecipe(Theme theme, ToastTone tone = ToastTone::Success);
 [[nodiscard]] DialogRecipe dialogRecipe(Theme theme);
 [[nodiscard]] MenuRecipe menuRecipe(Theme theme);
 // Danger is a destructive command; Warning is an elevated choice such as full access.

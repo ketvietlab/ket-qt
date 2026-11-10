@@ -16,11 +16,12 @@ class Toast final : public QWidget {
     Q_OBJECT
   public:
     // `anchor` is any widget in the target window; the toast attaches to its window.
-    explicit Toast(const QString& text, QWidget* anchor);
+    explicit Toast(const QString& text, QWidget* anchor, ToastTone tone = ToastTone::Success);
 
     // Shows a toast that deletes itself after the recipe duration, replacing any toast
     // this function showed earlier in the same window.
-    static Toast* showMessage(QWidget* anchor, const QString& text);
+    static Toast* showMessage(QWidget* anchor, const QString& text,
+                              ToastTone tone = ToastTone::Success);
 
     [[nodiscard]] QString text() const { return text_; }
     void setText(const QString& text);
@@ -28,6 +29,7 @@ class Toast final : public QWidget {
     // Shows the toast and restarts its timer; `durationMs` <= 0 keeps it until hidden.
     void popup(int durationMs);
 
+    [[nodiscard]] ToastTone tone() const { return tone_; }
     [[nodiscard]] ToastRecipe recipe() const;
     [[nodiscard]] QSize sizeHint() const override;
 
@@ -39,8 +41,11 @@ class Toast final : public QWidget {
     [[nodiscard]] QFont toastFont() const;
     [[nodiscard]] QMargins margins() const;
     void place();
+    // The text's box: as wide as its longest line, wrapped to fit the card's widest width.
+    [[nodiscard]] QRectF textBox() const;
 
     QString text_;
+    ToastTone tone_;
     QTimer timer_;
 };
 

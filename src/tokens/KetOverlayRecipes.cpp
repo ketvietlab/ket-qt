@@ -65,12 +65,14 @@ BannerRecipe bannerRecipe(BannerTone tone, Theme theme) {
     return recipe;
 }
 
-ToastRecipe toastRecipe(Theme theme) {
+ToastRecipe toastRecipe(Theme theme, ToastTone tone) {
     ToastRecipe recipe;
+    const bool success = tone == ToastTone::Success;
     recipe.background = token(u"panel-bg", theme);
-    recipe.border = token(u"positive-border", theme);
+    recipe.border = token(success ? u"positive-border" : u"panel-border", theme);
     recipe.text = token(u"text-main", theme);
-    recipe.icon = token(u"success", theme);
+    recipe.icon = token(success ? u"success" : u"text-muted", theme);
+    recipe.iconName = success ? QStringLiteral("success") : QStringLiteral("info");
     recipe.shadow = shadowToken(u"shadow-sm", theme);
     recipe.radius = Tokens::px(u"radius-md");
     recipe.paddingInline = profile().toastPaddingInline;
@@ -79,6 +81,8 @@ ToastRecipe toastRecipe(Theme theme) {
     recipe.iconSize = profile().iconSize;
     recipe.fontPixels = profile().buttonFontPixels;
     recipe.bottomOffset = Tokens::px(u"space-10");
+    recipe.maxWidth = 480;
+    recipe.sideMargin = Tokens::px(u"space-4");
     recipe.durationMs = profile().toastDurationMs;
     return recipe;
 }
