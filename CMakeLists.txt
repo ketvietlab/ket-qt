@@ -96,6 +96,7 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetDialog.h src/widgets/KetDialog.cpp
         src/widgets/KetMenuPainter.h src/widgets/KetMenuPainter.cpp
         src/widgets/KetShadow.h
+        src/widgets/KetNativeOverlay.h
         src/widgets/KetNavItem.h src/widgets/KetNavItem.cpp
         src/widgets/KetSegmentedControl.h src/widgets/KetSegmentedControl.cpp
         src/widgets/KetActivityIndicator.h src/widgets/KetActivityIndicator.cpp

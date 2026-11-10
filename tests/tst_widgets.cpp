@@ -37,6 +37,8 @@
 #include <QTest>
 #include <QTextEdit>
 #include <QToolTip>
+#include <QVBoxLayout>
+#include <QWindow>
 
 using namespace ket;
 
@@ -259,6 +261,39 @@ class WidgetsTest final : public QObject {
                 QVERIFY(toast->height() >
                         Toast::showMessage(&window, QStringLiteral("Saved"))->height());
             }
+    }
+
+    void overlaysStayAboveWindowContainers() {
+        // Without a native child the overlays stay drawn into the window's surface.
+        QWidget plain;
+        plain.resize(800, 600);
+        plain.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&plain));
+        Dialog flat(QStringLiteral("Rename"), &plain);
+        flat.setBody(new QWidget);
+        flat.open();
+        QVERIFY(!flat.testAttribute(Qt::WA_NativeWindow));
+        QVERIFY(!Toast::showMessage(&plain, QStringLiteral("Saved"))
+                     ->testAttribute(Qt::WA_NativeWindow));
+
+        // A window container (as the Agent Workspace's QQuickView) is a native child window
+        // above the window's surface, so the overlays become native children raised above it.
+        QWidget window;
+        window.resize(800, 600);
+        auto* layout = new QVBoxLayout(&window);
+        auto* container = QWidget::createWindowContainer(new QWindow, &window);
+        layout->addWidget(container);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        QVERIFY(container->isVisible());
+        Dialog dialog(QStringLiteral("Rename"), &window);
+        dialog.setBody(new QWidget);
+        dialog.open();
+        QVERIFY(dialog.testAttribute(Qt::WA_NativeWindow));
+        QVERIFY(dialog.internalWinId() != 0);
+        Toast* toast = Toast::showMessage(&window, QStringLiteral("Saved"));
+        QVERIFY(toast->testAttribute(Qt::WA_NativeWindow));
+        QVERIFY(toast->isVisible());
     }
 
     void dialogsTakeTheMocksWidth() {

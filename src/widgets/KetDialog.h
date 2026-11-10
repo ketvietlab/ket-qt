@@ -3,6 +3,7 @@
 
 #include "KetRecipes.h"
 
+#include <QPixmap>
 #include <QPointer>
 #include <QWidget>
 
@@ -76,6 +77,7 @@ class Dialog final : public QWidget {
     QHBoxLayout* footerLayout_;
     QPointer<QWidget> restoreFocus_;
     qreal cardWidth_ = 0;
+    QPixmap underlay_; // the window beneath, when the dialog is above native children
 };
 
 } // namespace ket
