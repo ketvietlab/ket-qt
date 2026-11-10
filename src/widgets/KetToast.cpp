@@ -8,6 +8,7 @@
 #include <QAccessible>
 #include <QEvent>
 #include <QPainter>
+#include <QTextLayout>
 #include <QtMath>
 
 namespace ket {
@@ -17,7 +18,8 @@ constexpr char kCurrentToast[] = "_ket_toast";
 
 } // namespace
 
-Toast::Toast(const QString& text, QWidget* anchor) : QWidget(anchor->window()), text_(text) {
+Toast::Toast(const QString& text, QWidget* anchor, const ToastTone tone)
+    : QWidget(anchor->window()), text_(text), tone_(tone) {
     setAttribute(Qt::WA_TransparentForMouseEvents);
     setFocusPolicy(Qt::NoFocus);
     setAccessibleName(text);
@@ -30,11 +32,11 @@ Toast::Toast(const QString& text, QWidget* anchor) : QWidget(anchor->window()), 
     connect(&Appearance::instance(), &Appearance::zoomChanged, this, &Toast::place);
 }
 
-Toast* Toast::showMessage(QWidget* anchor, const QString& text) {
+Toast* Toast::showMessage(QWidget* anchor, const QString& text, const ToastTone tone) {
     QWidget* window = anchor->window();
     if (auto* previous = window->property(kCurrentToast).value<QObject*>())
         previous->deleteLater();
-    auto* toast = new Toast(text, anchor);
+    auto* toast = new Toast(text, anchor, tone);
     window->setProperty(kCurrentToast, QVariant::fromValue<QObject*>(toast));
     connect(&toast->timer_, &QTimer::timeout, toast, &QObject::deleteLater);
     toast->popup(toast->recipe().durationMs);
@@ -62,7 +64,7 @@ void Toast::popup(int durationMs) {
         timer_.stop();
 }
 
-ToastRecipe Toast::recipe() const { return toastRecipe(Appearance::instance().theme()); }
+ToastRecipe Toast::recipe() const { return toastRecipe(Appearance::instance().theme(), tone_); }
 
 QFont Toast::toastFont() const {
     QFont result = font();
@@ -75,14 +77,49 @@ QMargins Toast::margins() const {
     return {qCeil(m.left()), qCeil(m.top()), qCeil(m.right()), qCeil(m.bottom())};
 }
 
+namespace {
+
+// Lays the message out in lines no wider than width. Words break at spaces, and a run without
+// one (a URL, a path) breaks anywhere, so the text never runs past the card.
+QSizeF layoutText(QTextLayout& layout, const qreal width) {
+    QTextOption option;
+    option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    layout.setTextOption(option);
+    layout.beginLayout();
+    qreal height = 0;
+    qreal widest = 0;
+    for (QTextLine line = layout.createLine(); line.isValid(); line = layout.createLine()) {
+        line.setLineWidth(width);
+        line.setPosition(QPointF(0, height));
+        height += line.height();
+        widest = qMax(widest, line.naturalTextWidth());
+    }
+    layout.endLayout();
+    return {widest, height};
+}
+
+} // namespace
+
+QRectF Toast::textBox() const {
+    const ToastRecipe r = recipe();
+    const Appearance& appearance = Appearance::instance();
+    const qreal chrome = 2 * appearance.scaled(r.paddingInline) + appearance.scaled(r.iconSize) +
+                         appearance.scaled(r.spacing);
+    qreal card = appearance.scaled(r.maxWidth);
+    if (const QWidget* window = parentWidget())
+        card = qMin(card, window->width() - 2 * appearance.scaled(r.sideMargin));
+    QTextLayout layout(text_, toastFont());
+    return {QPointF(0, 0), layoutText(layout, qMax<qreal>(1, card - chrome))};
+}
+
 QSize Toast::sizeHint() const {
     const ToastRecipe r = recipe();
     const Appearance& appearance = Appearance::instance();
-    const QFontMetricsF metrics(toastFont());
+    const QRectF text = textBox();
     const qreal width = 2 * appearance.scaled(r.paddingInline) + appearance.scaled(r.iconSize) +
-                        appearance.scaled(r.spacing) + metrics.horizontalAdvance(text_);
-    const qreal height = 2 * appearance.scaled(r.paddingBlock) +
-                         qMax(metrics.height(), appearance.scaled(r.iconSize));
+                        appearance.scaled(r.spacing) + text.width();
+    const qreal height =
+        2 * appearance.scaled(r.paddingBlock) + qMax(text.height(), appearance.scaled(r.iconSize));
     const QMargins m = margins();
     return {qCeil(width) + m.left() + m.right(), qCeil(height) + m.top() + m.bottom()};
 }
@@ -117,13 +154,18 @@ void Toast::paintEvent(QPaintEvent*) {
     const qreal iconBox = appearance.scaled(r.iconSize);
     const qreal x = card.left() + appearance.scaled(r.paddingInline);
     const qreal dpr = devicePixelRatioF();
-    painter.drawPixmap(QPointF(qRound(x), qRound(card.center().y() - iconBox / 2)),
-                       Icons::pixmap(u"success", iconBox, dpr, r.icon));
+    // The icon sits on the first line, so a wrapped message reads from its symbol.
+    const QFontMetricsF metrics(toastFont());
+    const qreal textTop = card.top() + appearance.scaled(r.paddingBlock);
+    const qreal firstLine = qMax(metrics.height(), iconBox);
+    painter.drawPixmap(QPointF(qRound(x), qRound(textTop + (firstLine - iconBox) / 2)),
+                       Icons::pixmap(r.iconName, iconBox, dpr, r.icon));
     painter.setFont(toastFont());
     painter.setPen(r.text);
     const qreal textLeft = x + iconBox + appearance.scaled(r.spacing);
-    painter.drawText(QRectF(textLeft, card.top(), card.right() - textLeft, card.height()),
-                     Qt::AlignLeft | Qt::AlignVCenter, text_);
+    QTextLayout layout(text_, toastFont());
+    const QSizeF text = layoutText(layout, card.right() - textLeft);
+    layout.draw(&painter, QPointF(textLeft, card.top() + (card.height() - text.height()) / 2));
 }
 
 } // namespace ket
