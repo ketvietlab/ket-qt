@@ -261,6 +261,26 @@ class WidgetsTest final : public QObject {
             }
     }
 
+    void dialogsTakeTheMocksWidth() {
+        QWidget window;
+        window.resize(1200, 800);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        Dialog dialog(QStringLiteral("Repository & worktree"), &window);
+        dialog.setBody(new QWidget);
+        dialog.setCardWidth(800);
+        dialog.open();
+        QCOMPARE(dialog.card()->width(), 800);
+        QCOMPARE(dialog.card()->geometry().center().x(), window.rect().center().x());
+        // A narrow window keeps the recipe's margin on both sides.
+        window.resize(600, 800);
+        const int margin = qRound(dialog.recipe().margin);
+        QCOMPARE(dialog.card()->width(), 600 - 2 * margin);
+        dialog.setCardWidth(0);
+        window.resize(1200, 800);
+        QCOMPARE(dialog.card()->width(), qRound(dialog.recipe().width));
+    }
+
     void dialogsCoverTheWindowAndTrapFocus() {
         QWidget window;
         window.resize(900, 700);

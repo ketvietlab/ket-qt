@@ -103,6 +103,7 @@ search logic. The app filters the palette's groups as its query changes.
 - **Dialogs and toasts draw inside their window**, as the mock's `.modal-backdrop` and
   `.toast` do, not as separate top-level windows. `ket::Dialog` covers its window, keeps
   Tab inside the card and rejects on Escape, the close button or a backdrop click.
+  Its card takes the recipe's width unless `setCardWidth()` sets the mock's `width: px(N)`.
   `KetDialog` is a modal `Dialog` in the window overlay.
 - **Menus are drawn by `ket::Style`**, so every `QMenu` and the `QComboBox` popup
   (`SH_ComboBox_Popup`) look like `.desktop-context-menu`. `Style::setDanger()`,
