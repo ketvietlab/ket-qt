@@ -39,8 +39,10 @@ class DialogCard final : public QWidget {
         painter.save();
         painter.setClipPath(shape);
         painter.setPen(QPen(r.divider, 1));
-        const qreal headerBottom = header_->geometry().bottom() + 0.5;
-        painter.drawLine(QPointF(0, headerBottom), QPointF(width(), headerBottom));
+        if (header_->isVisible()) {
+            const qreal headerBottom = header_->geometry().bottom() + 0.5;
+            painter.drawLine(QPointF(0, headerBottom), QPointF(width(), headerBottom));
+        }
         if (footer_->isVisible()) {
             const qreal footerTop = footer_->geometry().top() + 0.5;
             painter.fillRect(QRectF(0, footerTop, width(), height() - footerTop), r.footer);
@@ -93,6 +95,8 @@ Dialog::Dialog(const QString& title, QWidget* anchor)
 
     card_->setAccessibleName(title);
     parentWidget()->installEventFilter(this);
+    // The card follows its content's height while open (a body that changes state).
+    card_->installEventFilter(this);
     connect(&Appearance::instance(), &Appearance::themeChanged, this, &Dialog::applyRecipe);
     connect(&Appearance::instance(), &Appearance::zoomChanged, this, &Dialog::applyRecipe);
     applyRecipe();
@@ -134,7 +138,9 @@ void Dialog::applyRecipe() {
     // The dividers are 1 px inside the header's bottom and the footer's top edge.
     header_->layout()->setContentsMargins(inline_, header, inline_, header + 1);
     header_->layout()->setSpacing(qRound(appearance.scaled(r.footerGap)));
-    bodyLayout_->setContentsMargins(body, body, body, body);
+    const int pad = chromeless_ ? 0 : body;
+    bodyLayout_->setContentsMargins(pad, pad, pad, pad);
+    header_->setVisible(!chromeless_);
     footerLayout_->setContentsMargins(inline_, footer + 1, inline_, footer);
     footerLayout_->setSpacing(qRound(appearance.scaled(r.footerGap)));
 
@@ -244,9 +250,18 @@ void Dialog::mousePressEvent(QMouseEvent* event) {
     event->accept();
 }
 
+void Dialog::setChromeless(const bool chromeless) {
+    if (chromeless_ == chromeless)
+        return;
+    chromeless_ = chromeless;
+    applyRecipe();
+}
+
 bool Dialog::eventFilter(QObject* watched, QEvent* event) {
     if (watched == parentWidget() && event->type() == QEvent::Resize && isVisible())
         place();
+    if (watched == card_ && event->type() == QEvent::LayoutRequest && isVisible())
+        QMetaObject::invokeMethod(this, &Dialog::place, Qt::QueuedConnection);
     return QWidget::eventFilter(watched, event);
 }
 

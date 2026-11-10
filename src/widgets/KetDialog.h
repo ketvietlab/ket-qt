@@ -38,6 +38,11 @@ class Dialog final : public QWidget {
     void setCardWidth(qreal pixels);
     [[nodiscard]] qreal cardWidth() const { return cardWidth_; }
 
+    // The body draws its own header and footer (a page already built as the mock's modal):
+    // the card shows no header and pads nothing. The title stays the card's accessible name.
+    void setChromeless(bool chromeless);
+    [[nodiscard]] bool isChromeless() const { return chromeless_; }
+
     // Appends a footer button (right-aligned, in insertion order).
     Button* addButton(const QString& text, ButtonVariant variant = ButtonVariant::Secondary);
 
@@ -77,6 +82,7 @@ class Dialog final : public QWidget {
     QHBoxLayout* footerLayout_;
     QPointer<QWidget> restoreFocus_;
     qreal cardWidth_ = 0;
+    bool chromeless_ = false;
     QPixmap underlay_; // the window beneath, when the dialog is above native children
 };
 
