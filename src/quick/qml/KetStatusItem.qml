@@ -10,6 +10,8 @@ Row {
     property string iconName
     readonly property var recipe: KetTheme.statusBarRecipe(KetTheme.dark, KetTheme.zoom)
 
+    // KetStatusBar's rows only lay out x; centre the item in the row's height.
+    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
     spacing: recipe.itemGap
     Accessible.role: Accessible.StaticText
     Accessible.name: text

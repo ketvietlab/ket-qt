@@ -53,6 +53,7 @@ class QuickChromeTest final : public QObject {
             "  property alias picker: picker; property alias avatar: avatar\n"
             "  property alias tabs: tabs; property alias header: header\n"
             "  property alias tree: tree; property int actions: 0\n"
+            "  property alias status: status; property alias statusItem: statusItem\n"
             "  KetStepSlider { id: picker; width: 400; label: \"Reasoning effort\"\n"
             "    steps: [\"low\", \"medium\", \"high\"]; currentIndex: 1 }\n"
             "  KetAvatar { id: avatar; y: 100; name: \"Kieu Duy\" }\n"
@@ -62,9 +63,9 @@ class QuickChromeTest final : public QObject {
             "  KetTreeItem { id: tree; y: 260; width: 280; text: \"develop\"; iconName: "
             "\"branch\"\n"
             "    activity: \"working\"; activityText: \"Working\"; count: \"3\" }\n"
-            "  KetStatusBar { y: 400; width: 600\n"
+            "  KetStatusBar { id: status; y: 400; width: 600\n"
             "    trailing: [KetStatusItem { text: \"UTF-8\" }]\n"
-            "    KetStatusItem { text: \"Local\"; iconName: \"success\" } }\n"
+            "    KetStatusItem { id: statusItem; text: \"Local\"; iconName: \"success\" } }\n"
             "  KetBreadcrumb { y: 440; width: 600; path: [\"a\", \"b.qml\"] }\n"
             "  KetPaneHeader { y: 480; width: 600; title: \"b.qml\"; iconName: \"file-code\" }\n"
             "  KetSlider { y: 530; width: 200; from: 0; to: 10; value: 5 }\n"
@@ -83,6 +84,13 @@ class QuickChromeTest final : public QObject {
         auto* tree = root->property("tree").value<QQuickItem*>();
         QVERIFY(tree->property("hasActivity").toBool());
         QVERIFY(tree->implicitHeight() > 2 * 9 + 13);
+        // Status items sit in the middle of the bar below its 1 px top rule, not at its top.
+        auto* status = root->property("status").value<QQuickItem*>();
+        auto* statusItem = root->property("statusItem").value<QQuickItem*>();
+        const qreal centre =
+            statusItem->mapToItem(status, QPointF(0, statusItem->height() / 2)).y();
+        QVERIFY(statusItem->height() < status->height() - 1);
+        QVERIFY(qAbs(centre - (status->height() + 1) / 2) <= 0.5); // anchors snap to pixels
     }
 
     void surfacesLoadAndBehave() {
