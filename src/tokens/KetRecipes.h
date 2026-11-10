@@ -52,6 +52,10 @@ struct TagRecipe {
     qreal maxWidth = 0; // longer labels elide
     qreal fontPixels = 0;
     int fontWeight = 400;
+    // A locked tag leads with this icon; empty for every other tag.
+    QString iconCode;
+    qreal iconSize = 0;
+    qreal iconGap = 0;
 };
 
 struct BadgeRecipe {
@@ -363,6 +367,10 @@ struct EmptyStateRecipe {
 // A label-only chip tinted with `color`, a colour the app owns (tag colours are user data,
 // not design-system tokens). `overflow` is the muted "+N" chip; `hovered` is the filter hover.
 [[nodiscard]] TagRecipe tagRecipe(const QColor& color, bool overflow, bool hovered, Theme theme);
+// A tag that reads as fixed (a role, not a label the user set): a steady tint that does not
+// answer the pointer, stronger text and a leading lock. It is neither removable nor
+// filterable.
+[[nodiscard]] TagRecipe lockedTagRecipe(const QColor& color, Theme theme);
 
 // `invalid` draws the danger border, as an `.error-text` field does.
 [[nodiscard]] FieldRecipe fieldRecipe(const InteractionState& state, bool invalid, Theme theme);

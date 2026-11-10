@@ -100,6 +100,12 @@ Item {
                     width: parent.width; name: "ket-viewer · studio-mac"
                     iconName: "display"; expanded: false
                 }
+                Item { width: 1; height: KetTheme.px(7, KetTheme.zoom) }
+                // Activatable: the icon folds, the name opens the group's page.
+                KetGroupHeader {
+                    width: parent.width; name: "Checkout"; iconName: "users"
+                    activatable: true
+                }
             }
         }
     }

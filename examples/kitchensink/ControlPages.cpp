@@ -128,8 +128,14 @@ QWidget* sidebar(QWidget* parent) {
     remote->setIconCode(QStringLiteral("display"));
     remote->setExpanded(false);
     column->addWidget(remote);
+    // An activatable header: the icon folds the group, the name opens its page.
+    column->addSpacing(10);
+    auto* team = new GroupHeader(QStringLiteral("Checkout"), pane);
+    team->setActivatable(true);
+    team->setIconCode(QStringLiteral("users"));
+    column->addWidget(team);
     column->addStretch(1);
-    pane->setFixedSize(300, 330);
+    pane->setFixedSize(300, 370);
     return pane;
 }
 

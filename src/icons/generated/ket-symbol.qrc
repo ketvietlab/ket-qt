@@ -91,6 +91,7 @@
     <file alias="light/14/terminal.svg">../../../third_party/ket-symbol/svg/14/light/terminal.svg</file>
     <file alias="light/14/text-size.svg">../../../third_party/ket-symbol/svg/14/light/text-size.svg</file>
     <file alias="light/14/trash.svg">../../../third_party/ket-symbol/svg/14/light/trash.svg</file>
+    <file alias="light/14/users.svg">../../../third_party/ket-symbol/svg/14/light/users.svg</file>
     <file alias="light/14/view-list.svg">../../../third_party/ket-symbol/svg/14/light/view-list.svg</file>
     <file alias="light/14/warning.svg">../../../third_party/ket-symbol/svg/14/light/warning.svg</file>
     <file alias="light/14/wifi-off.svg">../../../third_party/ket-symbol/svg/14/light/wifi-off.svg</file>
@@ -185,6 +186,7 @@
     <file alias="light/16/terminal.svg">../../../third_party/ket-symbol/svg/16/light/terminal.svg</file>
     <file alias="light/16/text-size.svg">../../../third_party/ket-symbol/svg/16/light/text-size.svg</file>
     <file alias="light/16/trash.svg">../../../third_party/ket-symbol/svg/16/light/trash.svg</file>
+    <file alias="light/16/users.svg">../../../third_party/ket-symbol/svg/16/light/users.svg</file>
     <file alias="light/16/view-list.svg">../../../third_party/ket-symbol/svg/16/light/view-list.svg</file>
     <file alias="light/16/warning.svg">../../../third_party/ket-symbol/svg/16/light/warning.svg</file>
     <file alias="light/16/wifi-off.svg">../../../third_party/ket-symbol/svg/16/light/wifi-off.svg</file>
@@ -279,6 +281,7 @@
     <file alias="light/20/terminal.svg">../../../third_party/ket-symbol/svg/20/light/terminal.svg</file>
     <file alias="light/20/text-size.svg">../../../third_party/ket-symbol/svg/20/light/text-size.svg</file>
     <file alias="light/20/trash.svg">../../../third_party/ket-symbol/svg/20/light/trash.svg</file>
+    <file alias="light/20/users.svg">../../../third_party/ket-symbol/svg/20/light/users.svg</file>
     <file alias="light/20/view-list.svg">../../../third_party/ket-symbol/svg/20/light/view-list.svg</file>
     <file alias="light/20/warning.svg">../../../third_party/ket-symbol/svg/20/light/warning.svg</file>
     <file alias="light/20/wifi-off.svg">../../../third_party/ket-symbol/svg/20/light/wifi-off.svg</file>
@@ -373,6 +376,7 @@
     <file alias="light/24/terminal.svg">../../../third_party/ket-symbol/svg/24/light/terminal.svg</file>
     <file alias="light/24/text-size.svg">../../../third_party/ket-symbol/svg/24/light/text-size.svg</file>
     <file alias="light/24/trash.svg">../../../third_party/ket-symbol/svg/24/light/trash.svg</file>
+    <file alias="light/24/users.svg">../../../third_party/ket-symbol/svg/24/light/users.svg</file>
     <file alias="light/24/view-list.svg">../../../third_party/ket-symbol/svg/24/light/view-list.svg</file>
     <file alias="light/24/warning.svg">../../../third_party/ket-symbol/svg/24/light/warning.svg</file>
     <file alias="light/24/wifi-off.svg">../../../third_party/ket-symbol/svg/24/light/wifi-off.svg</file>
@@ -467,6 +471,7 @@
     <file alias="regular/14/terminal.svg">../../../third_party/ket-symbol/svg/14/regular/terminal.svg</file>
     <file alias="regular/14/text-size.svg">../../../third_party/ket-symbol/svg/14/regular/text-size.svg</file>
     <file alias="regular/14/trash.svg">../../../third_party/ket-symbol/svg/14/regular/trash.svg</file>
+    <file alias="regular/14/users.svg">../../../third_party/ket-symbol/svg/14/regular/users.svg</file>
     <file alias="regular/14/view-list.svg">../../../third_party/ket-symbol/svg/14/regular/view-list.svg</file>
     <file alias="regular/14/warning.svg">../../../third_party/ket-symbol/svg/14/regular/warning.svg</file>
     <file alias="regular/14/wifi-off.svg">../../../third_party/ket-symbol/svg/14/regular/wifi-off.svg</file>
@@ -561,6 +566,7 @@
     <file alias="regular/16/terminal.svg">../../../third_party/ket-symbol/svg/16/regular/terminal.svg</file>
     <file alias="regular/16/text-size.svg">../../../third_party/ket-symbol/svg/16/regular/text-size.svg</file>
     <file alias="regular/16/trash.svg">../../../third_party/ket-symbol/svg/16/regular/trash.svg</file>
+    <file alias="regular/16/users.svg">../../../third_party/ket-symbol/svg/16/regular/users.svg</file>
     <file alias="regular/16/view-list.svg">../../../third_party/ket-symbol/svg/16/regular/view-list.svg</file>
     <file alias="regular/16/warning.svg">../../../third_party/ket-symbol/svg/16/regular/warning.svg</file>
     <file alias="regular/16/wifi-off.svg">../../../third_party/ket-symbol/svg/16/regular/wifi-off.svg</file>
@@ -655,6 +661,7 @@
     <file alias="regular/20/terminal.svg">../../../third_party/ket-symbol/svg/20/regular/terminal.svg</file>
     <file alias="regular/20/text-size.svg">../../../third_party/ket-symbol/svg/20/regular/text-size.svg</file>
     <file alias="regular/20/trash.svg">../../../third_party/ket-symbol/svg/20/regular/trash.svg</file>
+    <file alias="regular/20/users.svg">../../../third_party/ket-symbol/svg/20/regular/users.svg</file>
     <file alias="regular/20/view-list.svg">../../../third_party/ket-symbol/svg/20/regular/view-list.svg</file>
     <file alias="regular/20/warning.svg">../../../third_party/ket-symbol/svg/20/regular/warning.svg</file>
     <file alias="regular/20/wifi-off.svg">../../../third_party/ket-symbol/svg/20/regular/wifi-off.svg</file>
@@ -749,6 +756,7 @@
     <file alias="regular/24/terminal.svg">../../../third_party/ket-symbol/svg/24/regular/terminal.svg</file>
     <file alias="regular/24/text-size.svg">../../../third_party/ket-symbol/svg/24/regular/text-size.svg</file>
     <file alias="regular/24/trash.svg">../../../third_party/ket-symbol/svg/24/regular/trash.svg</file>
+    <file alias="regular/24/users.svg">../../../third_party/ket-symbol/svg/24/regular/users.svg</file>
     <file alias="regular/24/view-list.svg">../../../third_party/ket-symbol/svg/24/regular/view-list.svg</file>
     <file alias="regular/24/warning.svg">../../../third_party/ket-symbol/svg/24/regular/warning.svg</file>
     <file alias="regular/24/wifi-off.svg">../../../third_party/ket-symbol/svg/24/regular/wifi-off.svg</file>

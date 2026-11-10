@@ -8,7 +8,7 @@
   "path": "symbol/dist/svg/<size>/<weight>/<code>.svg",
   "asset": null,
   "sha256": null,
-  "selection": "manifest.json ketplus.rows (the 95 Lucide names of KetPlus, 94 Két codes)",
+  "selection": "manifest.json ketplus.rows (the 95 Lucide names of KetPlus, 94 Két codes), plus users for KetPlus teams (ketvietlab/ketplus#469), copied unedited from the same commit",
   "sizes": [14, 16, 20, 24],
   "weights": ["light", "regular"],
   "license": "CC-BY-4.0",

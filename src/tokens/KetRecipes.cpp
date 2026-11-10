@@ -155,6 +155,15 @@ TagRecipe tagRecipe(const QColor& color, bool overflow, bool hovered, Theme them
     return recipe;
 }
 
+TagRecipe lockedTagRecipe(const QColor& color, Theme theme) {
+    TagRecipe recipe = tagRecipe(color, false, true, theme);
+    recipe.text = token(u"text-primary", theme);
+    recipe.iconCode = QStringLiteral("lock");
+    recipe.iconSize = recipe.fontPixels;
+    recipe.iconGap = recipe.paddingInline / 2;
+    return recipe;
+}
+
 QVariantMap toVariantMap(const ButtonRecipe& r) {
     return {{QStringLiteral("background"), r.background},
             {QStringLiteral("border"), r.border},
@@ -189,7 +198,10 @@ QVariantMap toVariantMap(const TagRecipe& r) {
             {QStringLiteral("paddingInline"), r.paddingInline},
             {QStringLiteral("maxWidth"), r.maxWidth},
             {QStringLiteral("fontPixels"), r.fontPixels},
-            {QStringLiteral("fontWeight"), r.fontWeight}};
+            {QStringLiteral("fontWeight"), r.fontWeight},
+            {QStringLiteral("iconCode"), r.iconCode},
+            {QStringLiteral("iconSize"), r.iconSize},
+            {QStringLiteral("iconGap"), r.iconGap}};
 }
 
 FieldRecipe fieldRecipe(const InteractionState& state, bool invalid, Theme theme) {

@@ -188,13 +188,17 @@ QWidget* tagEdgeCases(QWidget* parent) {
         new Tag(QStringLiteral("A label longer than the chip allows"), sampleColor(blue), host);
     auto* more = new Tag(QStringLiteral("+2"), {}, host);
     more->setOverflow(true);
-    for (Tag* tag : {filter, longTag}) {
+    auto* locked = new Tag(QStringLiteral("Leader"), sampleColor(blue), host);
+    locked->setLocked(true);
+    locked->setToolTip(QStringLiteral("A role: fixed, not a filter"));
+    for (Tag* tag : {filter, longTag, locked}) {
         QObject::connect(&Appearance::instance(), &Appearance::themeChanged, tag,
                          [tag] { tag->setColor(sampleColor(kSampleTags[0])); });
     }
     row->addWidget(filter);
     row->addWidget(longTag);
     row->addWidget(more);
+    row->addWidget(locked);
     row->addStretch();
     return host;
 }

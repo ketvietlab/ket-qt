@@ -60,6 +60,10 @@ class QuickChromeTest final : public QObject {
             "  KetRouteTabs { id: tabs; y: 150; width: 500; tabs: [\"General\", \"Providers\"] }\n"
             "  KetGroupHeader { id: header; y: 230; width: 280; name: \"ketplus\"\n"
             "    onActionTriggered: actions++ }\n"
+            "  property alias team: team; property int opened: 0\n"
+            "  KetGroupHeader { id: team; y: 200; width: 280; name: \"Checkout\"; activatable: "
+            "true\n"
+            "    iconName: \"users\"; onActivated: opened++ }\n"
             "  KetTreeItem { id: tree; y: 260; width: 280; text: \"develop\"; iconName: "
             "\"branch\"\n"
             "    activity: \"working\"; activityText: \"Working\"; count: \"3\" }\n"
@@ -81,6 +85,20 @@ class QuickChromeTest final : public QObject {
         auto* header = root->property("header").value<QQuickItem*>();
         QCOMPARE(header->implicitHeight(), 24.0);
         QVERIFY(header->property("expanded").toBool());
+        // An activatable header: the icon folds, the name activates; each names itself.
+        auto* team = root->property("team").value<QQuickItem*>();
+        auto* fold = team->findChild<QQuickItem*>(QStringLiteral("groupHeaderFold"));
+        auto* name = team->findChild<QQuickItem*>(QStringLiteral("groupHeaderName"));
+        QVERIFY(fold && name);
+        QVERIFY(name->isVisible());
+        QVERIFY(fold->width() < name->x());
+        QMetaObject::invokeMethod(name, "clicked");
+        QCOMPARE(root->property("opened").toInt(), 1);
+        QVERIFY(team->property("expanded").toBool());
+        fold->setProperty("checked", false);
+        QMetaObject::invokeMethod(fold, "toggled");
+        QVERIFY(!team->property("expanded").toBool());
+        QCOMPARE(root->property("opened").toInt(), 1);
         auto* tree = root->property("tree").value<QQuickItem*>();
         QVERIFY(tree->property("hasActivity").toBool());
         QVERIFY(tree->implicitHeight() > 2 * 9 + 13);

@@ -452,6 +452,11 @@
       "status": "exact"
     },
     {
+      "lucide": "users",
+      "code": "users",
+      "status": "exact"
+    },
+    {
       "lucide": "wifi-off",
       "code": "wifi-off",
       "status": "exact"

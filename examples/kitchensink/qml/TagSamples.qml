@@ -48,4 +48,10 @@ Row {
         text: "+2"
         overflow: true
     }
+    KetTag {
+        visible: samples.mode === "edge"
+        text: "Leader"
+        tagColor: samples.blue
+        locked: true
+    }
 }

@@ -319,6 +319,21 @@ class TokensTest final : public QObject {
         QCOMPARE(more.text, Tokens::color(u"text-muted", Theme::Dark));
     }
 
+    void lockedTagsReadAsFixed() {
+        const QColor blue(QStringLiteral("#2f6fde"));
+        for (const Theme theme : {Theme::Light, Theme::Dark}) {
+            const TagRecipe locked = lockedTagRecipe(blue, theme);
+            // A steady tint: the hover tint, whether hovered or not.
+            QCOMPARE(locked.background, tagRecipe(blue, false, true, theme).background);
+            QCOMPARE(locked.text, Tokens::color(u"text-primary", theme));
+            QCOMPARE(locked.iconCode, QStringLiteral("lock"));
+            QCOMPARE(locked.iconSize, locked.fontPixels);
+            QVERIFY(locked.iconGap > 0);
+            QCOMPARE(locked.height, tagRecipe(blue, false, false, theme).height);
+        }
+        QVERIFY(tagRecipe(blue, false, false, Theme::Light).iconCode.isEmpty());
+    }
+
     void shadowTokensParse() {
         const Shadow shadow = shadowToken(u"shadow-md", Theme::Light);
         QCOMPARE(shadow.x, 0.0);

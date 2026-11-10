@@ -23,6 +23,10 @@ class Tag final : public QAbstractButton {
     void setOverflow(bool overflow);
     [[nodiscard]] bool isFilterable() const { return filterable_; }
     void setFilterable(bool filterable);
+    // A locked tag reads as fixed (ket::lockedTagRecipe): it does not filter, is never clicked
+    // and says "Locked" to assistive technology.
+    [[nodiscard]] bool isLocked() const { return locked_; }
+    void setLocked(bool locked);
     // Pins the hover state for documentation pages; std::nullopt follows the pointer.
     void setPreviewHovered(std::optional<bool> hovered);
 
@@ -32,6 +36,7 @@ class Tag final : public QAbstractButton {
 
   protected:
     void paintEvent(QPaintEvent* event) override;
+    [[nodiscard]] bool hitButton(const QPoint& position) const override;
 
   private:
     [[nodiscard]] QFont tagFont() const;
@@ -39,6 +44,7 @@ class Tag final : public QAbstractButton {
     QColor color_;
     bool overflow_ = false;
     bool filterable_ = false;
+    bool locked_ = false;
     std::optional<bool> previewHovered_;
 };
 

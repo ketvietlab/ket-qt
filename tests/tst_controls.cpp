@@ -137,6 +137,45 @@ class ControlsTest final : public QObject {
         QCOMPARE(action.count(), 1);
     }
 
+    void activatableGroupHeadersSplitTheNameFromTheFold() {
+        QWidget window;
+        window.resize(400, 300);
+        auto* header = new GroupHeader(QStringLiteral("Checkout"), &window);
+        header->setGeometry(60, 140, 280, 24);
+        QCursor::setPos(window.mapToGlobal(QPoint(5, 5)));
+        QVERIFY(!header->nameButton()->isVisibleTo(header));
+        header->setActivatable(true);
+        header->setIconCode(QStringLiteral("users"));
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        QVERIFY(header->nameButton()->isVisible());
+        // Two stops, and each says what it does.
+        QCOMPARE(header->toggle()->accessibleName(), QStringLiteral("Fold Checkout"));
+        QCOMPARE(header->nameButton()->accessibleName(), QStringLiteral("Checkout"));
+        QVERIFY(header->toggle()->width() < header->nameButton()->x());
+        QSignalSpy toggled(header, &GroupHeader::toggled);
+        QSignalSpy activated(header, &GroupHeader::activated);
+        header->nameButton()->click();
+        QCOMPARE(activated.count(), 1);
+        QCOMPARE(toggled.count(), 0);
+        QVERIFY(header->isExpanded());
+        header->toggle()->click();
+        QCOMPARE(toggled.count(), 1);
+        QCOMPARE(activated.count(), 1);
+        QCOMPARE(header->toggle()->accessibleName(), QStringLiteral("Unfold Checkout"));
+        // The keyboard reaches both: Tab from the fold lands on the name, Space activates.
+        header->toggle()->setFocus();
+        QTest::keyClick(QApplication::focusWidget(), Qt::Key_Tab);
+        QCOMPARE(QApplication::focusWidget(), header->nameButton());
+        QTRY_VERIFY(header->action()->isVisible());
+        QTest::keyClick(header->nameButton(), Qt::Key_Space);
+        QCOMPARE(activated.count(), 2);
+        // Plain again: the name folds.
+        header->setActivatable(false);
+        QVERIFY(!header->nameButton()->isVisibleTo(header));
+        QCOMPARE(header->toggle()->accessibleName(), QStringLiteral("Checkout"));
+    }
+
     void routeTabsSwitchWithClicksAndArrows() {
         RouteTabs tabs;
         for (const char* label : {"General", "Providers", "Updates"})
