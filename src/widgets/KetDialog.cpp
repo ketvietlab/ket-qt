@@ -148,13 +148,20 @@ void Dialog::applyRecipe() {
     update();
 }
 
+void Dialog::setCardWidth(const qreal pixels) {
+    cardWidth_ = qMax<qreal>(0, pixels);
+    if (isVisible())
+        place();
+}
+
 void Dialog::place() {
     QWidget* window = parentWidget();
     setGeometry(window->rect());
     const DialogRecipe r = recipe();
     const Appearance& appearance = Appearance::instance();
     const int margin = qRound(appearance.scaled(r.margin));
-    const int width = qMin(qRound(appearance.scaled(r.width)), window->width() - 2 * margin);
+    const qreal pixels = cardWidth_ > 0 ? cardWidth_ : r.width;
+    const int width = qMin(qRound(appearance.scaled(pixels)), window->width() - 2 * margin);
     const int wanted = card_->layout()->hasHeightForWidth()
                            ? card_->layout()->totalHeightForWidth(width)
                            : card_->sizeHint().height();

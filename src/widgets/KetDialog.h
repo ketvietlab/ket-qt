@@ -32,6 +32,11 @@ class Dialog final : public QWidget {
     void setBody(QWidget* body);
     [[nodiscard]] QWidget* body() const { return body_; }
 
+    // The card's width in unscaled pixels, as the mock's `width: px(N)`; 0 uses the recipe's.
+    // The card still keeps the recipe's margin inside the window.
+    void setCardWidth(qreal pixels);
+    [[nodiscard]] qreal cardWidth() const { return cardWidth_; }
+
     // Appends a footer button (right-aligned, in insertion order).
     Button* addButton(const QString& text, ButtonVariant variant = ButtonVariant::Secondary);
 
@@ -70,6 +75,7 @@ class Dialog final : public QWidget {
     QWidget* footer_;
     QHBoxLayout* footerLayout_;
     QPointer<QWidget> restoreFocus_;
+    qreal cardWidth_ = 0;
 };
 
 } // namespace ket
