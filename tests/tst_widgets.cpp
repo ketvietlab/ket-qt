@@ -296,6 +296,36 @@ class WidgetsTest final : public QObject {
         QVERIFY(toast->isVisible());
     }
 
+    void chromelessDialogsShowTheirOwnPage() {
+        QWidget window;
+        window.resize(900, 700);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        Dialog dialog(QStringLiteral("Connect your phone"), &window);
+        auto* page = new QWidget;
+        auto* layout = new QVBoxLayout(page);
+        layout->setContentsMargins(0, 0, 0, 0);
+        auto* line = new QLabel(QStringLiteral("Scan the code"));
+        layout->addWidget(line);
+        auto* more = new QLabel(QStringLiteral("Compare the code on both screens"));
+        more->hide();
+        layout->addWidget(more);
+        dialog.setBody(page);
+        dialog.setChromeless(true);
+        dialog.open();
+        // No header band and no padding: the page fills the card.
+        for (auto* label : dialog.card()->findChildren<QLabel*>())
+            QVERIFY(label->text() != dialog.title() || !label->isVisible());
+        QCOMPARE(page->geometry().topLeft(), QPoint(0, 0));
+        QCOMPARE(page->width(), dialog.card()->width());
+        QCOMPARE(dialog.card()->accessibleName(), QStringLiteral("Connect your phone"));
+        // The card follows the page's height as its state changes.
+        const int before = dialog.card()->height();
+        more->show();
+        QTRY_VERIFY(dialog.card()->height() > before);
+        QCOMPARE(dialog.card()->geometry().center().y(), window.rect().center().y());
+    }
+
     void dialogsTakeTheMocksWidth() {
         QWidget window;
         window.resize(1200, 800);

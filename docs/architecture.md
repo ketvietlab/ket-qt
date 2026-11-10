@@ -104,6 +104,8 @@ search logic. The app filters the palette's groups as its query changes.
   `.toast` do, not as separate top-level windows. `ket::Dialog` covers its window, keeps
   Tab inside the card and rejects on Escape, the close button or a backdrop click.
   Its card takes the recipe's width unless `setCardWidth()` sets the mock's `width: px(N)`.
+  `setChromeless()` hands the whole card to a body that draws its own header and footer, and
+  the card follows its content's height while open.
   A window container (a `QQuickView` or web view) is a native child window above the
   window's own surface, so when the window holds one, a dialog or toast becomes a native
   child too, raised above it, and draws a snapshot of the window under its translucent parts.
