@@ -27,7 +27,14 @@ inline void makeNativeOverlay(QWidget* overlay) {
         return;
     overlay->setAttribute(Qt::WA_DontCreateNativeAncestors);
     overlay->setAttribute(Qt::WA_TranslucentBackground);
+    // Qt otherwise makes the overlay's siblings native too. A sibling that holds a window
+    // container (the page around an Agent Workspace) then gets its own native window above the
+    // container's, and the container disappears beneath it. Keep them as they are.
+    const bool keepSiblings =
+        QCoreApplication::testAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
+    QCoreApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings, true);
     overlay->setAttribute(Qt::WA_NativeWindow);
+    QCoreApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings, keepSiblings);
 }
 
 // What the window shows now, native children included, for an overlay to draw beneath its

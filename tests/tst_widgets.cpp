@@ -332,6 +332,32 @@ class WidgetsTest final : public QObject {
         QVERIFY(toast->isVisible());
     }
 
+    void overlaysLeaveTheirSiblingsAlone() {
+        // The page around a window container is the overlay's sibling. Had it become native, its
+        // own window would cover the container's (the Agent Workspace showed blank).
+        QWidget window;
+        window.resize(800, 600);
+        auto* layout = new QVBoxLayout(&window);
+        auto* page = new QWidget;
+        auto* pageLayout = new QVBoxLayout(page);
+        auto* quick = new QWindow;
+        pageLayout->addWidget(QWidget::createWindowContainer(quick, page));
+        layout->addWidget(page);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+
+        Toast* toast = Toast::showMessage(&window, QStringLiteral("Ready"));
+        QVERIFY(toast->testAttribute(Qt::WA_NativeWindow));
+        Dialog dialog(QStringLiteral("Rename"), &window);
+        dialog.setBody(new QWidget);
+        dialog.open();
+        QVERIFY(dialog.testAttribute(Qt::WA_NativeWindow));
+        QCoreApplication::processEvents();
+        QCOMPARE(page->internalWinId(), WId(0));
+        QCOMPARE(quick->parent(), window.windowHandle());
+        QVERIFY(!QCoreApplication::testAttribute(Qt::AA_DontCreateNativeWidgetSiblings));
+    }
+
     void chromelessDialogsShowTheirOwnPage() {
         QWidget window;
         window.resize(900, 700);
