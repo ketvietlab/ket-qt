@@ -87,11 +87,17 @@ ToastRecipe toastRecipe(Theme theme, ToastTone tone) {
     return recipe;
 }
 
+QColor modalBackdrop(const Theme theme) {
+    const qreal dark = profile().backdropOpacityDark;
+    QColor color =
+        theme == Theme::Dark && dark > 0 ? QColor(Qt::black) : token(u"text-main", Theme::Light);
+    color.setAlphaF(float(theme == Theme::Dark && dark > 0 ? dark : profile().backdropOpacity));
+    return color;
+}
+
 DialogRecipe dialogRecipe(Theme theme) {
     DialogRecipe recipe;
-    // The backdrop darkens in both themes: the light theme's main text colour, translucent.
-    recipe.backdrop = token(u"text-main", Theme::Light);
-    recipe.backdrop.setAlphaF(float(profile().backdropOpacity));
+    recipe.backdrop = modalBackdrop(theme);
     recipe.background = token(u"panel-bg", theme);
     recipe.border = token(u"border-default", theme);
     recipe.divider = token(u"panel-border", theme);

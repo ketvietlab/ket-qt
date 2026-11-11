@@ -87,6 +87,9 @@ struct Profile {
     qreal dialogFooterPaddingBlock = 0;
     qreal dialogTitlePixels = 0;
     qreal backdropOpacity = 0; // the modal backdrop over the window
+    // The dark theme's backdrop: black at this opacity. The light theme's dark ink is lighter
+    // than a dark window, so it cannot dim one. 0 keeps the light theme's backdrop.
+    qreal backdropOpacityDark = 0;
 
     // Menus (context menus, select popups).
     qreal menuMinWidth = 0;

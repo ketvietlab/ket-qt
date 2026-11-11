@@ -21,13 +21,6 @@ QVariantMap mapOf(std::initializer_list<std::pair<const char*, QVariant>> entrie
     return map;
 }
 
-QColor backdrop() {
-    // As the dialog's: the light theme's main text colour, translucent, in both themes.
-    QColor color = token(u"text-main", Theme::Light);
-    color.setAlphaF(float(profile().backdropOpacity));
-    return color;
-}
-
 QColor taskStatusColor(TaskStatus status, Theme theme) {
     switch (status) {
     case TaskStatus::Completed:
@@ -49,7 +42,7 @@ CommandPaletteRecipe commandPaletteRecipe(Theme theme) {
     CommandPaletteRecipe recipe;
     recipe.background = token(u"panel-bg", theme);
     recipe.border = token(u"border-default", theme);
-    recipe.backdrop = backdrop();
+    recipe.backdrop = modalBackdrop(theme);
     recipe.shadow = shadowToken(u"shadow-popover", theme);
     recipe.searchIcon = token(u"accent-text", theme);
     recipe.text = token(u"text-main", theme);
