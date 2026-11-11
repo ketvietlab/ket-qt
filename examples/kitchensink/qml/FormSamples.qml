@@ -152,6 +152,11 @@ Item {
             width: KetTheme.px(KetTheme.t.space16 * 7, KetTheme.zoom)
             spacing: KetTheme.px(KetTheme.t.space2, KetTheme.zoom)
 
+            KetCheckbox {
+                width: parent.width
+                wordWrap: true
+                text: "A checkbox whose long label wraps under itself in a narrow column"
+            }
             KetChoice {
                 width: parent.width
                 text: "Check for updates automatically"
@@ -205,6 +210,13 @@ Item {
                 label: "Worktree name"
                 error: "Use letters, numbers and dashes only."
                 KetTextField { text: "ketplus desktop"; invalid: true }
+            }
+            KetFieldRow {
+                width: parent.width
+                stacked: true
+                label: "Integration branch (stacked)"
+                help: "The label sits above the control in a narrow form."
+                KetTextField { text: "integration" }
             }
         }
     }

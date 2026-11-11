@@ -142,6 +142,10 @@ QWidget* choiceList(QWidget* parent) {
     auto* column = new QVBoxLayout(host);
     column->setContentsMargins(0, 0, 0, 0);
     column->setSpacing(qRound(Tokens::px(u"space-2")));
+    auto* wrapped = new Checkbox(
+        QStringLiteral("A checkbox whose long label wraps under itself in a narrow column"), host);
+    wrapped->setWordWrap(true);
+    column->addWidget(wrapped);
     auto* autoCheck =
         new Choice(QStringLiteral("Check for updates automatically"),
                    QStringLiteral("Once a day while KetPlus is open."), ToggleKind::Checkbox, host);
@@ -188,6 +192,13 @@ QWidget* settingsForm(QWidget* parent) {
     auto* nameRow = new FieldRow(QStringLiteral("Worktree name"), name, {}, host);
     nameRow->setError(QStringLiteral("Use letters, numbers and dashes only."));
     column->addWidget(nameRow);
+    auto* branch = new TextField;
+    branch->setText(QStringLiteral("integration"));
+    auto* stacked =
+        new FieldRow(QStringLiteral("Integration branch (stacked)"), branch,
+                     QStringLiteral("The label sits above the control in a narrow form."), host);
+    stacked->setStacked(true);
+    column->addWidget(stacked);
     return host;
 }
 

@@ -51,6 +51,45 @@ QSize Toggle::sizeHint() const {
     return {qCeil(box + label) + 4, qMax(qCeil(box) + 4, metrics.height())};
 }
 
+void Toggle::setWordWrap(const bool wrap) {
+    if (wordWrap_ == wrap)
+        return;
+    wordWrap_ = wrap;
+    QSizePolicy policy(wrap ? QSizePolicy::Preferred : QSizePolicy::Maximum, QSizePolicy::Fixed);
+    policy.setHeightForWidth(wrap);
+    setSizePolicy(policy);
+    updateGeometry();
+    update();
+}
+
+qreal Toggle::labelLeft() const {
+    const Appearance& appearance = Appearance::instance();
+    return 2 + appearance.scaled(recipe().size) + appearance.scaled(recipe().spacing);
+}
+
+// Wrapped, the toggle may be as narrow as its longest word.
+QSize Toggle::minimumSizeHint() const {
+    const QSize natural = sizeHint();
+    if (!wordWrap_ || text().isEmpty())
+        return natural;
+    const QFontMetrics metrics(labelFont());
+    int word = 0;
+    for (const QString& part : text().split(QLatin1Char(' '), Qt::SkipEmptyParts))
+        word = qMax(word, metrics.horizontalAdvance(part));
+    return {qMin(natural.width(), qCeil(labelLeft()) + word + 2), natural.height()};
+}
+
+int Toggle::heightForWidth(const int width) const {
+    const int single = sizeHint().height();
+    if (!wordWrap_ || text().isEmpty())
+        return single;
+    const int room = qMax(1, width - qCeil(labelLeft()));
+    const QRect wrapped = QFontMetrics(labelFont())
+                              .boundingRect(QRect(0, 0, room, QWIDGETSIZE_MAX),
+                                            Qt::AlignLeft | Qt::TextWordWrap, text());
+    return qMax(single, wrapped.height());
+}
+
 void Toggle::paintIndicator(QPainter& painter, const QRectF& box, ToggleKind kind,
                             const ToggleRecipe& r, qreal devicePixelRatio) {
     const qreal scale = box.width() / r.size;
@@ -84,14 +123,22 @@ void Toggle::paintEvent(QPaintEvent*) {
     painter.setOpacity(r.opacity);
     const qreal box = appearance.scaled(r.size);
     // Leave room for the focus ring around the indicator.
-    const QRectF indicator(2, (height() - box) / 2.0, box, box);
+    // Wrapped, the indicator and the label's first line share the height of one line.
+    const qreal line = wordWrap_ ? sizeHint().height() : height();
+    const QRectF indicator(2, (line - box) / 2.0, box, box);
     paintIndicator(painter, indicator, kind_, r, devicePixelRatioF());
     if (!text().isEmpty()) {
         painter.setFont(labelFont());
         painter.setPen(r.label);
-        const qreal x = indicator.right() + appearance.scaled(r.spacing);
-        painter.drawText(QRectF(x, 0, width() - x, height()), Qt::AlignLeft | Qt::AlignVCenter,
-                         text());
+        const qreal x = labelLeft();
+        if (wordWrap_) {
+            const qreal top = (line - QFontMetricsF(labelFont()).height()) / 2.0;
+            painter.drawText(QRectF(x, top, width() - x, height() - top),
+                             Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap, text());
+        } else {
+            painter.drawText(QRectF(x, 0, width() - x, height()), Qt::AlignLeft | Qt::AlignVCenter,
+                             text());
+        }
     }
 }
 

@@ -158,6 +158,15 @@ class QuickTest final : public QObject {
             background->property("border").value<QObject*>()->property("color").value<QColor>(),
             fieldR.border);
 
+        std::unique_ptr<QObject> wrapped = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "KetCheckbox { width: 90; wordWrap: true; text: \"Follow system appearance\" }\n"));
+        std::unique_ptr<QObject> unwrapped = create(
+            QByteArrayLiteral("import QtQuick\nimport Ket\n"
+                              "KetCheckbox { width: 90; text: \"Follow system appearance\" }\n"));
+        QVERIFY(wrapped->property("implicitHeight").toReal() >
+                unwrapped->property("implicitHeight").toReal());
+
         std::unique_ptr<QObject> check = create(QByteArrayLiteral(
             "import QtQuick\nimport Ket\nKetCheckbox { text: \"Follow\"; checked: true }\n"));
         auto* checkItem = qobject_cast<QQuickItem*>(check.get());
@@ -180,6 +189,16 @@ class QuickTest final : public QObject {
             "KetFieldRow { label: \"Font\"; help: \"Help\"; KetSelect { model: [\"A\"] } }\n"));
         QVERIFY(qobject_cast<QQuickItem*>(row.get()));
         QVERIFY(row->property("implicitWidth").toReal() > fieldRowRecipe(Theme::Light).labelWidth);
+        // Stacked, the label is a line above the control: the row needs less width, more height.
+        std::unique_ptr<QObject> stacked = create(
+            QByteArrayLiteral("import QtQuick\nimport Ket\n"
+                              "KetFieldRow { stacked: true; label: \"Font\"; help: \"Help\"; "
+                              "KetSelect { model: [\"A\"] } }\n"));
+        QVERIFY(qobject_cast<QQuickItem*>(stacked.get()));
+        QVERIFY(stacked->property("implicitWidth").toReal() <
+                row->property("implicitWidth").toReal());
+        QVERIFY(stacked->property("implicitHeight").toReal() >
+                row->property("implicitHeight").toReal());
     }
 
     void tagMatchesTheWidgetsRecipe() {
