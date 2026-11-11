@@ -39,6 +39,7 @@ class Toggle : public QAbstractButton {
 
     // Where the label starts: after the indicator, its focus ring and the spacing.
     [[nodiscard]] qreal labelLeft() const;
+    [[nodiscard]] QRectF wrappedLabelRect(int width) const;
 
     ToggleKind kind_;
     std::optional<InteractionState> preview_;
