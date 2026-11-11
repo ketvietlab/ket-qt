@@ -665,6 +665,33 @@ class WidgetsTest final : public QObject {
         QCOMPARE(more.recipe().text, Tokens::color(u"text-muted", Theme::Light));
         QVERIFY(more.sizeHint().width() < tag.sizeHint().width());
     }
+
+    void lockedTagsAreFixed() {
+        Tag plain(QStringLiteral("Developer"), QColor(0x2f6fde));
+        Tag locked(QStringLiteral("Developer"), QColor(0x2f6fde));
+        locked.setFilterable(true);
+        locked.setLocked(true);
+        QVERIFY(!locked.isFilterable());
+        QCOMPARE(locked.recipe().iconCode, QStringLiteral("lock"));
+        QCOMPARE(locked.accessibleDescription(), QStringLiteral("Locked"));
+        // Room for the lock, and the same tint hovered or not.
+        QVERIFY(locked.sizeHint().width() > plain.sizeHint().width());
+        locked.setPreviewHovered(false);
+        QCOMPARE(locked.recipe().background,
+                 lockedTagRecipe(QColor(0x2f6fde), Theme::Light).background);
+        locked.resize(locked.sizeHint());
+        QSignalSpy clicked(&locked, &QAbstractButton::clicked);
+        QTest::mouseClick(&locked, Qt::LeftButton, {}, locked.rect().center());
+        QCOMPARE(clicked.count(), 0);
+        QVERIFY(!locked.grab().isNull());
+        // A locked chip on a conversation row is wider by its lock.
+        ConversationRow row(QStringLiteral("Cart"));
+        row.resize(280, row.sizeHint().height());
+        row.setTags({{QStringLiteral("Developer"), QColor(0x2f6fde), true},
+                     {QStringLiteral("web"), QColor(0x22aa66)}});
+        QCOMPARE(row.visibleTagCount(), 2);
+        QVERIFY(!row.grab().isNull());
+    }
 };
 
 int main(int argc, char** argv) {

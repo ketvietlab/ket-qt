@@ -5,7 +5,7 @@ import Ket
 
 // Two-line sidebar conversation row; it draws ket::conversationRowRecipe and
 // ket::conversationStatusRecipe, as ket::ConversationRow does. `tags` is a list of
-// { label, color }; whole tags that fit are shown, the rest counted in +N. Without tags the
+// { label, color, locked }; whole tags that fit are shown, the rest counted in +N. Without tags the
 // meta line shows the status label.
 Basic.AbstractButton {
     id: control
@@ -24,19 +24,25 @@ Basic.AbstractButton {
     readonly property var statusRecipe: KetTheme.conversationStatusRecipe(KetTheme.dark, status)
     readonly property var moreRecipe: KetTheme.tagRecipe(KetTheme.dark, KetTheme.zoom,
                                                          "transparent", true, false)
+    // The lock a locked tag ({ label, color, locked: true }) leads with.
+    readonly property real lockedIcon: {
+        const locked = KetTheme.lockedTagRecipe(KetTheme.dark, KetTheme.zoom, "transparent")
+        return locked.iconSize + locked.iconGap
+    }
     // How many whole tags fit, keeping room for +N while any tag is left out.
     readonly property int visibleTagCount: {
         const room = tagArea.width
         const gap = recipe.tagGap
-        const chip = text => Math.min(tagMetrics.advanceWidth(text) + 2 * moreRecipe.paddingInline,
-                                      recipe.tagMaxWidth)
+        const chip = (text, locked) => Math.min(
+            tagMetrics.advanceWidth(text) + 2 * moreRecipe.paddingInline
+                + (locked ? lockedIcon : 0), recipe.tagMaxWidth)
         let x = 0
         for (let i = 0; i < tags.length; ++i) {
             const remaining = tags.length - i - 1
-            const reserve = remaining ? gap + chip("+" + remaining) : 0
-            if (x + chip(tags[i].label) + reserve > room)
+            const reserve = remaining ? gap + chip("+" + remaining, false) : 0
+            if (x + chip(tags[i].label, !!tags[i].locked) + reserve > room)
                 return i
-            x += chip(tags[i].label) + gap
+            x += chip(tags[i].label, !!tags[i].locked) + gap
         }
         return tags.length
     }
@@ -132,6 +138,7 @@ Basic.AbstractButton {
                             required property var modelData
                             text: modelData.label
                             tagColor: modelData.color
+                            locked: !!modelData.locked
                             maxWidth: control.recipe.tagMaxWidth
                         }
                     }

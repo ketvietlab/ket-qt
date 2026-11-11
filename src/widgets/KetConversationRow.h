@@ -15,6 +15,8 @@ namespace ket {
 struct ConversationTag {
     QString label;
     QColor color;
+    // A fixed tag, such as a role (ket::lockedTagRecipe): drawn with a leading lock.
+    bool locked = false;
 };
 
 // Two-line sidebar conversation row (`.sidebar-context .conversation`): the title, then the

@@ -97,14 +97,17 @@ QList<ConversationRow::Chip> ConversationRow::layoutChips(qreal left, qreal righ
     const qreal gap = scaled(r.tagGap);
     const qreal height = scaled(more.height);
     const auto chipWidth = [&](const QString& text, const TagRecipe& tag) {
-        return qMin(metrics.horizontalAdvance(text) + 2 * scaled(tag.paddingInline),
+        const qreal icon = tag.iconCode.isEmpty() ? 0 : scaled(tag.iconSize) + scaled(tag.iconGap);
+        return qMin(metrics.horizontalAdvance(text) + 2 * scaled(tag.paddingInline) + icon,
                     scaled(r.tagMaxWidth));
     };
     // Whole chips only, keeping room for +N while any tag is left out.
     QList<Chip> chips;
     qreal x = left;
     for (int i = 0; i < tags_.size(); ++i) {
-        const TagRecipe tag = tagRecipe(tags_.at(i).color, false, false, theme());
+        const TagRecipe tag = tags_.at(i).locked
+                                  ? lockedTagRecipe(tags_.at(i).color, theme())
+                                  : tagRecipe(tags_.at(i).color, false, false, theme());
         const qreal width = chipWidth(tags_.at(i).label, tag);
         const int remaining = int(tags_.size()) - i - 1;
         const qreal reserve =
@@ -208,8 +211,16 @@ void ConversationRow::paintEvent(QPaintEvent*) {
             painter.setBrush(chip.recipe.background);
             painter.drawRoundedRect(chip.rect, chipRadius, chipRadius);
             painter.setPen(chip.recipe.text);
-            const QRectF label = chip.rect.adjusted(scaled(chip.recipe.paddingInline), 0,
-                                                    -scaled(chip.recipe.paddingInline), 0);
+            QRectF label = chip.rect.adjusted(scaled(chip.recipe.paddingInline), 0,
+                                              -scaled(chip.recipe.paddingInline), 0);
+            if (!chip.recipe.iconCode.isEmpty()) {
+                const qreal icon = scaled(chip.recipe.iconSize);
+                painter.drawPixmap(
+                    QPointF(label.left(), chip.rect.top() + (chip.rect.height() - icon) / 2),
+                    Icons::pixmap(chip.recipe.iconCode, icon, devicePixelRatioF(),
+                                  chip.recipe.text));
+                label.setLeft(label.left() + icon + scaled(chip.recipe.iconGap));
+            }
             painter.drawText(
                 label, Qt::AlignCenter,
                 QFontMetricsF(tagFont).elidedText(chip.text, Qt::ElideRight, label.width()));

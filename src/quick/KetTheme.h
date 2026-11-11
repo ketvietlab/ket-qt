@@ -96,6 +96,7 @@ class QuickTheme final : public QObject {
     Q_INVOKABLE QVariantMap badgeRecipe(bool dark, qreal zoom, int tone) const;
     Q_INVOKABLE QVariantMap tagRecipe(bool dark, qreal zoom, const QColor& color, bool overflow,
                                       bool hovered) const;
+    Q_INVOKABLE QVariantMap lockedTagRecipe(bool dark, qreal zoom, const QColor& color) const;
     Q_INVOKABLE QVariantMap fieldRecipe(bool dark, qreal zoom, bool hovered, bool focused,
                                         bool enabled, bool invalid) const;
     Q_INVOKABLE QVariantMap toggleRecipe(bool dark, qreal zoom, int kind, bool checked,

@@ -126,6 +126,14 @@ QVariantMap QuickTheme::tagRecipe(bool dark, qreal zoom, const QColor& color, bo
     return recipe;
 }
 
+QVariantMap QuickTheme::lockedTagRecipe(bool dark, qreal zoom, const QColor& color) const {
+    QVariantMap recipe = toVariantMap(ket::lockedTagRecipe(color, themeOf(dark)));
+    scaleLengths(recipe, zoom,
+                 {u"height", u"radius", u"paddingInline", u"maxWidth", u"fontPixels", u"iconSize",
+                  u"iconGap"});
+    return recipe;
+}
+
 QVariantMap QuickTheme::fieldRecipe(bool dark, qreal zoom, bool hovered, bool focused, bool enabled,
                                     bool invalid) const {
     const InteractionState state{hovered, false, enabled, focused};

@@ -35,6 +35,8 @@ class GroupToggle final : public QAbstractButton {
 
     QString iconCode;
     bool selected = false;
+    // False in an activatable header: the name is its own control (GroupName).
+    bool nameShown = true;
 
     [[nodiscard]] GroupHeaderRecipe recipe() const {
         return groupHeaderRecipe(selected,
@@ -52,6 +54,8 @@ class GroupToggle final : public QAbstractButton {
 
     [[nodiscard]] QSize sizeHint() const override {
         const GroupHeaderRecipe r = recipe();
+        if (!nameShown)
+            return {qCeil(scaled(r.iconSize)) + 2, qRound(scaled(r.height))};
         return {qCeil(scaled(r.iconSize) + scaled(r.nameGap) +
                       QFontMetricsF(textFont()).horizontalAdvance(text())) +
                     2,
@@ -59,6 +63,8 @@ class GroupToggle final : public QAbstractButton {
     }
 
     [[nodiscard]] QSize minimumSizeHint() const override {
+        if (!nameShown)
+            return sizeHint();
         return {qRound(scaled(recipe().iconSize) * 3), sizeHint().height()};
     }
 
@@ -75,12 +81,71 @@ class GroupToggle final : public QAbstractButton {
                                                  : QStringLiteral("folder");
         painter.drawPixmap(QPointF(1, qRound((height() - icon) / 2)),
                            Icons::pixmap(code, icon, devicePixelRatioF(), r.text));
+        if (!nameShown)
+            return;
         const qreal x = 1 + icon + scaled(r.nameGap);
         const QFont font = textFont();
         painter.setFont(font);
         painter.setPen(r.text);
         painter.drawText(QRectF(x, 0, width() - x - 1, height()), Qt::AlignLeft | Qt::AlignVCenter,
                          QFontMetricsF(font).elidedText(text(), Qt::ElideRight, width() - x - 1));
+    }
+    void enterEvent(QEnterEvent* event) override {
+        update();
+        QAbstractButton::enterEvent(event);
+    }
+    void leaveEvent(QEvent* event) override {
+        update();
+        QAbstractButton::leaveEvent(event);
+    }
+};
+
+// The name of an activatable header: a button of its own, drawn like the header's name.
+class GroupName final : public QAbstractButton {
+  public:
+    explicit GroupName(QWidget* parent) : QAbstractButton(parent) {
+        setFocusPolicy(Qt::StrongFocus);
+        setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        setCursor(Qt::PointingHandCursor);
+    }
+
+    bool selected = false;
+
+    [[nodiscard]] GroupHeaderRecipe recipe() const {
+        return groupHeaderRecipe(selected,
+                                 InteractionState{underMouse(), isDown(), isEnabled(), hasFocus()},
+                                 Appearance::instance().theme());
+    }
+
+    [[nodiscard]] QFont textFont() const {
+        const GroupHeaderRecipe r = recipe();
+        QFont font = this->font();
+        font.setPixelSize(qRound(scaled(r.fontPixels)));
+        font.setWeight(QFont::Weight(r.fontWeight));
+        return font;
+    }
+
+    [[nodiscard]] QSize sizeHint() const override {
+        return {qCeil(QFontMetricsF(textFont()).horizontalAdvance(text())) + 4,
+                qRound(scaled(recipe().height))};
+    }
+
+    [[nodiscard]] QSize minimumSizeHint() const override {
+        return {qRound(scaled(recipe().iconSize) * 2), sizeHint().height()};
+    }
+
+  protected:
+    void paintEvent(QPaintEvent*) override {
+        const GroupHeaderRecipe r = recipe();
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setOpacity(r.opacity);
+        paintFocus(painter, QRectF(rect()), r.focusRing, scaled(Tokens::px(u"radius-sm")));
+        const QFont font = textFont();
+        painter.setFont(font);
+        painter.setPen(r.text);
+        painter.drawText(QRectF(2, 0, width() - 4, height()), Qt::AlignLeft | Qt::AlignVCenter,
+                         QFontMetricsF(font).elidedText(text(), Qt::ElideRight, width() - 4));
     }
     void enterEvent(QEnterEvent* event) override {
         update();
@@ -246,7 +311,7 @@ void TreeItem::leaveEvent(QEvent* event) {
 }
 
 GroupHeader::GroupHeader(const QString& name, QWidget* parent)
-    : QWidget(parent), toggle_(new GroupToggle(this)),
+    : QWidget(parent), toggle_(new GroupToggle(this)), name_(new GroupName(this)),
       action_(new IconButton(Icons::icon(u"plus"), tr("New conversation"), this)) {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     toggle_->setText(name);
@@ -254,11 +319,17 @@ GroupHeader::GroupHeader(const QString& name, QWidget* parent)
     action_->setControlSize(ControlSize::Small);
     action_->installEventFilter(this);
     toggle_->installEventFilter(this);
+    name_->setText(name);
+    name_->setVisible(false);
+    name_->installEventFilter(this);
     auto* row = new QHBoxLayout(this);
     row->addWidget(toggle_, 0);
+    row->addWidget(name_, 0);
     row->addStretch(1);
     row->addWidget(action_);
     connect(toggle_, &QAbstractButton::toggled, this, &GroupHeader::toggled);
+    connect(toggle_, &QAbstractButton::toggled, this, &GroupHeader::updateAccessibleNames);
+    connect(name_, &QAbstractButton::clicked, this, &GroupHeader::activated);
     connect(action_, &QAbstractButton::clicked, this, &GroupHeader::actionTriggered);
     connect(&Appearance::instance(), &Appearance::themeChanged, this, &GroupHeader::applyRecipe);
     connect(&Appearance::instance(), &Appearance::zoomChanged, this, &GroupHeader::applyRecipe);
@@ -270,8 +341,30 @@ QString GroupHeader::name() const { return toggle_->text(); }
 
 void GroupHeader::setName(const QString& name) {
     toggle_->setText(name);
-    toggle_->setAccessibleName(name);
+    name_->setText(name);
+    updateAccessibleNames();
     toggle_->updateGeometry();
+    name_->updateGeometry();
+}
+
+void GroupHeader::setActivatable(bool activatable) {
+    if (activatable_ == activatable)
+        return;
+    activatable_ = activatable;
+    static_cast<GroupToggle*>(toggle_)->nameShown = !activatable;
+    name_->setVisible(activatable);
+    updateAccessibleNames();
+    toggle_->updateGeometry();
+    toggle_->update();
+}
+
+void GroupHeader::updateAccessibleNames() {
+    const QString name = toggle_->text();
+    // Folding is the icon's job in an activatable header; its name says so.
+    toggle_->setAccessibleName(!activatable_  ? name
+                               : isExpanded() ? tr("Fold %1").arg(name)
+                                              : tr("Unfold %1").arg(name));
+    name_->setAccessibleName(name);
 }
 
 bool GroupHeader::isExpanded() const { return toggle_->isChecked(); }
@@ -285,7 +378,9 @@ void GroupHeader::setIconCode(const QString& code) {
 
 void GroupHeader::setSelected(bool selected) {
     static_cast<GroupToggle*>(toggle_)->selected = selected;
+    static_cast<GroupName*>(name_)->selected = selected;
     toggle_->update();
+    name_->update();
 }
 
 void GroupHeader::applyRecipe() {
@@ -298,12 +393,14 @@ void GroupHeader::applyRecipe() {
     setFixedHeight(qRound(scaled(r.height)));
     toggle_->updateGeometry();
     toggle_->update();
+    name_->updateGeometry();
+    name_->update();
 }
 
 void GroupHeader::updateAction() {
     // `.repository-group-header .icon-btn` is transparent until the header is hovered or
     // focused; it keeps its place so the name does not move.
-    const bool shown = hovered_ || action_->hasFocus() || toggle_->hasFocus();
+    const bool shown = hovered_ || action_->hasFocus() || toggle_->hasFocus() || name_->hasFocus();
     QSizePolicy policy = action_->sizePolicy();
     policy.setRetainSizeWhenHidden(true);
     action_->setSizePolicy(policy);
@@ -323,7 +420,7 @@ void GroupHeader::leaveEvent(QEvent* event) {
 }
 
 bool GroupHeader::eventFilter(QObject* watched, QEvent* event) {
-    if ((watched == action_ || watched == toggle_) &&
+    if ((watched == action_ || watched == toggle_ || watched == name_) &&
         (event->type() == QEvent::FocusIn || event->type() == QEvent::FocusOut))
         // Queued: Tab from the name moves focus to the action after the name's FocusOut.
         QMetaObject::invokeMethod(this, &GroupHeader::updateAction, Qt::QueuedConnection);

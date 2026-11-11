@@ -197,6 +197,29 @@ class QuickTest final : public QObject {
                  tagRecipe(QColor(0x2f6fde), false, true, Theme::Light).background);
     }
 
+    void lockedTagMatchesTheWidgetsRecipe() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "Item { property alias locked: locked; property alias plain: plain\n"
+            "  property alias row: row\n"
+            "  KetTag { id: plain; text: \"Leader\"; tagColor: \"#2f6fde\" }\n"
+            "  KetTag { id: locked; text: \"Leader\"; tagColor: \"#2f6fde\"; locked: true;\n"
+            "    filterable: true }\n"
+            "  KetConversationRow { id: row; width: 280; text: \"Cart\"\n"
+            "    tags: [{ label: \"Developer\", color: \"#2f6fde\", locked: true }] }\n"
+            "}\n"));
+        QVERIFY(root);
+        auto* locked = root->property("locked").value<QQuickItem*>();
+        auto* plain = root->property("plain").value<QQuickItem*>();
+        const TagRecipe recipe = lockedTagRecipe(QColor(0x2f6fde), Theme::Light);
+        QCOMPARE(locked->property("color").value<QColor>(), recipe.background);
+        QCOMPARE(locked->implicitHeight(), recipe.height);
+        QCOMPARE(locked->implicitWidth(),
+                 plain->implicitWidth() + recipe.iconSize + recipe.iconGap);
+        auto* row = root->property("row").value<QQuickItem*>();
+        QCOMPARE(row->property("visibleTagCount").toInt(), 1);
+    }
+
     void themeExposesTokenMap() {
         std::unique_ptr<QObject> root =
             create(QByteArrayLiteral("import QtQuick\nimport Ket\n"
