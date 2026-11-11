@@ -13,6 +13,7 @@
 #include "NavigationPages.h"
 #include "OverlayPages.h"
 #include "RichPages.h"
+#include "SidebarTreePages.h"
 #include "SurfacePages.h"
 
 #include <QComboBox>
@@ -47,6 +48,7 @@ const PageEntry kPages[] = {
     {"forms", "Components", "Forms", formPage},
     {"overlays", "Components", "Overlays", overlayPage},
     {"navigation", "Components", "Navigation", navigationPage},
+    {"sidebar-tree", "Components", "Sidebar tree", sidebarTreePage},
     {"conversation", "Components", "Conversation", conversationPage},
     {"rich", "Components", "Rich transcript", richPage},
     {"chat", "Components", "Chat extras", chatPage},

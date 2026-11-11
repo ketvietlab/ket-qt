@@ -193,6 +193,27 @@ class QuickTheme final : public QObject {
                                            bool pressed, bool enabled, bool focused) const;
     Q_INVOKABLE QVariantMap groupHeaderRecipe(bool dark, qreal zoom, bool selected, bool hovered,
                                               bool pressed, bool enabled, bool focused) const;
+    // The sidebar tree (KetSidebarTreeRecipes), in KetThemeSidebar.cpp.
+    Q_INVOKABLE QVariantMap sidebarTreeColumns(int level, qreal zoom) const;
+    Q_INVOKABLE QVariantMap sidebarTreeGuideRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap sidebarRepositoryRecipe(bool dark, qreal zoom, bool selected,
+                                                    bool hovered, bool pressed, bool enabled,
+                                                    bool focused) const;
+    Q_INVOKABLE QVariantMap sidebarTeamRecipe(bool dark, qreal zoom, bool selected, bool waiting,
+                                              bool hovered, bool pressed, bool enabled,
+                                              bool focused) const;
+    Q_INVOKABLE QVariantMap sidebarSectionRecipe(bool dark, qreal zoom) const;
+    Q_INVOKABLE QVariantMap sidebarRowRecipe(bool dark, qreal zoom, bool selected, bool unread,
+                                             bool hovered, bool pressed, bool enabled,
+                                             bool focused) const;
+    Q_INVOKABLE QString sidebarChevronIcon(bool expanded) const;
+    Q_INVOKABLE QString sidebarRepositoryDescription(bool expanded, int conversations,
+                                                     int waiting) const;
+    Q_INVOKABLE QString sidebarTeamDescription(int members, int decisions) const;
+    Q_INVOKABLE QString sidebarRowStateText(int status, bool unread, const QString& label,
+                                            const QString& detail) const;
+    Q_INVOKABLE QString sidebarRowDescription(const QString& role, const QString& state,
+                                              const QString& worktree) const;
     Q_INVOKABLE QVariantMap routeTabRecipe(bool dark, qreal zoom, bool active, bool hovered,
                                            bool pressed, bool enabled, bool focused) const;
     Q_INVOKABLE QVariantMap statusBarRecipe(bool dark, qreal zoom) const;
