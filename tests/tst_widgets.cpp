@@ -255,6 +255,19 @@ class WidgetsTest final : public QObject {
         QTRY_VERIFY(first.isNull()); // the earlier toast is replaced
     }
 
+    void toastsCanFollowAnExpiredToast() {
+        // An expired toast deletes itself; the next message must not delete it again.
+        QWidget window;
+        window.resize(800, 600);
+        QPointer<Toast> expired = Toast::showMessage(&window, QStringLiteral("Opened"));
+        expired->deleteLater();
+        QTRY_VERIFY(expired.isNull());
+        QVERIFY(!window.property("_ket_toast").value<QObject*>());
+        Toast* next = Toast::showMessage(&window, QStringLiteral("Opened again"));
+        QCOMPARE(window.property("_ket_toast").value<QObject*>(), next);
+        QVERIFY(next->isVisibleTo(&window));
+    }
+
     void toastsKeepTheirToneAndFitTheWindow() {
         QWidget window;
         window.resize(800, 600);

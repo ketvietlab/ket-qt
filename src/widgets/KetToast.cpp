@@ -39,6 +39,12 @@ Toast* Toast::showMessage(QWidget* anchor, const QString& text, const ToastTone 
         previous->deleteLater();
     auto* toast = new Toast(text, anchor, tone);
     window->setProperty(kCurrentToast, QVariant::fromValue<QObject*>(toast));
+    // The property holds a plain pointer: forget it once the toast is gone (it expired or its
+    // window deleted it), or the next message would delete it a second time.
+    connect(toast, &QObject::destroyed, window, [window, toast] {
+        if (window->property(kCurrentToast).value<QObject*>() == toast)
+            window->setProperty(kCurrentToast, QVariant());
+    });
     connect(&toast->timer_, &QTimer::timeout, toast, &QObject::deleteLater);
     toast->popup(toast->recipe().durationMs);
     return toast;
