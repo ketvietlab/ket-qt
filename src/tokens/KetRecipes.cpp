@@ -157,7 +157,7 @@ TagRecipe tagRecipe(const QColor& color, bool overflow, bool hovered, Theme them
 
 TagRecipe lockedTagRecipe(const QColor& color, Theme theme) {
     TagRecipe recipe = tagRecipe(color, false, true, theme);
-    recipe.text = token(u"text-primary", theme);
+    recipe.text = token(u"text-main", theme);
     recipe.iconCode = QStringLiteral("lock");
     recipe.iconSize = recipe.fontPixels;
     recipe.iconGap = recipe.paddingInline / 2;
