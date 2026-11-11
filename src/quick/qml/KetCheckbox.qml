@@ -8,6 +8,8 @@ Basic.CheckBox {
     id: control
 
     property var previewState: null
+    // A long label wraps under itself, with the indicator on its first line.
+    property bool wordWrap: false
     readonly property var recipe: previewState
         ? KetTheme.toggleRecipe(KetTheme.dark, KetTheme.zoom, KetTheme.ToggleKind.Checkbox, checked,
                                 !!previewState.hovered, !!previewState.pressed,
@@ -24,7 +26,9 @@ Basic.CheckBox {
 
     indicator: KetToggleIndicator {
         x: control.leftPadding
-        anchors.verticalCenter: parent.verticalCenter
+        y: control.wordWrap
+            ? control.topPadding + Math.max(0, (firstLine.height - height) / 2)
+            : (control.height - height) / 2
         recipe: control.recipe
         kind: KetTheme.ToggleKind.Checkbox
     }
@@ -34,6 +38,12 @@ Basic.CheckBox {
         text: control.text
         font: control.font
         color: control.recipe.label
-        verticalAlignment: Text.AlignVCenter
+        verticalAlignment: control.wordWrap ? Text.AlignTop : Text.AlignVCenter
+        wrapMode: control.wordWrap ? Text.WordWrap : Text.NoWrap
+    }
+
+    FontMetrics {
+        id: firstLine
+        font: control.font
     }
 }

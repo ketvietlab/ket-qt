@@ -3,29 +3,34 @@ import QtQuick
 import QtQuick.Layouts
 import Ket
 
-// A labelled settings row (`.field-row`): a fixed label column, then the control (the
-// default property) with help text or an error below; it draws ket::fieldRowRecipe.
+// A labelled settings row (`.field-row`): a fixed label column (or, `stacked`, a label
+// line), then the control (the default property) with help text or an error below; it draws ket::fieldRowRecipe.
 Item {
     id: row
 
     property string label
     property string help
     property string error
+    // The label above the control instead of beside it, for a narrow form.
+    property bool stacked: false
     default property alias control: slot.data
     readonly property var recipe: KetTheme.fieldRowRecipe(KetTheme.dark, KetTheme.zoom)
 
     implicitWidth: layout.implicitWidth
     implicitHeight: layout.implicitHeight
 
-    RowLayout {
+    GridLayout {
         id: layout
         anchors.fill: parent
-        spacing: row.recipe.gap
+        columns: row.stacked ? 1 : 2
+        columnSpacing: row.recipe.gap
+        rowSpacing: row.recipe.helpGap
 
         Text {
-            Layout.preferredWidth: row.recipe.labelWidth
+            Layout.preferredWidth: row.stacked ? -1 : row.recipe.labelWidth
+            Layout.fillWidth: row.stacked
             Layout.alignment: Qt.AlignTop
-            topPadding: row.recipe.labelTop
+            topPadding: row.stacked ? 0 : row.recipe.labelTop
             text: row.label
             wrapMode: Text.WordWrap
             color: row.recipe.label

@@ -47,10 +47,17 @@ void FieldRow::fitNote() {
         note_->setMinimumHeight(0);
         return;
     }
-    const auto* row = static_cast<QHBoxLayout*>(layout());
-    const int noteWidth = width() - label_->width() - row->spacing();
+    const auto* row = static_cast<QBoxLayout*>(layout());
+    const int noteWidth = stacked_ ? width() : width() - label_->width() - row->spacing();
     if (noteWidth > 0)
         note_->setMinimumHeight(note_->heightForWidth(noteWidth));
+}
+
+void FieldRow::setStacked(const bool stacked) {
+    if (stacked_ == stacked)
+        return;
+    stacked_ = stacked;
+    applyRecipe();
 }
 
 void FieldRow::setHelp(const QString& help) {
@@ -77,18 +84,26 @@ void FieldRow::applyRecipe() {
         label->setPalette(p);
     };
     styled(label_, r.label, appearance.scaled(r.labelPixels));
-    label_->setFixedWidth(qRound(appearance.scaled(r.labelWidth)));
-    label_->setContentsMargins(0, qRound(appearance.scaled(r.labelTop)), 0, 0);
+    // Beside the control the label is a column of fixed width, dropped to the control's
+    // text line; above it the label is a line of its own.
+    if (stacked_) {
+        label_->setMinimumWidth(0);
+        label_->setMaximumWidth(QWIDGETSIZE_MAX);
+    } else {
+        label_->setFixedWidth(qRound(appearance.scaled(r.labelWidth)));
+    }
+    label_->setContentsMargins(0, stacked_ ? 0 : qRound(appearance.scaled(r.labelTop)), 0, 0);
     const bool error = !error_.isEmpty();
     styled(note_, error ? r.error : r.help, appearance.scaled(r.helpPixels));
     note_->setText(error ? error_ : help_);
     note_->setVisible(!note_->text().isEmpty());
-    fitNote();
     control_->setMinimumHeight(control_->sizeHint().height());
-    auto* row = static_cast<QHBoxLayout*>(layout());
-    row->setSpacing(qRound(appearance.scaled(r.gap)));
+    auto* row = static_cast<QBoxLayout*>(layout());
+    row->setDirection(stacked_ ? QBoxLayout::TopToBottom : QBoxLayout::LeftToRight);
+    row->setSpacing(qRound(appearance.scaled(stacked_ ? r.helpGap : r.gap)));
     static_cast<QVBoxLayout*>(row->itemAt(1)->layout())
         ->setSpacing(qRound(appearance.scaled(r.helpGap)));
+    fitNote();
 }
 
 } // namespace ket

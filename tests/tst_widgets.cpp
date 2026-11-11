@@ -202,6 +202,48 @@ class WidgetsTest final : public QObject {
         check.click();
         QVERIFY(check.isChecked());
         QCOMPARE(check.recipe().background, Tokens::color(u"accent", Theme::Light));
+        // Wrapped, a narrow toggle grows down instead of asking for its label's width.
+        QCOMPARE(check.minimumSizeHint(), check.sizeHint());
+        QVERIFY(!check.hasHeightForWidth());
+        check.setWordWrap(true);
+        QVERIFY(check.minimumSizeHint().width() < check.sizeHint().width());
+        QCOMPARE(check.heightForWidth(check.sizeHint().width()), check.sizeHint().height());
+        QVERIFY(check.heightForWidth(check.minimumSizeHint().width()) > check.sizeHint().height());
+
+        // In a layout the wrapped toggle gets the height its width needs, at every zoom.
+        for (const qreal zoom : {1.0, 1.25, 1.5}) {
+            Appearance::instance().setZoom(zoom);
+            QWidget column;
+            auto* layout = new QVBoxLayout(&column);
+            auto* wrapped = new Checkbox(
+                QStringLiteral(
+                    "The leader writes requirements before the developers implement them."),
+                &column);
+            wrapped->setWordWrap(true);
+            layout->addWidget(wrapped);
+            layout->addStretch();
+            column.resize(220, 400);
+            column.show();
+            QVERIFY(QTest::qWaitForWindowExposed(&column));
+            QTRY_COMPARE(wrapped->height(), wrapped->heightForWidth(wrapped->width()));
+            QVERIFY(wrapped->height() > wrapped->sizeHint().height());
+        }
+        Appearance::instance().setZoom(1.0);
+
+        // At exactly that height the whole label is painted: drawn taller, nothing more
+        // of it shows below.
+        Checkbox paragraph(QStringLiteral("Paragraph gyp descenders wrap several words gyp"));
+        paragraph.setWordWrap(true);
+        const int fitted = paragraph.heightForWidth(145);
+        paragraph.resize(145, fitted + 12);
+        QImage taller(paragraph.size(), QImage::Format_ARGB32_Premultiplied);
+        taller.fill(Qt::transparent);
+        paragraph.render(&taller, {}, {}, QWidget::DrawChildren);
+        int below = 0;
+        for (int y = fitted; y < taller.height(); ++y)
+            for (int x = 0; x < taller.width(); ++x)
+                below += qAlpha(taller.pixel(x, y)) > 0;
+        QCOMPARE(below, 0);
 
         QWidget group;
         auto* first = new Radio(QStringLiteral("Workspace write"), &group);
@@ -227,6 +269,24 @@ class WidgetsTest final : public QObject {
         QVERIFY(field->isInvalid());
         row.setError({});
         QVERIFY(!field->isInvalid());
+
+        // Stacked, the label is a line above the control and the row needs less width.
+        const int beside = row.minimumSizeHint().width();
+        row.resize(beside + 40, row.sizeHint().height());
+        row.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&row));
+        auto* label = row.findChild<QLabel*>();
+        QVERIFY(label->geometry().right() < field->geometry().left());
+        row.setStacked(true);
+        QVERIFY(row.isStacked());
+        QVERIFY(row.minimumSizeHint().width() < beside);
+        row.resize(field->minimumSizeHint().width(), row.sizeHint().height());
+        QTRY_VERIFY(label->geometry().bottom() < field->geometry().top());
+        QCOMPARE(field->width(), row.width());
+        row.setStacked(false);
+        row.resize(beside + 40, row.sizeHint().height());
+        QTRY_VERIFY(label->geometry().right() < field->geometry().left());
+        QCOMPARE(label->width(), qRound(fieldRowRecipe(Theme::Light).labelWidth));
     }
 
     void bannersWrapAndTakeAnAction() {

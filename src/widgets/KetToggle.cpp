@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetToggle.h"
 
+#include <cmath>
+
 #include "KetAppearance.h"
 #include "KetIcons.h"
 
@@ -51,6 +53,57 @@ QSize Toggle::sizeHint() const {
     return {qCeil(box + label) + 4, qMax(qCeil(box) + 4, metrics.height())};
 }
 
+void Toggle::setWordWrap(const bool wrap) {
+    if (wordWrap_ == wrap)
+        return;
+    wordWrap_ = wrap;
+    // Wrapped, the height follows the width, so the layout must be free to give more than
+    // one line: a Fixed height would cut the label off after its first line.
+    QSizePolicy policy(wrap ? QSizePolicy::Preferred : QSizePolicy::Maximum,
+                       wrap ? QSizePolicy::Minimum : QSizePolicy::Fixed);
+    policy.setHeightForWidth(wrap);
+    setSizePolicy(policy);
+    updateGeometry();
+    update();
+}
+
+qreal Toggle::labelLeft() const {
+    const Appearance& appearance = Appearance::instance();
+    return 2 + appearance.scaled(recipe().size) + appearance.scaled(recipe().spacing);
+}
+
+// Wrapped, the toggle may be as narrow as its longest word.
+QSize Toggle::minimumSizeHint() const {
+    const QSize natural = sizeHint();
+    if (!wordWrap_ || text().isEmpty())
+        return natural;
+    const QFontMetrics metrics(labelFont());
+    int word = 0;
+    for (const QString& part : text().split(QLatin1Char(' '), Qt::SkipEmptyParts))
+        word = qMax(word, metrics.horizontalAdvance(part));
+    return {qMin(natural.width(), qCeil(labelLeft()) + word + 2), natural.height()};
+}
+
+// Where the wrapped label is drawn in a toggle `width` wide: its first line shares the
+// height of one line with the indicator. Measuring and painting both use this.
+QRectF Toggle::wrappedLabelRect(const int width) const {
+    const QFontMetricsF metrics(labelFont());
+    const qreal left = labelLeft();
+    const qreal top = qMax(0.0, (sizeHint().height() - metrics.height()) / 2.0);
+    const qreal room = qMax(1.0, std::floor(width - left));
+    const QRectF text =
+        metrics.boundingRect(QRectF(0, 0, room, QWIDGETSIZE_MAX),
+                             Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap, this->text());
+    return {left, top, room, text.height()};
+}
+
+int Toggle::heightForWidth(const int width) const {
+    const int single = sizeHint().height();
+    if (!wordWrap_ || text().isEmpty())
+        return single;
+    return qMax(single, qCeil(wrappedLabelRect(width).bottom()));
+}
+
 void Toggle::paintIndicator(QPainter& painter, const QRectF& box, ToggleKind kind,
                             const ToggleRecipe& r, qreal devicePixelRatio) {
     const qreal scale = box.width() / r.size;
@@ -84,14 +137,22 @@ void Toggle::paintEvent(QPaintEvent*) {
     painter.setOpacity(r.opacity);
     const qreal box = appearance.scaled(r.size);
     // Leave room for the focus ring around the indicator.
-    const QRectF indicator(2, (height() - box) / 2.0, box, box);
+    // Wrapped, the indicator and the label's first line share the height of one line.
+    const qreal line = wordWrap_ ? sizeHint().height() : height();
+    const QRectF indicator(2, (line - box) / 2.0, box, box);
     paintIndicator(painter, indicator, kind_, r, devicePixelRatioF());
     if (!text().isEmpty()) {
         painter.setFont(labelFont());
         painter.setPen(r.label);
-        const qreal x = indicator.right() + appearance.scaled(r.spacing);
-        painter.drawText(QRectF(x, 0, width() - x, height()), Qt::AlignLeft | Qt::AlignVCenter,
-                         text());
+        const qreal x = labelLeft();
+        if (wordWrap_) {
+            QRectF label = wrappedLabelRect(width());
+            label.setBottom(height());
+            painter.drawText(label, Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap, text());
+        } else {
+            painter.drawText(QRectF(x, 0, width() - x, height()), Qt::AlignLeft | Qt::AlignVCenter,
+                             text());
+        }
     }
 }
 

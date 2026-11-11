@@ -18,6 +18,10 @@ class FieldRow final : public QWidget {
              QWidget* parent = nullptr);
 
     [[nodiscard]] QWidget* control() const { return control_; }
+    // The label above the control instead of beside it, for a form narrower than the label
+    // column and a control need side by side. The row then needs only the control's width.
+    void setStacked(bool stacked);
+    [[nodiscard]] bool isStacked() const { return stacked_; }
     void setHelp(const QString& help);
     // A non-empty error replaces the help text and turns a ket::TextField invalid.
     void setError(const QString& error);
@@ -34,6 +38,7 @@ class FieldRow final : public QWidget {
     QLabel* note_;
     QString help_;
     QString error_;
+    bool stacked_{false};
 };
 
 } // namespace ket
