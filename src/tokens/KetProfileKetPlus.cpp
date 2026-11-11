@@ -64,9 +64,10 @@ Profile Profile::ketPlus() {
     p.dialogPaddingInline = 22; // header, body and footer
     p.dialogHeaderPaddingBlock = 18;
     p.dialogFooterPaddingBlock = 14;
-    p.dialogTitlePixels = 18; // 16 px at the 15 px interface scale
-    p.backdropOpacity = 0.24; // `.modal-backdrop` rgb(18 22 30 / 24%)
-    p.menuMinWidth = 210;     // `.desktop-context-menu`
+    p.dialogTitlePixels = 18;     // 16 px at the 15 px interface scale
+    p.backdropOpacity = 0.24;     // `.modal-backdrop` rgb(18 22 30 / 24%)
+    p.backdropOpacityDark = 0.56; // a dark window dims only under black
+    p.menuMinWidth = 210;         // `.desktop-context-menu`
     p.menuMaxWidth = 330;
     p.menuPadding = 6; // 5 px plus the border
     p.menuRadius = 7;

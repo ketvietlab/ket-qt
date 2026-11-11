@@ -4,6 +4,7 @@
 #include "KetMarkdown.h"
 #include "KetProfile.h"
 #include "KetRecipes.h"
+#include "KetSurfaceRecipes.h"
 #include "KetSyntax.h"
 #include "KetTokens.h"
 
@@ -363,7 +364,10 @@ class TokensTest final : public QObject {
         const DialogRecipe dialog = dialogRecipe(Theme::Dark);
         QCOMPARE(dialog.width, 500.0);
         QCOMPARE(dialog.radius, 12.0);
-        QCOMPARE(dialog.backdrop.alpha(), qRound(0.24 * 255));
+        // A dark window dims under black; the light theme keeps its translucent ink.
+        QCOMPARE(dialog.backdrop.rgba(), qRgba(0, 0, 0, qRound(0.56 * 255)));
+        QCOMPARE(dialogRecipe(Theme::Light).backdrop.alpha(), qRound(0.24 * 255));
+        QCOMPARE(commandPaletteRecipe(Theme::Dark).backdrop.rgba(), dialog.backdrop.rgba());
         QCOMPARE(dialog.footer, Tokens::color(u"surface-raised", Theme::Dark));
 
         const MenuRecipe menu = menuRecipe(Theme::Light);

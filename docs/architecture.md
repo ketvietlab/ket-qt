@@ -103,6 +103,8 @@ search logic. The app filters the palette's groups as its query changes.
 - **Dialogs and toasts draw inside their window**, as the mock's `.modal-backdrop` and
   `.toast` do, not as separate top-level windows. `ket::Dialog` covers its window, keeps
   Tab inside the card and rejects on Escape, the close button or a backdrop click.
+  The backdrop (`ket::modalBackdrop`) dims the window in both themes: translucent ink in
+  the light theme, black at `Profile::backdropOpacityDark` in the dark one.
   Its card takes the recipe's width unless `setCardWidth()` sets the mock's `width: px(N)`.
   `setChromeless()` hands the whole card to a body that draws its own header and footer, and
   the card follows its content's height while open.

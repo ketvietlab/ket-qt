@@ -185,6 +185,11 @@ struct ToastRecipe {
     int durationMs = 0;
 };
 
+// What covers the window behind a modal surface (dialog, command palette). It must darken:
+// the light theme uses its translucent ink; a dark window is darker than that ink, so the
+// dark theme uses black at Profile::backdropOpacityDark.
+[[nodiscard]] QColor modalBackdrop(Theme theme);
+
 // A modal dialog over the window (`.modal`, `.modal-backdrop`).
 struct DialogRecipe {
     QColor backdrop;
