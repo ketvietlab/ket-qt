@@ -325,7 +325,11 @@ class TokensTest final : public QObject {
             const TagRecipe locked = lockedTagRecipe(blue, theme);
             // A steady tint: the hover tint, whether hovered or not.
             QCOMPARE(locked.background, tagRecipe(blue, false, true, theme).background);
-            QCOMPARE(locked.text, Tokens::color(u"text-primary", theme));
+            // The main text colour; "text-primary" was no token and drew the label black.
+            QCOMPARE(locked.text, Tokens::color(u"text-main", theme));
+            QVERIFY(locked.text.isValid());
+            if (theme == Theme::Dark)
+                QVERIFY(locked.text.lightnessF() > 0.8);
             QCOMPARE(locked.iconCode, QStringLiteral("lock"));
             QCOMPARE(locked.iconSize, locked.fontPixels);
             QVERIFY(locked.iconGap > 0);
