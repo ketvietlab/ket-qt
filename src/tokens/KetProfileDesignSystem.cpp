@@ -463,6 +463,17 @@ Profile Profile::designSystem() {
     p.lightboxThumbSmall = px(u"space-10");
     p.lightboxThumbMedium = px(u"space-16") + px(u"space-6");
     p.lightboxThumbLarge = 144;
+    p.textAreaPaddingBlock = px(u"control-padding-block");
+    p.textAreaLineHeight = Tokens::number(u"leading-normal");
+    p.textAreaMinLines = 3;
+    p.textAreaMaxLines = 12;
+    p.textAreaCountPixels = px(u"text-xs");
+    p.textAreaCountGap = px(u"space-1-5");
+    p.mentionTokenWeight = qRound(Tokens::number(u"weight-medium"));
+    p.expandablePixels = px(u"text-sm");
+    p.expandableLineHeight = Tokens::number(u"leading-normal");
+    p.expandableFoldedLines = 3;
+    p.expandableToggleGap = px(u"space-1");
     return p;
 }
 

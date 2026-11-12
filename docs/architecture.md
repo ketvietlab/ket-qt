@@ -19,8 +19,8 @@ flowchart LR
 |---|---|---|
 | `KetQt::Tokens` | `ket::Tokens` (generated table), `ket::Appearance`, `ket::Profile`, `ket::*Recipe` | Core, Gui |
 | `KetQt::Icons` | `ket::Icons`: Két Symbol resources, size and weight rules | Gui, Svg |
-| `KetQt::Widgets` | `ket::Style`, `ket::Button`, `ket::IconButton`, `ket::Badge`, `ket::Tag`, `ket::Icon`, `ket::TextField`, `ket::Select`, `ket::Checkbox`, `ket::Radio`, `ket::Choice`, `ket::FieldRow` | Widgets |
-| `KetQt::Quick` + `KetQt::QuickPlugin` | QML module `Ket`: `KetTheme`, `KetButton`, `KetIconButton`, `KetBadge`, `KetTag`, `KetIcon`, `KetTextField`, `KetSelect`, `KetCheckbox`, `KetRadio`, `KetChoice`, `KetFieldRow` | Qml, Quick, QuickControls2 |
+| `KetQt::Widgets` | `ket::Style`, `ket::Button`, `ket::IconButton`, `ket::Badge`, `ket::Tag`, `ket::Icon`, `ket::TextField`, `ket::TextArea`, `ket::ExpandableText`, `ket::Select`, `ket::Checkbox`, `ket::Radio`, `ket::Choice`, `ket::FieldRow` | Widgets |
+| `KetQt::Quick` + `KetQt::QuickPlugin` | QML module `Ket`: `KetTheme`, `KetButton`, `KetIconButton`, `KetBadge`, `KetTag`, `KetIcon`, `KetTextField`, `KetTextArea`, `KetExpandableText`, `KetMentionTokens`, `KetSelect`, `KetCheckbox`, `KetRadio`, `KetChoice`, `KetFieldRow` | Qml, Quick, QuickControls2 |
 
 ## Tokens
 
@@ -97,7 +97,7 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery, Slider and step slider, Avatar, Tree item, Group header, Sidebar tree (repository header, team branch, section label, one-line conversation row, guide line; columns per level from `ket::sidebarTreeColumns` and `Profile::sidebarTree`), Route tabs, Pane header, Breadcrumb, Status bar, Command palette, File explorer row, Changed files, Diff lines, Background tasks, Update card and pill, Theme card, Accent swatch, Image viewer (lightbox, thumbnail, round tool; from the design system's `interactions/lightbox`) (pill tabs are the Segmented control; the search field is a TextField with a leading icon) | None: every component of the mock is in the kit |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), TextArea (multi-line, with a character count and drawn mentions), Expandable text, Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery, Slider and step slider, Avatar, Tree item, Group header, Sidebar tree (repository header, team branch, section label, one-line conversation row, guide line; columns per level from `ket::sidebarTreeColumns` and `Profile::sidebarTree`), Route tabs, Pane header, Breadcrumb, Status bar, Command palette, File explorer row, Changed files, Diff lines, Background tasks, Update card and pill, Theme card, Accent swatch, Image viewer (lightbox, thumbnail, round tool; from the design system's `interactions/lightbox`) (pill tabs are the Segmented control; the search field is a TextField with a leading icon) | None: every component of the mock is in the kit |
 
 The surfaces only present data. `ket::DiffView` and `KetDiffView` draw lines that the app
 supplies (`parseUnified()` only reads a unified diff's hunks and line numbers); the file
@@ -143,6 +143,28 @@ search logic. The app filters the palette's groups as its query changes.
 - **The `@agent/` mention picker** opens above the composer, overlapping its top edge. The
   composer keeps focus and forwards Up, Down, Enter, Tab and Esc. `ket::agentMention()` ports
   the mock's `K.conversationMention`, and the app answers `mentionQueryChanged` with items.
+- **Multi-line text fields** (`ket::TextArea`, `KetTextArea`) have the text field's frame and
+  colours and grow from `minimumLines` to `maximumLines` line boxes before they scroll. They
+  paste plain text, Return breaks the line, Tab moves the focus, and Cmd/Ctrl+Return is left
+  to the window (a shortcut or a parent's key handler), so a dialog keeps its main action.
+  An optional `maxLength` shows `n / max` below the field and turns it invalid above the
+  limit; the text is never cut. The count and the mentions are the field's accessible
+  description.
+- **Drawn mentions** (`ket::MentionTokens`, `KetMentionTokens`) are character formats over a
+  plain-text document, so `text()` stays `@agent/<number>`. A mention chosen in the picker, or
+  in text that is set or pasted in one edit, is drawn in `mentionTokenRecipe`; characters
+  typed one by one are not, until one is chosen. A token is atomic: Backspace at its end and
+  Delete at its start remove it whole, the caret never stops inside it, and an edit inside
+  it, or a character typed at its edge that changes the mention (`@agent/12` then `3`), turns
+  it back into plain text. The host marks numbers it does not know, which are drawn
+  in the danger colours. The field reuses the mention picker and the composer's
+  query/items API, and places the picker below itself, or above when the window has no room.
+- **Expandable text** (`ket::ExpandableText`, `KetExpandableText`) is read-only text folded
+  to `foldedLines` with a Show more / Show less button; line breaks are kept and mentions are
+  `agent:<number>` links drawn as tokens. It takes the focus only when it has mentions: the
+  arrow keys move between them, a mention behind the fold opens the text, and Return, Space
+  or a click emits `mentionActivated`. Hosts name the conversations for assistive
+  technology (`setMentionTitle()`, `mentionTitles`).
 - **The usage ring** turns warning at 80 % and danger at 95 %, which the mock leaves to the
   app. Meters use the same thresholds, where the mock fills every track with the accent.
 - **Popovers** are in-window panels like dialogs: `ket::Popover::openAbove()` reparents to

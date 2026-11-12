@@ -15,6 +15,7 @@
 #include "RichPages.h"
 #include "SidebarTreePages.h"
 #include "SurfacePages.h"
+#include "TextPages.h"
 
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -46,6 +47,7 @@ const PageEntry kPages[] = {
     {"tag", "Components", "Tag", tagPage},
     {"icons", "Components", "Icons", iconPage},
     {"forms", "Components", "Forms", formPage},
+    {"text", "Components", "Multi-line text", textPage},
     {"overlays", "Components", "Overlays", overlayPage},
     {"navigation", "Components", "Navigation", navigationPage},
     {"sidebar-tree", "Components", "Sidebar tree", sidebarTreePage},

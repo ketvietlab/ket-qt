@@ -15,6 +15,7 @@ qt_add_executable(ketqt_kitchensink
     SurfacePages.h SurfacePages.cpp
     LightboxPages.h LightboxPages.cpp
     SidebarTreePages.h SidebarTreePages.cpp
+    TextPages.h TextPages.cpp
 )
 qt_add_qml_module(ketqt_kitchensink
     URI KetKitchenSink
@@ -22,11 +23,11 @@ qt_add_qml_module(ketqt_kitchensink
     SOURCES KitchenSinkHost.h KitchenSinkHost.cpp
     QML_FILES qml/ButtonMatrix.qml qml/ButtonLive.qml qml/IconButtonMatrix.qml qml/IconButtonLive.qml
               qml/BadgeTones.qml qml/TagSamples.qml
-              qml/IconGallery.qml qml/FormSamples.qml qml/OverlaySamples.qml qml/NavigationSamples.qml qml/ConversationSamples.qml qml/RichSamples.qml qml/ChatSamples.qml qml/ControlSamples.qml qml/SurfaceSamples.qml qml/LightboxSamples.qml qml/SidebarTreeSamples.qml
+              qml/IconGallery.qml qml/FormSamples.qml qml/OverlaySamples.qml qml/NavigationSamples.qml qml/ConversationSamples.qml qml/RichSamples.qml qml/ChatSamples.qml qml/ControlSamples.qml qml/SurfaceSamples.qml qml/LightboxSamples.qml qml/TextSamples.qml qml/SidebarTreeSamples.qml
     RESOURCE_PREFIX /qt/qml
 )
 foreach(file ButtonMatrix ButtonLive IconButtonMatrix IconButtonLive BadgeTones TagSamples IconGallery FormSamples OverlaySamples NavigationSamples
-             ConversationSamples RichSamples ChatSamples ControlSamples SurfaceSamples LightboxSamples SidebarTreeSamples)
+             ConversationSamples RichSamples ChatSamples ControlSamples SurfaceSamples LightboxSamples TextSamples SidebarTreeSamples)
     set_source_files_properties(qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
 endforeach()
 # Synthetic screenshots for the gallery samples, drawn for the kitchensink.

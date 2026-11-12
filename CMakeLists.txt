@@ -50,6 +50,8 @@ add_library(ketqt_tokens STATIC
     src/tokens/KetRichRecipes.h src/tokens/KetRichRecipes.cpp
     src/tokens/KetMarkdown.h src/tokens/KetMarkdown.cpp
     src/tokens/KetSyntax.h src/tokens/KetSyntax.cpp
+    src/tokens/KetTextRecipes.h src/tokens/KetTextRecipes.cpp
+    src/tokens/KetMentionTokens.h src/tokens/KetMentionTokens.cpp
     src/tokens/KetChatRecipes.h src/tokens/KetChatRecipes.cpp
     src/tokens/KetControlRecipes.h src/tokens/KetControlRecipes.cpp
     src/tokens/KetSurfaceRecipes.h src/tokens/KetSurfaceRecipes.cpp
@@ -112,6 +114,8 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetActivityRow.h src/widgets/KetActivityRow.cpp
         src/widgets/KetMarkdownView.h src/widgets/KetMarkdownView.cpp
         src/widgets/KetMentionPicker.h src/widgets/KetMentionPicker.cpp
+        src/widgets/KetTextArea.h src/widgets/KetTextArea.cpp
+        src/widgets/KetExpandableText.h src/widgets/KetExpandableText.cpp
         src/widgets/KetThemeCard.h src/widgets/KetThemeCard.cpp
         src/widgets/KetUpdateCard.h src/widgets/KetUpdateCard.cpp
         src/widgets/KetTaskBar.h src/widgets/KetTaskBar.cpp
@@ -162,6 +166,7 @@ if(KETQT_BUILD_QUICK)
         OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/qml/Ket
         CLASS_NAME KetPlugin
         SOURCES src/quick/KetTheme.h src/quick/KetTheme.cpp src/quick/KetThemeDetail.h src/quick/KetThemeSurfaces.cpp src/quick/KetThemeControls.cpp src/quick/KetThemeChat.cpp src/quick/KetThemeLightbox.cpp src/quick/KetThemeSidebar.cpp
+                src/quick/KetThemeText.cpp src/quick/KetMentionTokensItem.h src/quick/KetMentionTokensItem.cpp
         QML_FILES src/quick/qml/KetButton.qml src/quick/qml/KetIconButton.qml
                   src/quick/qml/KetBadge.qml src/quick/qml/KetTag.qml src/quick/qml/KetIcon.qml
                   src/quick/qml/KetTextField.qml src/quick/qml/KetSelect.qml
@@ -183,6 +188,7 @@ if(KETQT_BUILD_QUICK)
                   src/quick/qml/KetMarkdownText.qml src/quick/qml/KetCodeBlock.qml
                   src/quick/qml/KetMarkdown.qml src/quick/qml/KetMentionPicker.qml
                   src/quick/qml/KetUsageRing.qml
+                  src/quick/qml/KetTextArea.qml src/quick/qml/KetExpandableText.qml
                   src/quick/qml/KetCommandPalette.qml
                   src/quick/qml/KetCommandResult.qml
                   src/quick/qml/KetFileRow.qml
