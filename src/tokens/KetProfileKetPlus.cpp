@@ -123,6 +123,7 @@ Profile Profile::ketPlus() {
     p.emptyMessageMaxWidth = 390;
     p.emptyLineHeight = 1.8;
     // Two-line rows: conversation-tags.css over the desktop-alignment row.
+    p.sidebarTree = SidebarTreeMetrics::ketPlus();
     p.conversationRowHeight = 48;
     p.conversationRowPaddingInline = 8;
     p.conversationRowPaddingBlock = 7;

@@ -46,6 +46,7 @@ add_library(ketqt_tokens STATIC
     src/tokens/KetOverlayRecipes.cpp
     src/tokens/KetNavigationRecipes.cpp
     src/tokens/KetConversationRecipes.h src/tokens/KetConversationRecipes.cpp
+    src/tokens/KetSidebarTreeRecipes.h src/tokens/KetSidebarTreeRecipes.cpp
     src/tokens/KetRichRecipes.h src/tokens/KetRichRecipes.cpp
     src/tokens/KetMarkdown.h src/tokens/KetMarkdown.cpp
     src/tokens/KetSyntax.h src/tokens/KetSyntax.cpp
@@ -57,6 +58,7 @@ add_library(ketqt_tokens STATIC
     src/tokens/KetLightboxRecipes.h src/tokens/KetLightboxRecipes.cpp
     src/tokens/KetProfile.h src/tokens/KetProfile.cpp
     src/tokens/KetProfileDesignSystem.cpp src/tokens/KetProfileKetPlus.cpp
+    src/tokens/KetSidebarTreeProfile.h src/tokens/KetSidebarTreeProfile.cpp
 )
 add_library(KetQt::Tokens ALIAS ketqt_tokens)
 target_include_directories(ketqt_tokens PUBLIC
@@ -101,6 +103,7 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetNativeOverlay.h
         src/widgets/KetNavItem.h src/widgets/KetNavItem.cpp
         src/widgets/KetSegmentedControl.h src/widgets/KetSegmentedControl.cpp
+        src/widgets/KetAnimationClock.h src/widgets/KetAnimationClock.cpp
         src/widgets/KetActivityIndicator.h src/widgets/KetActivityIndicator.cpp
         src/widgets/KetEmptyState.h src/widgets/KetEmptyState.cpp
         src/widgets/KetBarPainter.h src/widgets/KetBarPainter.cpp
@@ -123,6 +126,9 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetChrome.h src/widgets/KetChrome.cpp
         src/widgets/KetRouteTabs.h src/widgets/KetRouteTabs.cpp
         src/widgets/KetTreeItem.h src/widgets/KetTreeItem.cpp
+        src/widgets/KetSidebarTree.h src/widgets/KetSidebarTreeDetail.h
+        src/widgets/KetSidebarTreeHeaders.cpp src/widgets/KetSidebarTeamBranch.cpp
+        src/widgets/KetSidebarRow.cpp
         src/widgets/KetAvatar.h src/widgets/KetAvatar.cpp
         src/widgets/KetStepSlider.h src/widgets/KetStepSlider.cpp
         src/widgets/KetSliderPainter.h src/widgets/KetSliderPainter.cpp
@@ -159,7 +165,7 @@ if(KETQT_BUILD_QUICK)
         PLUGIN_TARGET ketqt_quickplugin
         OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/qml/Ket
         CLASS_NAME KetPlugin
-        SOURCES src/quick/KetTheme.h src/quick/KetTheme.cpp src/quick/KetThemeDetail.h src/quick/KetThemeSurfaces.cpp src/quick/KetThemeControls.cpp src/quick/KetThemeChat.cpp src/quick/KetThemeLightbox.cpp
+        SOURCES src/quick/KetTheme.h src/quick/KetTheme.cpp src/quick/KetThemeDetail.h src/quick/KetThemeSurfaces.cpp src/quick/KetThemeControls.cpp src/quick/KetThemeChat.cpp src/quick/KetThemeLightbox.cpp src/quick/KetThemeSidebar.cpp
                 src/quick/KetThemeText.cpp src/quick/KetMentionTokensItem.h src/quick/KetMentionTokensItem.cpp
         QML_FILES src/quick/qml/KetButton.qml src/quick/qml/KetIconButton.qml
                   src/quick/qml/KetBadge.qml src/quick/qml/KetTag.qml src/quick/qml/KetIcon.qml
@@ -201,6 +207,11 @@ if(KETQT_BUILD_QUICK)
                   src/quick/qml/KetRouteTabs.qml
                   src/quick/qml/KetGroupHeader.qml
                   src/quick/qml/KetTreeItem.qml
+                  src/quick/qml/KetSidebarRepositoryHeader.qml
+                  src/quick/qml/KetSidebarTeamBranch.qml
+                  src/quick/qml/KetSidebarSectionLabel.qml
+                  src/quick/qml/KetSidebarRow.qml
+                  src/quick/qml/KetSidebarTreeGuide.qml
                   src/quick/qml/KetAvatar.qml
                   src/quick/qml/KetStepSlider.qml
                   src/quick/qml/KetSlider.qml
@@ -224,7 +235,7 @@ if(KETQT_BUILD_QUICK)
                  KetNavItem KetKbd KetSegmentedControl KetTabBar KetTabButton KetProgressBar
                  KetActivityIndicator KetEmptyState KetConversationRow KetComposer
                  KetReadingText KetUserMessage KetAssistantMessage KetDayDivider KetActivityRow
-                 KetMarkdownText KetCodeBlock KetMarkdown KetMentionPicker KetUsageRing KetCommandPalette KetCommandResult KetFileRow KetChangedFiles KetDiffView KetTaskRow KetTaskBar KetUpdateCard KetUpdatePill KetThemeCard KetAccentSwatch KetPaneHeader KetBreadcrumb KetStatusBar KetStatusItem KetRouteTabs KetGroupHeader KetTreeItem KetAvatar KetStepSlider KetSlider KetGallery KetActivityGroup KetQuestionCard KetSuggestion KetAttachmentChip KetMeter KetPopoverDivider KetPopoverText KetPopover KetLightboxButton KetLightboxThumb KetLightbox)
+                 KetMarkdownText KetCodeBlock KetMarkdown KetMentionPicker KetUsageRing KetCommandPalette KetCommandResult KetFileRow KetChangedFiles KetDiffView KetTaskRow KetTaskBar KetUpdateCard KetUpdatePill KetThemeCard KetAccentSwatch KetPaneHeader KetBreadcrumb KetStatusBar KetStatusItem KetRouteTabs KetGroupHeader KetTreeItem KetSidebarRepositoryHeader KetSidebarTeamBranch KetSidebarSectionLabel KetSidebarRow KetSidebarTreeGuide KetAvatar KetStepSlider KetSlider KetGallery KetActivityGroup KetQuestionCard KetSuggestion KetAttachmentChip KetMeter KetPopoverDivider KetPopoverText KetPopover KetLightboxButton KetLightboxThumb KetLightbox)
         set_source_files_properties(src/quick/qml/${file}.qml PROPERTIES QT_RESOURCE_ALIAS ${file}.qml)
     endforeach()
     add_library(KetQt::Quick ALIAS ketqt_quick)
@@ -260,6 +271,7 @@ if(KETQT_INSTALL)
     )
     install(FILES src/tokens/KetTokens.h src/tokens/KetAppearance.h src/tokens/KetRecipes.h
                   src/tokens/KetProfile.h src/tokens/KetConversationRecipes.h
+                  src/tokens/KetSidebarTreeProfile.h src/tokens/KetSidebarTreeRecipes.h
                   src/tokens/KetRichRecipes.h src/tokens/KetMarkdown.h src/tokens/KetSyntax.h
                   src/tokens/KetSurfaceRecipes.h
                   src/tokens/KetControlRecipes.h
@@ -274,6 +286,7 @@ if(KETQT_INSTALL)
                       src/widgets/KetFieldRow.h src/widgets/KetBanner.h src/widgets/KetToast.h
                       src/widgets/KetDialog.h src/widgets/KetNavItem.h
                       src/widgets/KetSegmentedControl.h src/widgets/KetActivityIndicator.h
+                      src/widgets/KetAnimationClock.h
                       src/widgets/KetEmptyState.h src/widgets/KetConversationRow.h
                       src/widgets/KetComposer.h src/widgets/KetTranscript.h
                       src/widgets/KetActivityRow.h src/widgets/KetMarkdownView.h
@@ -287,7 +300,7 @@ if(KETQT_INSTALL)
                       src/widgets/KetCommandPalette.h
                       src/widgets/KetChrome.h
                       src/widgets/KetRouteTabs.h
-                      src/widgets/KetTreeItem.h
+                      src/widgets/KetTreeItem.h src/widgets/KetSidebarTree.h
                       src/widgets/KetAvatar.h
                       src/widgets/KetStepSlider.h
                       src/widgets/KetGallery.h

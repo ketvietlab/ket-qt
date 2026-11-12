@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetActivityIndicator.h"
 #include "KetActivityRow.h"
+#include "KetAnimationClock.h"
 #include "KetAppearance.h"
 #include "KetBadge.h"
 #include "KetBanner.h"
@@ -32,6 +33,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
+#include <QPaintEvent>
 #include <QProgressBar>
 #include <QSignalSpy>
 #include <QStyleOptionMenuItem>
@@ -670,6 +672,61 @@ class WidgetsTest final : public QObject {
         QCOMPARE(row.statusLabel(), QStringLiteral("Working"));
         row.setStatusLabel(QStringLiteral("Đang làm"));
         QCOMPARE(row.statusLabel(), QStringLiteral("Đang làm"));
+    }
+
+    // Working rows and activity bars step together on one 20 Hz clock, which runs only while
+    // something shown needs it, and a spinner step repaints the icon rather than the row.
+    void workingRowsStepOnTheSharedClock() {
+        AnimationClock& clock = AnimationClock::instance();
+        QCOMPARE(AnimationClock::intervalMs, 50);
+        QWidget host;
+        auto* layout = new QVBoxLayout(&host);
+        auto* first = new ConversationRow(QStringLiteral("First"));
+        auto* second = new ConversationRow(QStringLiteral("Second"));
+        auto* bars = new ActivityIndicator;
+        layout->addWidget(first);
+        layout->addWidget(second);
+        layout->addWidget(bars);
+        first->setStatus(ConversationStatus::Working);
+        second->setStatus(ConversationStatus::Working);
+        host.resize(320, 160);
+        host.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&host));
+        QCOMPARE(clock.subscriberCount(), 3);
+        QVERIFY(clock.isRunning());
+
+        QList<QRect> painted;
+        struct Recorder : QObject {
+            QList<QRect>* rects;
+            explicit Recorder(QList<QRect>* r) : rects(r) {}
+            bool eventFilter(QObject*, QEvent* event) override {
+                if (event->type() == QEvent::Paint)
+                    rects->append(static_cast<QPaintEvent*>(event)->rect());
+                return false;
+            }
+        } recorder(&painted);
+        QCoreApplication::processEvents();
+        first->installEventFilter(&recorder);
+        clock.stepForTest();
+        QTRY_VERIFY(!painted.isEmpty());
+        for (const QRect& rect : painted) {
+            QVERIFY(first->indicatorRect().contains(rect));
+            QVERIFY(rect.width() * rect.height() * 8 < first->width() * first->height());
+        }
+        first->removeEventFilter(&recorder);
+
+        bars->setPreviewTime(0);
+        QCOMPARE(clock.subscriberCount(), 2);
+        first->setStatus(ConversationStatus::Completed);
+        QCOMPARE(clock.subscriberCount(), 1);
+        second->hide();
+        QCOMPARE(clock.subscriberCount(), 0);
+        QVERIFY(!clock.isRunning());
+        second->show();
+        QCOMPARE(clock.subscriberCount(), 1);
+        delete second;
+        QCOMPARE(clock.subscriberCount(), 0);
+        QVERIFY(!clock.isRunning());
     }
 
     void composerToolbarHidesWhileEmpty() {

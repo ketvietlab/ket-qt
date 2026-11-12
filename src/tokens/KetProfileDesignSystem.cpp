@@ -116,6 +116,7 @@ Profile Profile::designSystem() {
     p.emptyMessagePixels = px(u"text-md");
     p.emptyMessageMaxWidth = px(u"space-16") * 6;
     p.emptyLineHeight = 1.6;
+    p.sidebarTree = SidebarTreeMetrics::designSystem();
     p.conversationRowHeight = px(u"space-12");
     p.conversationRowPaddingInline = px(u"space-2");
     p.conversationRowPaddingBlock = px(u"space-1-5");

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 #pragma once
 
+#include "KetSidebarTreeProfile.h"
+
 #include <QString>
 #include <QStringList>
 
@@ -159,6 +161,9 @@ struct Profile {
     qreal emptyMessagePixels = 0;
     qreal emptyMessageMaxWidth = 0;
     qreal emptyLineHeight = 1.0;
+
+    // The sidebar tree: repository headers, team branches, section labels, one-line rows.
+    SidebarTreeMetrics sidebarTree;
 
     // Sidebar conversation rows (two lines: title, then number and tags or status).
     qreal conversationRowHeight = 0;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetActivityIndicator.h"
 
+#include "KetAnimationClock.h"
 #include "KetAppearance.h"
 
 #include <QPainter>
@@ -11,12 +12,18 @@ namespace ket {
 ActivityIndicator::ActivityIndicator(QWidget* parent) : QWidget(parent) {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setAccessibleName(tr("Working"));
-    frame_.setInterval(16);
-    connect(&frame_, &QTimer::timeout, this, qOverload<>(&QWidget::update));
     connect(&Appearance::instance(), &Appearance::themeChanged, this,
             qOverload<>(&QWidget::update));
     connect(&Appearance::instance(), &Appearance::zoomChanged, this, &QWidget::updateGeometry);
-    clock_.start();
+}
+
+ActivityIndicator::~ActivityIndicator() { AnimationClock::instance().unsubscribe(this); }
+
+void ActivityIndicator::updateClock() {
+    if (isVisible() && !preview_)
+        AnimationClock::instance().subscribe(this, [this] { update(); });
+    else
+        AnimationClock::instance().unsubscribe(this);
 }
 
 void ActivityIndicator::setColor(std::optional<QColor> color) {
@@ -26,10 +33,7 @@ void ActivityIndicator::setColor(std::optional<QColor> color) {
 
 void ActivityIndicator::setPreviewTime(std::optional<qint64> elapsedMs) {
     preview_ = elapsedMs;
-    if (preview_)
-        frame_.stop();
-    else if (isVisible())
-        frame_.start();
+    updateClock();
     update();
 }
 
@@ -47,7 +51,7 @@ QSize ActivityIndicator::sizeHint() const {
 void ActivityIndicator::paintEvent(QPaintEvent*) {
     const ActivityRecipe r = recipe();
     const Appearance& a = Appearance::instance();
-    const qint64 elapsed = preview_.value_or(clock_.elapsed());
+    const qint64 elapsed = preview_.value_or(AnimationClock::instance().elapsed());
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::NoPen);
@@ -66,13 +70,12 @@ void ActivityIndicator::paintEvent(QPaintEvent*) {
 }
 
 void ActivityIndicator::showEvent(QShowEvent* event) {
-    if (!preview_)
-        frame_.start();
     QWidget::showEvent(event);
+    updateClock();
 }
 
 void ActivityIndicator::hideEvent(QHideEvent* event) {
-    frame_.stop();
+    AnimationClock::instance().unsubscribe(this);
     QWidget::hideEvent(event);
 }
 

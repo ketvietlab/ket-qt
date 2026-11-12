@@ -68,6 +68,12 @@ each state. It takes the metrics a product decides from the current `ket::Profil
 - **Other products**, such as Lampion OS, install their own profile before creating
   windows.
 
+A family of parts that must line up keeps its metrics together in one nested struct of the
+profile, such as `Profile::sidebarTree` (`ket::SidebarTreeMetrics`). The sidebar tree's
+parts take their columns from `ket::sidebarTreeColumns(level, zoom)`, which rounds each
+edge from its own offset, so a header's text and the text of the rows under it share one
+pixel column at every zoom in both layers (`tests/tst_sidebar_tree.cpp`).
+
 Focus is drawn inside a control's bounds (a 2 px `focus-border` border on fields, a ring
 around toggles), not as the mock's outside outline, which Qt Widgets cannot paint.
 
@@ -91,7 +97,7 @@ Colours that are user data, such as tag colours, are parameters.
 
 | Done | Next, from the mock |
 |---|---|
-| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), TextArea (multi-line, with a character count and drawn mentions), Expandable text, Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery, Slider and step slider, Avatar, Tree item, Group header, Route tabs, Pane header, Breadcrumb, Status bar, Command palette, File explorer row, Changed files, Diff lines, Background tasks, Update card and pill, Theme card, Accent swatch, Image viewer (lightbox, thumbnail, round tool; from the design system's `interactions/lightbox`) (pill tabs are the Segmented control; the search field is a TextField with a leading icon) | None: every component of the mock is in the kit |
+| Button (primary, secondary, ghost, danger, ghost danger), IconButton, Badge (neutral, brand, success, warning, …), Tag, Icon, TextField (with a leading icon for search), TextArea (multi-line, with a character count and drawn mentions), Expandable text, Select, Checkbox, Radio, Choice card, Field row, Banner, Toast, Dialog, Context menu (also the Select popup), Tooltip, Nav item, Kbd, Segmented control, Tab strip, Progress bar, Activity indicator, Empty state, Conversation row (two lines with tags), Composer, User and assistant messages, Reading text, Day divider, Activity row, Markdown with code blocks and quotes, Mention picker, Usage ring, Popover (usage panel), Meter (usage stat, sidebar quota), Attachment chip, Suggestion, Question card, Activity group, Gallery, Slider and step slider, Avatar, Tree item, Group header, Sidebar tree (repository header, team branch, section label, one-line conversation row, guide line; columns per level from `ket::sidebarTreeColumns` and `Profile::sidebarTree`), Route tabs, Pane header, Breadcrumb, Status bar, Command palette, File explorer row, Changed files, Diff lines, Background tasks, Update card and pill, Theme card, Accent swatch, Image viewer (lightbox, thumbnail, round tool; from the design system's `interactions/lightbox`) (pill tabs are the Segmented control; the search field is a TextField with a leading icon) | None: every component of the mock is in the kit |
 
 The surfaces only present data. `ket::DiffView` and `KetDiffView` draw lines that the app
 supplies (`parseUnified()` only reads a unified diff's hunks and line numbers); the file

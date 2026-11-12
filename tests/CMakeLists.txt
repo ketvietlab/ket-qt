@@ -25,6 +25,7 @@ if(KETQT_BUILD_QUICK)
 endif()
 if(KETQT_BUILD_WIDGETS AND KETQT_BUILD_QUICK)
     ketqt_test(tst_lightbox LIBS KetQt::Widgets KetQt::Quick KetQt::QuickPlugin)
+    ketqt_test(tst_sidebar_tree LIBS KetQt::Widgets KetQt::Quick KetQt::QuickPlugin)
 endif()
 
 find_package(Python3 COMPONENTS Interpreter)

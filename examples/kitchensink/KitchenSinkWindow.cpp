@@ -13,6 +13,7 @@
 #include "NavigationPages.h"
 #include "OverlayPages.h"
 #include "RichPages.h"
+#include "SidebarTreePages.h"
 #include "SurfacePages.h"
 #include "TextPages.h"
 
@@ -49,6 +50,7 @@ const PageEntry kPages[] = {
     {"text", "Components", "Multi-line text", textPage},
     {"overlays", "Components", "Overlays", overlayPage},
     {"navigation", "Components", "Navigation", navigationPage},
+    {"sidebar-tree", "Components", "Sidebar tree", sidebarTreePage},
     {"conversation", "Components", "Conversation", conversationPage},
     {"rich", "Components", "Rich transcript", richPage},
     {"chat", "Components", "Chat extras", chatPage},
