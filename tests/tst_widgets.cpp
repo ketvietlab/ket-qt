@@ -363,6 +363,13 @@ class WidgetsTest final : public QObject {
         Toast::setBottomAvoidance(&window, input);
         delete input;
         QTRY_COMPARE(toast.geometry(), cleared);
+        Toast::setBottomAvoidance(&window, 200);
+        const int gap = qRound(Appearance::instance().scaled(toast.recipe().bottomOffset));
+        QCOMPARE(toast.geometry().bottom() + 1, window.height() - 200 - gap);
+        Toast::setBottomAvoidance(&window, 240);
+        QCOMPARE(toast.geometry().bottom() + 1, window.height() - 240 - gap);
+        Toast::setBottomAvoidance(&window, 0);
+        QCOMPARE(toast.geometry(), cleared);
     }
 
     void toastsCanFollowAnExpiredToast() {

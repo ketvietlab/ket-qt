@@ -242,5 +242,7 @@ visible bottom input region. The window owns the reservation across toast lifeti
 move, resize, visibility and ancestor geometry changes re-place existing toasts.
 Hidden/destroyed regions and `nullptr` restore ordinary bottom placement. The toast
 remains horizontally centred and uses the recipe bottom offset as the clear gap.
+Embedded scenes can instead call the integer overload with the current reserved height
+in window coordinates, updating it on scene geometry and visibility changes.
 Quick hosts bind `KetToast.bottomAvoidance` to the visible reserved height in overlay
 coordinates; zero preserves the default position. No content layout is changed.

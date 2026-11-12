@@ -28,6 +28,9 @@ class Toast final : public QWidget {
     // with the recipe gap and follow geometry/visibility changes, including ancestors.
     // nullptr clears the reservation. The widget must belong to the same window.
     static void setBottomAvoidance(QWidget* window, QWidget* region);
+    // For embedded scenes: the host supplies the current reserved bottom height in
+    // window coordinates and calls again on scene geometry/visibility changes.
+    static void setBottomAvoidance(QWidget* window, int reservedHeight);
 
     [[nodiscard]] QString text() const { return text_; }
     void setText(const QString& text);

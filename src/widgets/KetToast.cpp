@@ -28,6 +28,7 @@ class ToastPlacement final : public QObject {
         qApp->installEventFilter(this);
     }
     QPointer<QWidget> region;
+    int reservedHeight{0};
     void refresh() {
         const auto toasts = window_->findChildren<Toast*>(QString(), Qt::FindDirectChildrenOnly);
         for (auto* toast : toasts)
@@ -71,10 +72,28 @@ void Toast::setBottomAvoidance(QWidget* window, QWidget* region) {
     if (placement->region)
         disconnect(placement->region, &QObject::destroyed, placement, nullptr);
     placement->region = region;
+    placement->reservedHeight = 0;
     if (region)
         connect(region, &QObject::destroyed, placement, [placement] {
             QTimer::singleShot(0, placement, [placement] { placement->refresh(); });
         });
+    placement->refresh();
+}
+
+void Toast::setBottomAvoidance(QWidget* window, int reservedHeight) {
+    if (!window)
+        return;
+    window = window->window();
+    auto* placement = static_cast<ToastPlacement*>(window->findChild<QObject*>(
+        QStringLiteral("_ket_toast_placement"), Qt::FindDirectChildrenOnly));
+    if (!placement) {
+        placement = new ToastPlacement(window);
+        placement->setObjectName(QStringLiteral("_ket_toast_placement"));
+    }
+    if (placement->region)
+        disconnect(placement->region, nullptr, placement, nullptr);
+    placement->region.clear();
+    placement->reservedHeight = qMax(0, reservedHeight);
     placement->refresh();
 }
 
@@ -208,6 +227,8 @@ void Toast::place() {
     int bottomEdge = window->height() - bottom + margins().bottom();
     auto* placement = static_cast<ToastPlacement*>(window->findChild<QObject*>(
         QStringLiteral("_ket_toast_placement"), Qt::FindDirectChildrenOnly));
+    if (placement && placement->reservedHeight > 0)
+        bottomEdge = qMin(bottomEdge, window->height() - placement->reservedHeight - bottom);
     if (placement && placement->region && placement->region->window() == window &&
         placement->region->isVisibleTo(window))
         bottomEdge = qMin(bottomEdge, placement->region->mapTo(window, QPoint()).y() - bottom);
