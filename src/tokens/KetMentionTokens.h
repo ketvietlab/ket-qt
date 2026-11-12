@@ -25,7 +25,9 @@ namespace ket {
 //
 // - Text inserted in one edit (set, pasted, or a choice from the mention picker) has its
 //   mentions drawn; characters typed one by one do not become a token until one is chosen.
-// - A token is atomic: an edit inside it turns it back into plain text, Backspace at its end
+// - A token is atomic: an edit inside it, or a character typed at its edge that changes the
+//   mention there (`3` after `@agent/12`, `x` before its `@`), turns it back into plain
+//   text; a token stays only while the text holds exactly its mention. Backspace at its end
 //   and Delete at its start remove it whole (deletion()), and the caret never stops inside it
 //   (snap()).
 // - The host marks numbers it does not know (setUnknown()); they are drawn in the danger

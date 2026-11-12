@@ -51,7 +51,8 @@ Item {
     property string query
     property int closed: 0
     property string description: area.input.Accessible.description
-    Shortcut { sequence: "Ctrl+Return"; onActivated: shortcuts++ }
+    property alias hostShortcut: hostShortcut
+    Shortcut { id: hostShortcut; sequence: "Ctrl+Return"; onActivated: shortcuts++ }
     Column {
         width: parent.width
         KetTextArea {
@@ -140,6 +141,11 @@ class QuickTextAreaTest final : public QObject {
         QTest::keyClick(view_.get(), Qt::Key_Return, Qt::ControlModifier);
         QCOMPARE(root()->property("shortcuts").toInt(), 1);
         QCOMPARE(text(), QStringLiteral("One\nTwo"));
+        // Without a shortcut the key still does not break the line, with Control or Meta.
+        root()->property("hostShortcut").value<QObject*>()->setProperty("enabled", false);
+        QTest::keyClick(view_.get(), Qt::Key_Return, Qt::ControlModifier);
+        QTest::keyClick(view_.get(), Qt::Key_Return, Qt::MetaModifier);
+        QCOMPARE(text(), QStringLiteral("One\nTwo"));
         QTest::keyClick(view_.get(), Qt::Key_Tab);
         QVERIFY(root()->property("next").value<QQuickItem*>()->hasActiveFocus());
         QCOMPARE(text(), QStringLiteral("One\nTwo")); // no tab character
@@ -193,6 +199,43 @@ class QuickTextAreaTest final : public QObject {
         input()->setProperty("cursorPosition", 0);
         QTest::keyClick(view_.get(), Qt::Key_Delete);
         QCOMPARE(text(), QStringLiteral(" hi"));
+    }
+
+    // Typing at a token's edge changes the mention there, so the token ends.
+    void typingAtATokensEdgeEndsIt() {
+        QVERIFY(open(kAreaWindow));
+        auto* tokens = area()->property("mentions").value<QObject*>();
+        area()->setProperty("text", QStringLiteral("Ask @agent/12"));
+        input()->setProperty("cursorPosition", 13);
+        type(QStringLiteral("3"));
+        QCOMPARE(text(), QStringLiteral("Ask @agent/123"));
+        QVERIFY(tokens->property("numbers").toStringList().isEmpty());
+        QVERIFY(drawnColor(input(), 5) != token(u"accent-text"));
+        QTest::keyClick(view_.get(), Qt::Key_Backspace);
+        QCOMPARE(text(), QStringLiteral("Ask @agent/12"));
+
+        area()->setProperty("text", QStringLiteral("@agent/12 hi"));
+        input()->setProperty("cursorPosition", 0);
+        type(QStringLiteral("x"));
+        QCOMPARE(text(), QStringLiteral("x@agent/12 hi"));
+        QVERIFY(tokens->property("numbers").toStringList().isEmpty());
+    }
+
+    // As ket::TextArea: the picker closes when the field loses the focus.
+    void thePickerClosesWhenTheFieldLosesFocus() {
+        QVERIFY(open(kAreaWindow));
+        type(QStringLiteral("Ask @agent/4"));
+        area()->setProperty("mentionItems",
+                            QVariantList{QVariantMap{
+                                {QStringLiteral("number"), QStringLiteral("4310")},
+                                {QStringLiteral("title"), QStringLiteral("Refine navigation")}}});
+        auto* picker = area()->property("mentionPicker").value<QObject*>();
+        QTRY_VERIFY(picker->property("visible").toBool());
+        const int closed = root()->property("closed").toInt();
+        root()->property("next").value<QQuickItem*>()->forceActiveFocus();
+        QTRY_VERIFY(!picker->property("visible").toBool());
+        QCOMPARE(root()->property("closed").toInt(), closed + 1);
+        QCOMPARE(text(), QStringLiteral("Ask @agent/4"));
     }
 
     void theCaretNeverStopsInsideAToken() {

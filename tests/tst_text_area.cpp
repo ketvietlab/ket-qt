@@ -140,9 +140,10 @@ class TextAreaTest final : public QObject {
         QTest::keyClick(w.window.windowHandle(), Qt::Key_Return, Qt::ControlModifier);
         QCOMPARE(activated.count(), 1);
         QCOMPARE(w.area->text(), QStringLiteral("One\nTwo"));
-        // Without a shortcut the key still does not break the line.
+        // Without a shortcut the key still does not break the line, with Control or Meta.
         shortcut.setEnabled(false);
         QTest::keyClick(w.edit, Qt::Key_Return, Qt::ControlModifier);
+        QTest::keyClick(w.edit, Qt::Key_Return, Qt::MetaModifier);
         QCOMPARE(w.area->text(), QStringLiteral("One\nTwo"));
         // Tab leaves the field.
         auto* next = new TextArea;
@@ -203,6 +204,32 @@ class TextAreaTest final : public QObject {
         QCOMPARE(w.area->text(), QStringLiteral(" hi"));
     }
 
+    // Typing at a token's edge changes the mention there, so the token ends.
+    void typingAtATokensEdgeEndsIt() {
+        Window w;
+        w.area->setText(QStringLiteral("Ask @agent/12"));
+        w.edit->moveCursor(QTextCursor::End);
+        QTest::keyClicks(w.edit, QStringLiteral("3"));
+        QCOMPARE(w.area->text(), QStringLiteral("Ask @agent/123"));
+        QVERIFY(w.area->mentions()->spans().isEmpty());
+        QVERIFY(drawnColor(w.edit->document(), 5) != token(u"accent-text"));
+        QTest::keyClick(w.edit, Qt::Key_Backspace); // one character, not a token
+        QCOMPARE(w.area->text(), QStringLiteral("Ask @agent/12"));
+
+        w.area->setText(QStringLiteral("@agent/12 hi"));
+        w.edit->moveCursor(QTextCursor::Start);
+        QTest::keyClicks(w.edit, QStringLiteral("x"));
+        QCOMPARE(w.area->text(), QStringLiteral("x@agent/12 hi"));
+        QVERIFY(w.area->mentions()->spans().isEmpty());
+
+        // A space keeps the token: the mention is still there.
+        w.area->setText(QStringLiteral("@agent/12 hi"));
+        w.edit->moveCursor(QTextCursor::Start);
+        QTest::keyClicks(w.edit, QStringLiteral(" "));
+        QCOMPARE(w.area->mentions()->numbers(), QStringList{QStringLiteral("12")});
+        QCOMPARE(w.area->mentions()->spans().first().start, 1);
+    }
+
     void theCaretNeverStopsInsideAToken() {
         Window w;
         w.area->setText(QStringLiteral("a @agent/12 b"));
@@ -220,8 +247,8 @@ class TextAreaTest final : public QObject {
         QCOMPARE(w.edit->textCursor().position(), 11);
         cursor.setPosition(2);
         w.edit->setTextCursor(cursor);
-        // Typing at its edge keeps the token; an edit inside it makes it plain text.
-        QTest::keyClicks(w.edit, QStringLiteral("x"));
+        // A space at its edge keeps the token; an edit inside it makes it plain text.
+        QTest::keyClicks(w.edit, QStringLiteral(" "));
         QCOMPARE(w.area->mentions()->spans().size(), 1);
         QCOMPARE(w.area->mentions()->spans().first().start, 3);
         cursor = w.edit->textCursor();

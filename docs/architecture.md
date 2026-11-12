@@ -155,7 +155,8 @@ search logic. The app filters the palette's groups as its query changes.
   in text that is set or pasted in one edit, is drawn in `mentionTokenRecipe`; characters
   typed one by one are not, until one is chosen. A token is atomic: Backspace at its end and
   Delete at its start remove it whole, the caret never stops inside it, and an edit inside
-  it turns it back into plain text. The host marks numbers it does not know, which are drawn
+  it, or a character typed at its edge that changes the mention (`@agent/12` then `3`), turns
+  it back into plain text. The host marks numbers it does not know, which are drawn
   in the danger colours. The field reuses the mention picker and the composer's
   query/items API, and places the picker below itself, or above when the window has no room.
 - **Expandable text** (`ket::ExpandableText`, `KetExpandableText`) is read-only text folded
