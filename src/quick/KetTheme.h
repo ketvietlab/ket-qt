@@ -164,6 +164,20 @@ class QuickTheme final : public QObject {
     // { start, end, query } for an `@agent/` mention at `cursor`, or null.
     Q_INVOKABLE QVariant agentMention(const QString& text, int cursor) const;
     Q_INVOKABLE QString agentMentionText(const QString& number) const;
+    // The multi-line text field and the expandable text (KetThemeText.cpp).
+    Q_INVOKABLE QVariantMap textAreaRecipe(bool dark, qreal zoom, bool hovered, bool focused,
+                                           bool enabled, bool invalid, bool overLimit) const;
+    Q_INVOKABLE QVariantMap expandableTextRecipe(bool dark, qreal zoom) const;
+    // ket::mentionLinkedHtml(): the text with its mentions as `agent:<number>` links.
+    Q_INVOKABLE QString mentionLinkedHtml(const QString& text, bool dark,
+                                          const QStringList& unknown, int focusedMention) const;
+    Q_INVOKABLE QString mentionLinkNumber(const QString& link) const;
+    // [{ start, end, number }] for every complete mention (ket::findAgentMentions).
+    Q_INVOKABLE QVariantList agentMentions(const QString& text) const;
+    Q_INVOKABLE QString spokenMention(const QString& number, const QString& title,
+                                      bool unknown) const;
+    Q_INVOKABLE QString characterCountText(int count, int max) const;
+    Q_INVOKABLE QString characterCountDescription(int count, int max) const;
     // Két Symbol (ket::Icons): the qrc URL of the master for a `box` (already zoomed), the
     // logical size the drawing occupies and its whole-device-pixel offset in the box.
     Q_INVOKABLE QString iconSource(const QString& code, qreal box, int weight) const;
