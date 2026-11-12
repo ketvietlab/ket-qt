@@ -8,6 +8,9 @@ import Ket
 Basic.Popup {
     id: toast
 
+    // Height reserved by the host's visible bottom input region, in overlay coordinates.
+    // Bind to host geometry; zero preserves the ordinary bottom placement.
+    property real bottomAvoidance: 0
     property string text
     readonly property var recipe: KetTheme.toastRecipe(KetTheme.dark, KetTheme.zoom)
 
@@ -20,7 +23,7 @@ Basic.Popup {
 
     parent: Basic.Overlay.overlay
     x: parent ? Math.round((parent.width - width) / 2) : 0
-    y: parent ? parent.height - recipe.bottomOffset - height : 0
+    y: parent ? parent.height - Math.max(0, bottomAvoidance) - recipe.bottomOffset - height : 0
     closePolicy: Basic.Popup.NoAutoClose
     focus: false
     modal: false

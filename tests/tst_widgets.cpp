@@ -30,6 +30,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QButtonGroup>
+#include <QDir>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
@@ -315,6 +316,60 @@ class WidgetsTest final : public QObject {
         Toast* second = Toast::showMessage(&window, QStringLiteral("Saved again"));
         QVERIFY(second != first);
         QTRY_VERIFY(first.isNull()); // the earlier toast is replaced
+    }
+
+    void toastsAvoidVisibleBottomRegions() {
+        QWidget window;
+        window.resize(800, 600);
+        QWidget panel(&window);
+        panel.setGeometry(0, 300, 800, 300);
+        auto* input = new QLabel(QStringLiteral("Bottom input region"), &panel);
+        input->setGeometry(20, 180, 760, 120);
+        window.show();
+        Toast toast(QStringLiteral("Saved"), &window);
+        toast.popup(0);
+        const QRect original = toast.geometry();
+        const auto capture = [&](const QString& name) {
+            const QString directory = qEnvironmentVariable("KETQT_TEST_CAPTURE_DIR");
+            if (!directory.isEmpty()) {
+                QVERIFY(QDir().mkpath(directory));
+                QVERIFY(
+                    window.grab().save(QDir(directory).filePath(name + QStringLiteral(".png"))));
+            }
+        };
+        capture(QStringLiteral("toast-default"));
+        Toast::setBottomAvoidance(&window, input);
+        const auto verifyGap = [&] {
+            const int top = input->mapTo(&window, QPoint()).y();
+            const int gap = qRound(Appearance::instance().scaled(toast.recipe().bottomOffset));
+            QVERIFY(toast.geometry().bottom() < top - gap);
+            QCOMPARE(toast.geometry().center().x(), window.rect().center().x());
+        };
+        verifyGap();
+        capture(QStringLiteral("toast-avoiding"));
+        input->setGeometry(20, 100, 760, 200);
+        verifyGap();
+        capture(QStringLiteral("toast-grown"));
+        panel.move(0, 250);
+        verifyGap();
+        window.resize(900, 700);
+        verifyGap();
+        input->hide();
+        QCOMPARE(toast.y(), window.height() - 600 + original.y());
+        input->show();
+        verifyGap();
+        Toast::setBottomAvoidance(&window, nullptr);
+        const QRect cleared = toast.geometry();
+        Toast::setBottomAvoidance(&window, input);
+        delete input;
+        QTRY_COMPARE(toast.geometry(), cleared);
+        Toast::setBottomAvoidance(&window, 200);
+        const int gap = qRound(Appearance::instance().scaled(toast.recipe().bottomOffset));
+        QCOMPARE(toast.geometry().bottom() + 1, window.height() - 200 - gap);
+        Toast::setBottomAvoidance(&window, 240);
+        QCOMPARE(toast.geometry().bottom() + 1, window.height() - 240 - gap);
+        Toast::setBottomAvoidance(&window, 0);
+        QCOMPARE(toast.geometry(), cleared);
     }
 
     void toastsCanFollowAnExpiredToast() {

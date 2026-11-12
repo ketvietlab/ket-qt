@@ -24,6 +24,14 @@ class Toast final : public QWidget {
     static Toast* showMessage(QWidget* anchor, const QString& text,
                               ToastTone tone = ToastTone::Success);
 
+    // Reserve a visible bottom region in this window. Toasts stay above its top edge
+    // with the recipe gap and follow geometry/visibility changes, including ancestors.
+    // nullptr clears the reservation. The widget must belong to the same window.
+    static void setBottomAvoidance(QWidget* window, QWidget* region);
+    // For embedded scenes: the host supplies the current reserved bottom height in
+    // window coordinates and calls again on scene geometry/visibility changes.
+    static void setBottomAvoidance(QWidget* window, int reservedHeight);
+
     [[nodiscard]] QString text() const { return text_; }
     void setText(const QString& text);
 
@@ -39,6 +47,7 @@ class Toast final : public QWidget {
     bool eventFilter(QObject* watched, QEvent* event) override;
 
   private:
+    friend class ToastPlacement;
     [[nodiscard]] QFont toastFont() const;
     [[nodiscard]] QMargins margins() const;
     void place();
