@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetConversationRow.h"
 
+#include "KetAnimationClock.h"
 #include "KetAppearance.h"
 #include "KetIcons.h"
 #include "KetProfile.h"
 
+#include <QPaintEvent>
 #include <QPainter>
 #include <QtMath>
 
@@ -22,13 +24,12 @@ ConversationRow::ConversationRow(const QString& title, QWidget* parent) : QAbstr
     setCheckable(true);
     setFocusPolicy(Qt::StrongFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    frame_.setInterval(16);
-    connect(&frame_, &QTimer::timeout, this, qOverload<>(&QWidget::update));
     connect(&Appearance::instance(), &Appearance::themeChanged, this,
             qOverload<>(&QWidget::update));
     connect(&Appearance::instance(), &Appearance::zoomChanged, this, &QWidget::updateGeometry);
-    clock_.start();
 }
+
+ConversationRow::~ConversationRow() { AnimationClock::instance().unsubscribe(this); }
 
 void ConversationRow::setNumber(const QString& number) {
     number_ = number;
@@ -143,7 +144,18 @@ int ConversationRow::visibleTagCount() const {
     return count;
 }
 
-void ConversationRow::paintEvent(QPaintEvent*) {
+QRect ConversationRow::indicatorRect() const {
+    const ConversationRowRecipe r = recipe();
+    const qreal indicator = scaled(r.indicatorSize);
+    const QRectF icon(qRound(width() - scaled(r.paddingInline) - indicator),
+                      qRound(scaled(r.paddingBlock) + scaled(r.indicatorTop)), indicator,
+                      indicator);
+    // A turning square reaches √2 of its side; keep a pixel more for antialiasing.
+    const qreal reach = indicator * (M_SQRT2 - 1) / 2 + 1;
+    return icon.adjusted(-reach, -reach, reach, reach).toAlignedRect();
+}
+
+void ConversationRow::paintEvent(QPaintEvent* event) {
     const ConversationRowRecipe r = recipe();
     const ConversationStatusRecipe s = conversationStatusRecipe(status_, theme());
     const qreal dpr = devicePixelRatioF();
@@ -172,12 +184,15 @@ void ConversationRow::paintEvent(QPaintEvent*) {
     if (s.spinning && s.spinMs > 0) {
         painter.save();
         painter.translate(iconOrigin + QPointF(indicator / 2, indicator / 2));
-        painter.rotate(360.0 * qreal(clock_.elapsed() % s.spinMs) / s.spinMs);
+        painter.rotate(360.0 * qreal(AnimationClock::instance().elapsed() % s.spinMs) / s.spinMs);
         painter.drawPixmap(QPointF(-indicator / 2, -indicator / 2), icon);
         painter.restore();
     } else {
         painter.drawPixmap(iconOrigin, icon);
     }
+    // A spinner step repaints the icon alone; the text it would clip away is not laid out.
+    if (event != nullptr && indicatorRect().contains(event->rect()))
+        return;
 
     // Line 1: the title.
     const QFont titleFont = font(r.titlePixels, r.titleWeight);
@@ -253,15 +268,15 @@ void ConversationRow::showEvent(QShowEvent* event) {
 }
 
 void ConversationRow::hideEvent(QHideEvent* event) {
-    frame_.stop();
+    AnimationClock::instance().unsubscribe(this);
     QAbstractButton::hideEvent(event);
 }
 
 void ConversationRow::updateSpinner() {
     if (isVisible() && conversationStatusRecipe(status_, theme()).spinning)
-        frame_.start();
+        AnimationClock::instance().subscribe(this, [this] { update(indicatorRect()); });
     else
-        frame_.stop();
+        AnimationClock::instance().unsubscribe(this);
 }
 
 } // namespace ket

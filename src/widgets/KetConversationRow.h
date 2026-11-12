@@ -4,8 +4,6 @@
 #include "KetConversationRecipes.h"
 
 #include <QAbstractButton>
-#include <QElapsedTimer>
-#include <QTimer>
 
 #include <optional>
 
@@ -28,6 +26,7 @@ class ConversationRow final : public QAbstractButton {
     Q_OBJECT
   public:
     explicit ConversationRow(const QString& title = {}, QWidget* parent = nullptr);
+    ~ConversationRow() override;
 
     [[nodiscard]] QString number() const { return number_; }
     void setNumber(const QString& number);
@@ -44,6 +43,9 @@ class ConversationRow final : public QAbstractButton {
     [[nodiscard]] int visibleTagCount() const;
 
     [[nodiscard]] ConversationRowRecipe recipe() const;
+    // Where the status icon is drawn, with room for it to turn; a spinning icon repaints
+    // only this.
+    [[nodiscard]] QRect indicatorRect() const;
     [[nodiscard]] QSize sizeHint() const override;
     [[nodiscard]] QSize minimumSizeHint() const override;
 
@@ -73,8 +75,6 @@ class ConversationRow final : public QAbstractButton {
     QString statusLabel_;
     bool hovered_ = false;
     std::optional<InteractionState> preview_;
-    QElapsedTimer clock_;
-    QTimer frame_;
 };
 
 } // namespace ket
