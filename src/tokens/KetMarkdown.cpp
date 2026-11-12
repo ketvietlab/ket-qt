@@ -210,4 +210,30 @@ std::optional<AgentMention> agentMention(QStringView text, qsizetype cursor) {
 
 QString agentMentionText(QStringView number) { return QStringLiteral("@agent/%1 ").arg(number); }
 
+QList<MentionSpan> findAgentMentions(QStringView text) {
+    static constexpr QStringView prefix = u"@agent/";
+    const auto isNumberChar = [](QChar c) {
+        return c.isLetterOrNumber() || c == QLatin1Char('-') || c == QLatin1Char('_');
+    };
+    QList<MentionSpan> spans;
+    qsizetype from = 0;
+    while ((from = text.indexOf(prefix, from)) >= 0) {
+        const qsizetype start = from;
+        from += prefix.size();
+        if (start > 0) {
+            const QChar before = text.at(start - 1);
+            if (!before.isSpace() && !QStringLiteral("([{'\"").contains(before))
+                continue;
+        }
+        qsizetype end = from;
+        while (end < text.size() && isNumberChar(text.at(end)))
+            ++end;
+        if (end == from)
+            continue;
+        spans.append({start, end, text.mid(from, end - from).toString()});
+        from = end;
+    }
+    return spans;
+}
+
 } // namespace ket

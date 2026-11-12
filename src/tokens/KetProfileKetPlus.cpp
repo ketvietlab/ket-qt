@@ -472,6 +472,19 @@ Profile Profile::ketPlus() {
     p.lightboxThumbSmall = 40;    // `--lightbox-thumb-size` 2.5rem, 5.5rem and 9rem
     p.lightboxThumbMedium = 88;
     p.lightboxThumbLarge = 144;
+    // The mock has no textarea of its own: the text field's 10 px padding, 1 px border and
+    // text size, with the composer's denser body line height.
+    p.textAreaPaddingBlock = 9; // 8 px padding plus the 1 px border
+    p.textAreaLineHeight = 1.5;
+    p.textAreaMinLines = 3;
+    p.textAreaMaxLines = 12;
+    p.textAreaCountPixels = 12; // `.field-help`
+    p.textAreaCountGap = 6;     // `.error-text` margin-top
+    p.mentionTokenWeight = 500;
+    p.expandablePixels = px(u"text-md");
+    p.expandableLineHeight = 1.6;
+    p.expandableFoldedLines = 3;
+    p.expandableToggleGap = 4;
     return p;
 }
 
