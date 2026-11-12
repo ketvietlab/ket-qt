@@ -97,12 +97,27 @@ Item {
         input.forceActiveFocus()
     }
 
+    // Cmd/Ctrl+Return (Control or Meta, as ket::TextArea reads them) belongs to the window.
+    function isHostKey(event) {
+        return (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
+            && (event.modifiers & (Qt.ControlModifier | Qt.MetaModifier))
+    }
+
+    function closeMentions() {
+        if (!mention && !mentionItems)
+            return
+        mention = null
+        mentionItems = null
+        mentionClosed()
+    }
+
     function handleKey(event) {
+        // Not accepted, and TextEdit inserts nothing for it, so it reaches the window.
+        if (isHostKey(event))
+            return false
         if (picker.visible) {
             if (event.key === Qt.Key_Escape) {
-                mention = null
-                mentionItems = null
-                mentionClosed()
+                closeMentions()
                 return true
             }
             const count = picker.shownItems.length
@@ -111,8 +126,7 @@ Item {
                 return count > 0
             }
             if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter
-                 || event.key === Qt.Key_Tab) && count > 0
-                    && !(event.modifiers & Qt.ControlModifier)) {
+                 || event.key === Qt.Key_Tab) && count > 0) {
                 applyMention(picker.shownItems[Math.max(0, picker.highlightedIndex)])
                 return true
             }
@@ -188,6 +202,8 @@ Item {
                                                                             area.maxLength) : "",
                     tokens.spoken].filter(part => part !== "").join(". ")
                 Keys.onPressed: event => { event.accepted = area.handleKey(event) }
+                // As ket::TextArea: the picker closes when the field loses the focus.
+                onActiveFocusChanged: if (!activeFocus) area.closeMentions()
                 onCursorPositionChanged: {
                     const snapped = tokens.snap(cursorPosition, area.lastPosition)
                     if (snapped !== cursorPosition) {

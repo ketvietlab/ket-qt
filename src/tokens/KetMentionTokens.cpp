@@ -161,9 +161,21 @@ void MentionTokens::contentsChanged(int, int, int) {
         }
         // An edit inside a token turns it back into plain text.
     }
+    const QList<MentionSpan> complete = findAgentMentions(text);
+    // A character typed at a token's edge changes what the text says there: `@agent/12` and a
+    // `3` after it is `@agent/123`, and an `x` before the `@` is no mention at all. A token is
+    // kept only while the text still holds exactly that mention.
+    const auto holds = [&complete](const MentionSpan& span) {
+        return std::any_of(complete.cbegin(), complete.cend(), [&span](const MentionSpan& one) {
+            return one.start == span.start && one.end == span.end && one.number == span.number;
+        });
+    };
+    kept.erase(std::remove_if(kept.begin(), kept.end(),
+                              [&holds](const MentionSpan& span) { return !holds(span); }),
+               kept.end());
     if (!inserting_ && added > 1) {
         // Pasted or set text: its complete mentions become tokens.
-        for (const MentionSpan& span : findAgentMentions(text)) {
+        for (const MentionSpan& span : complete) {
             if (span.start < prefix || span.end > prefix + added)
                 continue;
             kept.append(span);
