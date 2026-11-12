@@ -247,8 +247,8 @@ class TextAreaTest final : public QObject {
         QCOMPARE(w.edit->textCursor().position(), 11);
         cursor.setPosition(2);
         w.edit->setTextCursor(cursor);
-        // Typing at its edge keeps the token; an edit inside it makes it plain text.
-        QTest::keyClicks(w.edit, QStringLiteral("x"));
+        // A space at its edge keeps the token; an edit inside it makes it plain text.
+        QTest::keyClicks(w.edit, QStringLiteral(" "));
         QCOMPARE(w.area->mentions()->spans().size(), 1);
         QCOMPARE(w.area->mentions()->spans().first().start, 3);
         cursor = w.edit->textCursor();
