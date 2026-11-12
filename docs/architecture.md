@@ -234,3 +234,13 @@ Family names match without regard to case or accents
 (`Tokens::installedFamily`), because the KÉT Sans font files register as "KET Sans" and
 "KET Sans Mono". The kitchensink's `--fonts=<dir>` registers local font files for review
 screenshots; no font file is committed.
+
+## Toast placement
+
+Widgets hosts can call `Toast::setBottomAvoidance(window, region)` to reserve a
+visible bottom input region. The window owns the reservation across toast lifetimes;
+move, resize, visibility and ancestor geometry changes re-place existing toasts.
+Hidden/destroyed regions and `nullptr` restore ordinary bottom placement. The toast
+remains horizontally centred and uses the recipe bottom offset as the clear gap.
+Quick hosts bind `KetToast.bottomAvoidance` to the visible reserved height in overlay
+coordinates; zero preserves the default position. No content layout is changed.

@@ -7,6 +7,7 @@
 #include "KetShadow.h"
 
 #include <QAccessible>
+#include <QApplication>
 #include <QEvent>
 #include <QPainter>
 #include <QTextLayout>
@@ -18,6 +19,64 @@ namespace {
 constexpr char kCurrentToast[] = "_ket_toast";
 
 } // namespace
+
+// Window-owned reservation survives individual toast lifetimes. Watching application
+// geometry events also catches an ancestor moving without the region itself moving.
+class ToastPlacement final : public QObject {
+  public:
+    explicit ToastPlacement(QWidget* window) : QObject(window), window_(window) {
+        qApp->installEventFilter(this);
+    }
+    QPointer<QWidget> region;
+    void refresh() {
+        const auto toasts = window_->findChildren<Toast*>(QString(), Qt::FindDirectChildrenOnly);
+        for (auto* toast : toasts)
+            toast->place();
+    }
+
+  protected:
+    bool eventFilter(QObject* watched, QEvent* event) override {
+        switch (event->type()) {
+        case QEvent::Move:
+        case QEvent::Resize:
+        case QEvent::Show:
+        case QEvent::Hide:
+        case QEvent::ParentChange:
+            if (auto* widget = qobject_cast<QWidget*>(watched);
+                region && (widget == region || (widget && widget->isAncestorOf(region))))
+                refresh();
+            break;
+        default:
+            break;
+        }
+        return false;
+    }
+
+  private:
+    QWidget* window_;
+};
+
+void Toast::setBottomAvoidance(QWidget* window, QWidget* region) {
+    if (!window)
+        return;
+    window = window->window();
+    if (region && (region == window || region->window() != window))
+        return;
+    auto* placement = static_cast<ToastPlacement*>(window->findChild<QObject*>(
+        QStringLiteral("_ket_toast_placement"), Qt::FindDirectChildrenOnly));
+    if (!placement) {
+        placement = new ToastPlacement(window);
+        placement->setObjectName(QStringLiteral("_ket_toast_placement"));
+    }
+    if (placement->region)
+        disconnect(placement->region, &QObject::destroyed, placement, nullptr);
+    placement->region = region;
+    if (region)
+        connect(region, &QObject::destroyed, placement, [placement] {
+            QTimer::singleShot(0, placement, [placement] { placement->refresh(); });
+        });
+    placement->refresh();
+}
 
 Toast::Toast(const QString& text, QWidget* anchor, const ToastTone tone)
     : QWidget(anchor->window()), text_(text), tone_(tone) {
@@ -146,8 +205,13 @@ void Toast::place() {
     QWidget* window = parentWidget();
     const QSize size = sizeHint();
     const int bottom = qRound(Appearance::instance().scaled(recipe().bottomOffset));
-    setGeometry((window->width() - size.width()) / 2,
-                window->height() - bottom - size.height() + margins().bottom(), size.width(),
+    int bottomEdge = window->height() - bottom + margins().bottom();
+    auto* placement = static_cast<ToastPlacement*>(window->findChild<QObject*>(
+        QStringLiteral("_ket_toast_placement"), Qt::FindDirectChildrenOnly));
+    if (placement && placement->region && placement->region->window() == window &&
+        placement->region->isVisibleTo(window))
+        bottomEdge = qMin(bottomEdge, placement->region->mapTo(window, QPoint()).y() - bottom);
+    setGeometry((window->width() - size.width()) / 2, bottomEdge - size.height(), size.width(),
                 size.height());
 }
 

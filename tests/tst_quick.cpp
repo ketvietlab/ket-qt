@@ -527,7 +527,7 @@ class QuickTest final : public QObject {
     void composerCompletesAgentMentions() {
         std::unique_ptr<QObject> root = create(QByteArrayLiteral(
             "import QtQuick\nimport Ket\n"
-            "Window { width: 800; height: 600; visible: true\n"
+            "Window { width: 800; height: 600; visible: false\n"
             "  property alias composer: composer; property string lastQuery: \"-\"\n"
             "  KetComposer { id: composer; y: 400; width: 600\n"
             "    onMentionQuery: query => { lastQuery = query;\n"
@@ -604,6 +604,34 @@ class QuickTest final : public QObject {
         QCOMPARE(popover->property("x").toReal() + 340.0, 730.0);
         QCOMPARE(popover->property("y").toReal() + popover->property("height").toReal() + 12,
                  600.0);
+    }
+
+    // Keep this visible-window test after the inactive-application clock fixture:
+    // the offscreen platform retains ApplicationActive after its last window closes.
+    void toastReservedBottomFollowsHostGeometry() {
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport QtQuick.Controls.Basic\nimport Ket\n"
+            "ApplicationWindow { id: host; width: 800; height: 600; visible: true\n"
+            " property real reserved: 0; property alias toast: toast\n"
+            " KetToast { id: toast; text: \"Saved\";"
+            "            bottomAvoidance: host.reserved }\n"
+            "}\n"));
+        QVERIFY(root);
+        QObject* toast = root->property("toast").value<QObject*>();
+        QVERIFY(toast);
+        QVERIFY(QMetaObject::invokeMethod(toast, "open"));
+        QTRY_VERIFY(toast->property("y").toReal() > 0);
+        const qreal original = toast->property("y").toReal();
+        root->setProperty("reserved", 120);
+        QTRY_COMPARE(toast->property("y").toReal(), original - 120);
+        root->setProperty("reserved", 200);
+        QTRY_COMPARE(toast->property("y").toReal(), original - 200);
+        root->setProperty("height", 700);
+        QTRY_COMPARE(toast->property("y").toReal(), original - 100);
+        root->setProperty("reserved", 0);
+        QTRY_COMPARE(toast->property("y").toReal(), original + 100);
+        QTRY_COMPARE(toast->property("x").toReal(),
+                     qreal(qRound((800 - toast->property("width").toReal()) / 2)));
     }
 
   private:
