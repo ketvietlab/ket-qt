@@ -527,6 +527,24 @@ struct Profile {
     qreal lightboxThumbMedium = 0;
     qreal lightboxThumbLarge = 0;
 
+    // Multi-line text fields (`textarea`): the field's frame, colours and inline padding are
+    // the text field's; these are the block padding, line box and default line counts.
+    qreal textAreaPaddingBlock = 0; // including the border
+    qreal textAreaLineHeight = 1.0;
+    int textAreaMinLines = 1;
+    int textAreaMaxLines = 1;
+    qreal textAreaCountPixels = 0; // the `n / max` character count
+    qreal textAreaCountGap = 0;    // field to count
+
+    // An `@agent/` mention drawn in a text field or an expandable text.
+    int mentionTokenWeight = 400;
+
+    // Expandable text: multi-line read-only text folded to a number of lines.
+    qreal expandablePixels = 0;
+    qreal expandableLineHeight = 1.0;
+    int expandableFoldedLines = 1;
+    qreal expandableToggleGap = 0; // text to the Show more / Show less button
+
     [[nodiscard]] static Profile designSystem();
     [[nodiscard]] static Profile ketPlus();
 

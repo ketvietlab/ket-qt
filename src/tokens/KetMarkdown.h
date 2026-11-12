@@ -41,4 +41,16 @@ struct AgentMention {
 // The text that replaces a mention: `@agent/<number> `.
 [[nodiscard]] QString agentMentionText(QStringView number);
 
+// A complete `@agent/<number>` in a text: [start, end) and the number.
+struct MentionSpan {
+    qsizetype start = 0;
+    qsizetype end = 0;
+    QString number;
+};
+
+// Every complete mention in `text`. A number is letters, digits, `-` and `_`, so trailing
+// punctuation ends it; the `@` follows the start, a space or an opening bracket or quote, as
+// in agentMention().
+[[nodiscard]] QList<MentionSpan> findAgentMentions(QStringView text);
+
 } // namespace ket
