@@ -4,8 +4,6 @@
 #include "KetSidebarTreeRecipes.h"
 
 #include <QAbstractButton>
-#include <QElapsedTimer>
-#include <QTimer>
 #include <QWidget>
 
 #include <optional>
@@ -205,6 +203,7 @@ class SidebarRow final : public QAbstractButton {
     Q_OBJECT
   public:
     explicit SidebarRow(const QString& title = {}, QWidget* parent = nullptr);
+    ~SidebarRow() override;
 
     void setLevel(int level);
     [[nodiscard]] int level() const { return level_; }
@@ -257,8 +256,6 @@ class SidebarRow final : public QAbstractButton {
     bool unread_ = false;
     bool hovered_ = false;
     std::optional<InteractionState> preview_;
-    QTimer frame_;
-    QElapsedTimer clock_;
 };
 
 // A column of tree parts with the guide line of its level: a 1 px line under the chevron's

@@ -101,6 +101,7 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetNativeOverlay.h
         src/widgets/KetNavItem.h src/widgets/KetNavItem.cpp
         src/widgets/KetSegmentedControl.h src/widgets/KetSegmentedControl.cpp
+        src/widgets/KetAnimationClock.h src/widgets/KetAnimationClock.cpp
         src/widgets/KetActivityIndicator.h src/widgets/KetActivityIndicator.cpp
         src/widgets/KetEmptyState.h src/widgets/KetEmptyState.cpp
         src/widgets/KetBarPainter.h src/widgets/KetBarPainter.cpp
@@ -279,6 +280,7 @@ if(KETQT_INSTALL)
                       src/widgets/KetFieldRow.h src/widgets/KetBanner.h src/widgets/KetToast.h
                       src/widgets/KetDialog.h src/widgets/KetNavItem.h
                       src/widgets/KetSegmentedControl.h src/widgets/KetActivityIndicator.h
+                      src/widgets/KetAnimationClock.h
                       src/widgets/KetEmptyState.h src/widgets/KetConversationRow.h
                       src/widgets/KetComposer.h src/widgets/KetTranscript.h
                       src/widgets/KetActivityRow.h src/widgets/KetMarkdownView.h

@@ -2,9 +2,11 @@
 // The sidebar tree's one-line conversation row.
 #include "KetSidebarTree.h"
 
+#include "KetAnimationClock.h"
 #include "KetProfile.h"
 #include "KetSidebarTreeDetail.h"
 
+#include <QPaintEvent>
 #include <QtMath>
 
 namespace ket {
@@ -16,9 +18,6 @@ SidebarRow::SidebarRow(const QString& title, QWidget* parent) : QAbstractButton(
     setCheckable(true);
     setFocusPolicy(Qt::StrongFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    frame_.setInterval(16);
-    connect(&frame_, &QTimer::timeout, this, qOverload<>(&QWidget::update));
-    clock_.start();
     connect(&Appearance::instance(), &Appearance::themeChanged, this,
             qOverload<>(&QWidget::update));
     connect(&Appearance::instance(), &Appearance::zoomChanged, this, [this] {
@@ -155,7 +154,15 @@ void SidebarRow::updateAccessibility() {
     setToolTip(description);
 }
 
-void SidebarRow::paintEvent(QPaintEvent*) {
+SidebarRow::~SidebarRow() { AnimationClock::instance().unsubscribe(this); }
+
+// Where the state's icon turns: the mark, with room for a turning square's corners.
+static QRect turningRect(const QRect& mark) {
+    const int reach = qCeil(mark.width() * (M_SQRT2 - 1) / 2) + 1;
+    return mark.adjusted(-reach, -reach, reach, reach);
+}
+
+void SidebarRow::paintEvent(QPaintEvent* event) {
     const SidebarRowRecipe r = recipe();
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -188,13 +195,17 @@ void SidebarRow::paintEvent(QPaintEvent*) {
         if (s.spinning && s.spinMs > 0) {
             painter.save();
             painter.translate(QRectF(mark).center());
-            painter.rotate(360.0 * qreal(clock_.elapsed() % s.spinMs) / s.spinMs);
+            painter.rotate(360.0 * qreal(AnimationClock::instance().elapsed() % s.spinMs) /
+                           s.spinMs);
             painter.drawPixmap(QPointF(-mark.width() / 2.0, -mark.height() / 2.0), icon);
             painter.restore();
         } else {
             painter.drawPixmap(mark.topLeft(), icon);
         }
     }
+    // A spinner step repaints the mark alone; the text it would clip away is not laid out.
+    if (event != nullptr && turningRect(mark).contains(event->rect()))
+        return;
 
     const QRect title = titleRect();
     const QFont titleFont = textFont(r.titlePixels, r.titleWeight);
@@ -238,15 +249,15 @@ void SidebarRow::showEvent(QShowEvent* event) {
 }
 
 void SidebarRow::hideEvent(QHideEvent* event) {
-    frame_.stop();
+    AnimationClock::instance().unsubscribe(this);
     QAbstractButton::hideEvent(event);
 }
 
 void SidebarRow::updateSpinner() {
     if (isVisible() && conversationStatusRecipe(status_, theme()).spinning)
-        frame_.start();
+        AnimationClock::instance().subscribe(this, [this] { update(turningRect(markRect())); });
     else
-        frame_.stop();
+        AnimationClock::instance().unsubscribe(this);
 }
 
 } // namespace ket
