@@ -3,9 +3,32 @@
 
 #include <QFontDatabase>
 #include <QHash>
+#include <QReadWriteLock>
+#include <optional>
 
 namespace ket {
 namespace {
+
+// Readers can resolve recipes on worker threads while the GUI thread publishes
+// an entire branch. Keep locks away from QObject signals and recipe evaluation.
+struct ColorOverrides {
+    QReadWriteLock lock;
+    QHash<QString, QColor> light;
+    QHash<QString, QColor> dark;
+};
+ColorOverrides& overrides() {
+    static ColorOverrides state;
+    return state;
+}
+std::optional<QColor> overrideColor(QStringView name, Theme theme) {
+    auto& state = overrides();
+    const QReadLocker locker(&state.lock);
+    const auto& colors = theme == Theme::Dark ? state.dark : state.light;
+    if (colors.isEmpty())
+        return std::nullopt;
+    const auto it = colors.constFind(name.toString());
+    return it == colors.cend() ? std::nullopt : std::optional<QColor>(*it);
+}
 
 struct Entry {
     QStringView name;
@@ -39,7 +62,7 @@ QVariant typed(const Entry& entry, Theme theme) {
     const QStringView value = valueOf(entry, theme);
     switch (entry.kind) {
     case TokenKind::Color:
-        return QColor::fromString(value);
+        return Tokens::color(entry.name, theme);
     case TokenKind::Length:
     case TokenKind::Number:
         return value.toDouble();
@@ -69,13 +92,37 @@ QStringList Tokens::names() {
 
 QString Tokens::raw(QStringView name, Theme theme) {
     const Entry* entry = find(name);
+    if (entry && entry->kind == TokenKind::Color) {
+        if (const auto color = overrideColor(name, theme))
+            return color->name(color->alpha() == 255 ? QColor::HexRgb : QColor::HexArgb);
+    }
     return entry ? valueOf(*entry, theme).toString() : QString();
 }
 
 QColor Tokens::color(QStringView name, Theme theme) {
     const Entry* entry = find(name);
-    return entry && entry->kind == TokenKind::Color ? QColor::fromString(valueOf(*entry, theme))
-                                                    : QColor();
+    if (!entry || entry->kind != TokenKind::Color)
+        return {};
+    if (const auto color = overrideColor(name, theme))
+        return *color;
+    return QColor::fromString(valueOf(*entry, theme));
+}
+
+QStringList Tokens::replaceColorOverrides(Theme theme, const QHash<QString, QColor>& colors) {
+    QHash<QString, QColor> accepted;
+    QStringList rejected;
+    for (auto it = colors.cbegin(); it != colors.cend(); ++it) {
+        const auto* entry = find(it.key());
+        if (!entry || entry->kind != TokenKind::Color || !it.value().isValid())
+            rejected.append(it.key());
+        else
+            accepted.insert(it.key(), it.value());
+    }
+    rejected.sort();
+    auto& state = overrides();
+    const QWriteLocker locker(&state.lock);
+    (theme == Theme::Dark ? state.dark : state.light).swap(accepted);
+    return rejected;
 }
 
 qreal Tokens::px(QStringView name) {

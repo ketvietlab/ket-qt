@@ -34,6 +34,34 @@ flowchart LR
   (`KetTheme.t.terminalAnsi0` …) on `page-bg`. Each reads at 4.5:1 or more on that
   background, except black (0) on dark and bright white (15) on light (`tst_tokens`).
 
+### Runtime color overrides
+
+`Appearance::setColorOverrides(theme, colors)` replaces the complete override map
+for one `Theme` branch. Keys are the existing hyphenated token names and values are
+QColors, including alpha. Unknown names, non-color tokens and invalid colors are
+ignored and returned as a sorted QStringList. An omitted previously overridden key
+returns to its generated default. `clearColorOverrides(theme)` restores the branch.
+Names, token kinds, lengths, typography, profiles and generated source files stay
+unchanged. The API knows nothing about any application's theme file format.
+
+Call setters on the GUI thread. Each explicit set or clear publishes exactly one
+`Appearance::themeChanged(currentTheme)` after replacing the map, including no-op
+requests and inactive branches. This also refreshes recipes that deliberately use
+a different theme branch. Existing Widgets repaint and the existing QML `KetTheme`
+object rebuilds its `t` map and notifies recipe bindings; applications must not
+reload QML or recreate views. Consumers that batch mode and color changes can block
+intermediate Appearance signals and publish their final override set once.
+
+`Tokens::color`, color entries in `Tokens::map` and `Tokens::raw` all see overrides.
+The raw form of an overridden translucent color follows Qt's `#AARRGGBB` convention;
+QColor is the preferred transport between applications and the kit. Without an
+override the original generated raw spelling and all default colors are unchanged.
+Token reads are protected against concurrent branch replacement; signals are sent
+after releasing the lock. This is process-local state: persistence, cross-process
+synchronization, imports and selection policies belong to the host application.
+
+See [decision 0004](decisions/0004-runtime-color-overrides.md).
+
 ### Updating the design system
 
 1. Copy `tokens.css` from the new `@ketvietlab/design-system` revision into

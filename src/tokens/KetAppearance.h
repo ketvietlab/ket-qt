@@ -23,6 +23,13 @@ class Appearance final : public QObject {
     [[nodiscard]] bool dark() const { return theme_ == Theme::Dark; }
     void setMode(Mode mode);
 
+    // GUI thread only. Replaces this theme branch's complete override set. Unknown
+    // names, non-color tokens and invalid colors are ignored and returned, sorted.
+    // Every explicit set/clear publishes exactly one themeChanged(currentTheme),
+    // including inactive branches and no-op requests, to refresh recipe bindings.
+    [[nodiscard]] QStringList setColorOverrides(Theme theme, const QHash<QString, QColor>& colors);
+    void clearColorOverrides(Theme theme);
+
     // Interface zoom: 1.0 = 100%. Components scale token lengths by it.
     [[nodiscard]] qreal zoom() const { return zoom_; }
     void setZoom(qreal zoom);
