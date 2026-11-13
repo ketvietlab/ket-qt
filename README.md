@@ -102,3 +102,27 @@ KetQt is licensed under the [Mozilla Public License 2.0](LICENSE). The pinned
 The names Két, Két Symbol and Lampion are trademarks and are not licensed. Run
 `python3 tools/generate_icons.py` after changing them. Qt is used under its LGPL 3.0,
 GPL or commercial terms as the consuming app chooses.
+
+## Runtime colors
+
+Applications can replace existing color-token values without changing the pinned
+names or metrics. The same values feed Widgets and QML recipes:
+
+```cpp
+#include "KetAppearance.h"
+
+auto& appearance = ket::Appearance::instance();
+const QStringList rejected = appearance.setColorOverrides(ket::Theme::Dark, {
+    {QStringLiteral("page-bg"), QColor(24, 28, 32)},
+    {QStringLiteral("action-primary-bg"), QColor(80, 120, 200)}
+});
+// Handle rejected names, non-color tokens or invalid colors in the host UI.
+appearance.clearColorOverrides(ket::Theme::Dark);
+```
+
+Set/clear on the GUI thread. Each call emits one `themeChanged` notification after
+publishing the complete branch, so existing Widgets and `KetTheme` bindings refresh
+in place. Clear restores the generated defaults. See
+[the override contract](docs/architecture.md#runtime-color-overrides) for replacement,
+alpha, threading and notification semantics. No application or file-format policy
+is added to the kit.

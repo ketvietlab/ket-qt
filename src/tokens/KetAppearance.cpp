@@ -3,6 +3,7 @@
 
 #include <QGuiApplication>
 #include <QStyleHints>
+#include <QThread>
 #include <QtMath>
 
 namespace ket {
@@ -23,6 +24,20 @@ void Appearance::setMode(Mode mode) {
         return;
     mode_ = mode;
     update();
+}
+
+QStringList Appearance::setColorOverrides(Theme theme, const QHash<QString, QColor>& colors) {
+    Q_ASSERT(QThread::currentThread() == thread());
+    const auto rejected = Tokens::replaceColorOverrides(theme, colors);
+    // Publish after replacing the complete map and releasing its lock. Existing
+    // widgets and QuickTheme already observe this signal, even if dark() is stable.
+    emit themeChanged(theme_);
+    return rejected;
+}
+
+void Appearance::clearColorOverrides(Theme theme) {
+    const auto rejected = setColorOverrides(theme, {});
+    Q_UNUSED(rejected);
 }
 
 void Appearance::setZoom(qreal zoom) {

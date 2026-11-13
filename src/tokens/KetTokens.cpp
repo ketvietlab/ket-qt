@@ -3,6 +3,9 @@
 
 #include <QFontDatabase>
 #include <QHash>
+#include <QReadWriteLock>
+#include <atomic>
+#include <optional>
 
 namespace ket {
 namespace {
@@ -13,6 +16,33 @@ struct Entry {
     QStringView light;
     QStringView dark;
 };
+
+// Entry addresses are stable for the lifetime of the generated table. Runtime
+// paint reads therefore need neither a temporary QString nor a second name lookup.
+struct OverrideBranch {
+    std::atomic<bool> active{false};
+    QHash<const Entry*, QColor> colors;
+};
+struct ColorOverrides {
+    QReadWriteLock lock;
+    OverrideBranch light;
+    OverrideBranch dark;
+};
+ColorOverrides& overrides() {
+    static ColorOverrides state;
+    return state;
+}
+std::optional<QColor> overrideColor(const Entry& entry, Theme theme) {
+    auto& state = overrides();
+    const auto& branch = theme == Theme::Dark ? state.dark : state.light;
+    // The default path never takes the map lock. Writers publish the flag only
+    // after replacing the complete map while holding the write lock.
+    if (!branch.active.load(std::memory_order_acquire))
+        return std::nullopt;
+    const QReadLocker locker(&state.lock);
+    const auto it = branch.colors.constFind(&entry);
+    return it == branch.colors.cend() ? std::nullopt : std::optional<QColor>(*it);
+}
 
 constexpr Entry kTable[] = {
 #include "generated/KetTokenTable.inc"
@@ -35,11 +65,17 @@ QStringView valueOf(const Entry& entry, Theme theme) {
     return theme == Theme::Dark ? entry.dark : entry.light;
 }
 
+QColor colorOf(const Entry& entry, Theme theme) {
+    if (const auto color = overrideColor(entry, theme))
+        return *color;
+    return QColor::fromString(valueOf(entry, theme));
+}
+
 QVariant typed(const Entry& entry, Theme theme) {
     const QStringView value = valueOf(entry, theme);
     switch (entry.kind) {
     case TokenKind::Color:
-        return QColor::fromString(value);
+        return colorOf(entry, theme);
     case TokenKind::Length:
     case TokenKind::Number:
         return value.toDouble();
@@ -69,13 +105,37 @@ QStringList Tokens::names() {
 
 QString Tokens::raw(QStringView name, Theme theme) {
     const Entry* entry = find(name);
+    if (entry && entry->kind == TokenKind::Color) {
+        if (const auto color = overrideColor(*entry, theme))
+            return color->name(color->alpha() == 255 ? QColor::HexRgb : QColor::HexArgb);
+    }
     return entry ? valueOf(*entry, theme).toString() : QString();
 }
 
 QColor Tokens::color(QStringView name, Theme theme) {
     const Entry* entry = find(name);
-    return entry && entry->kind == TokenKind::Color ? QColor::fromString(valueOf(*entry, theme))
-                                                    : QColor();
+    if (!entry || entry->kind != TokenKind::Color)
+        return {};
+    return colorOf(*entry, theme);
+}
+
+QStringList Tokens::replaceColorOverrides(Theme theme, const QHash<QString, QColor>& colors) {
+    QHash<const Entry*, QColor> accepted;
+    QStringList rejected;
+    for (auto it = colors.cbegin(); it != colors.cend(); ++it) {
+        const auto* entry = find(it.key());
+        if (!entry || entry->kind != TokenKind::Color || !it.value().isValid())
+            rejected.append(it.key());
+        else
+            accepted.insert(entry, it.value());
+    }
+    rejected.sort();
+    auto& state = overrides();
+    const QWriteLocker locker(&state.lock);
+    auto& branch = theme == Theme::Dark ? state.dark : state.light;
+    branch.colors.swap(accepted);
+    branch.active.store(!branch.colors.isEmpty(), std::memory_order_release);
+    return rejected;
 }
 
 qreal Tokens::px(QStringView name) {

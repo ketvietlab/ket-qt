@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <QFont>
+#include <QHash>
 #include <QString>
 #include <QStringList>
 #include <QStringView>
@@ -14,7 +15,8 @@ enum class Theme { Light, Dark };
 
 enum class TokenKind { Color, Length, Number, Duration, Easing, Shadow, Font, Other };
 
-// Read-only access to the Két Design System tokens compiled into KetQt::Tokens.
+// Access to the Két Design System tokens compiled into KetQt::Tokens.
+// Appearance can override existing color values; names, kinds and metrics stay fixed.
 // Names are the CSS custom property without the `--kv-` prefix, e.g. "page-bg".
 // Lengths are logical pixels at 100% zoom; durations are milliseconds.
 class Tokens final {
@@ -46,6 +48,12 @@ class Tokens final {
 
     // Source of the compiled table, e.g. "@ketvietlab/design-system 0.1.44 (e8adee2d)".
     [[nodiscard]] static QString source();
+
+  private:
+    friend class Appearance;
+    // Atomically replaces one branch, returning rejected keys in sorted order.
+    [[nodiscard]] static QStringList replaceColorOverrides(Theme theme,
+                                                           const QHash<QString, QColor>& colors);
 };
 
 } // namespace ket
