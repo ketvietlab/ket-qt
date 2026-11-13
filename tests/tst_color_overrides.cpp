@@ -171,6 +171,7 @@ class OverridesTest final : public QObject {
     }
     void concurrentReadersSeeValidColors() {
         const QColor first(1, 2, 3, 4), second(5, 6, 7, 8);
+        const auto baseline = Tokens::color(u"page-bg", Theme::Light);
         const auto initial =
             Appearance::instance().setColorOverrides(Theme::Light, {{"page-bg", first}});
         QVERIFY(initial.isEmpty());
@@ -178,11 +179,16 @@ class OverridesTest final : public QObject {
         std::thread reader([&] {
             while (!done.load()) {
                 const auto color = Tokens::color(u"page-bg", Theme::Light);
-                if (color != first && color != second)
-                    valid = false;
+                const auto raw = QColor::fromString(Tokens::raw(u"page-bg", Theme::Light));
+                const auto mapped = Tokens::map(Theme::Light).value("pageBg").value<QColor>();
+                for (const auto& value : {color, raw, mapped})
+                    if (value != first && value != second && value != baseline)
+                        valid = false;
             }
         });
         for (int i = 0; i < 100; ++i) {
+            if (i % 3 == 0)
+                Appearance::instance().clearColorOverrides(Theme::Light);
             const auto rejected = Appearance::instance().setColorOverrides(
                 Theme::Light, {{"page-bg", i % 2 ? first : second}});
             if (!rejected.isEmpty())

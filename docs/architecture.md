@@ -56,8 +56,11 @@ intermediate Appearance signals and publish their final override set once.
 The raw form of an overridden translucent color follows Qt's `#AARRGGBB` convention;
 QColor is the preferred transport between applications and the kit. Without an
 override the original generated raw spelling and all default colors are unchanged.
-Token reads are protected against concurrent branch replacement; signals are sent
-after releasing the lock. This is process-local state: persistence, cross-process
+Active override reads are protected against concurrent branch replacement. A
+per-branch atomic flag skips locking entirely when no overrides are present, and
+runtime lookups use stable generated-entry addresses rather than allocating token
+names. Token-map conversion reuses each entry directly. Signals are sent after
+releasing the lock. This is process-local state: persistence, cross-process
 synchronization, imports and selection policies belong to the host application.
 
 See [decision 0004](decisions/0004-runtime-color-overrides.md).
