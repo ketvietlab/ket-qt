@@ -17,7 +17,9 @@ namespace ket {
 
 // QML singleton `KetTheme` in the `Ket` module. It mirrors ket::Appearance and exposes
 // the token map `t` and the shared component recipes, so QML and Widgets agree.
-class QuickTheme final : public QObject {
+// Not `final`: Qt's registration of a default-constructible QML type instantiates
+// QQmlPrivate::QQmlElement<QuickTheme>, which derives from it, and MSVC rejects that (C3246).
+class QuickTheme : public QObject {
     Q_OBJECT
     QML_NAMED_ELEMENT(KetTheme)
     QML_SINGLETON
