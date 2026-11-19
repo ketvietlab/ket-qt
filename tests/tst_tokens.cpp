@@ -143,6 +143,22 @@ class TokensTest final : public QObject {
         QCOMPARE(Profile::designSystem().monoFamilies, Tokens::fontFamilies(u"font-mono"));
     }
 
+    void installedFamiliesFollowFontDatabaseChanges() {
+        const QString installed = QFontDatabase::families().value(0);
+        if (installed.isEmpty())
+            QSKIP("No family is installed.");
+        const QStringList stack{QStringLiteral("No Such Family"), installed};
+        QCOMPARE(Tokens::installedFamily(stack), installed);
+        QCOMPARE(Tokens::installedFamily(stack), installed);
+        // A different stack is its own answer, not the cached one.
+        QVERIFY(Tokens::installedFamily({QStringLiteral("No Such Family")}).isEmpty());
+
+        // The cache drops its answers when the application fonts change and answers anew.
+        Q_EMIT qGuiApp->fontDatabaseChanged();
+        QCOMPARE(Tokens::installedFamily(stack), installed);
+        QVERIFY(Tokens::installedFamily({QStringLiteral("No Such Family")}).isEmpty());
+    }
+
     void mapsUseCamelCase() {
         const QVariantMap map = Tokens::map(Theme::Dark);
         QCOMPARE(map.value(QStringLiteral("pageBg")).value<QColor>(),
