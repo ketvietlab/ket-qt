@@ -263,7 +263,8 @@ then the `font-mono` token), and the Két DS profile uses the `font-mono` token 
 
 Family names match without regard to case or accents
 (`Tokens::installedFamily`), because the KÉT Sans font files register as "KET Sans" and
-"KET Sans Mono". The kitchensink's `--fonts=<dir>` registers local font files for review
+"KET Sans Mono". Answers are cached per family list until `QGuiApplication::fontDatabaseChanged`,
+because font bindings and painters ask on every row they build. The kitchensink's `--fonts=<dir>` registers local font files for review
 screenshots; no font file is committed.
 
 ## Toast placement

@@ -2,6 +2,7 @@
 #include "KetTokens.h"
 
 #include <QFontDatabase>
+#include <QGuiApplication>
 #include <QHash>
 #include <QReadWriteLock>
 #include <atomic>
@@ -175,7 +176,9 @@ QStringList Tokens::fontFamilies(QStringView name) {
 
 QString Tokens::availableFamily(QStringView name) { return installedFamily(fontFamilies(name)); }
 
-QString Tokens::installedFamily(const QStringList& families) {
+namespace {
+
+QString lookUpInstalledFamily(const QStringList& families) {
     const auto folded = [](const QString& family) {
         QString result;
         for (QChar ch : family.normalized(QString::NormalizationForm_D))
@@ -193,6 +196,60 @@ QString Tokens::installedFamily(const QStringList& families) {
                 return candidate;
     }
     return {};
+}
+
+// Font bindings and painters ask for the same few stacks on every row they build, and each
+// uncached answer lists and folds every installed family. Answers stay valid until the
+// application fonts change, which QGuiApplication reports.
+struct FamilyCache {
+    QReadWriteLock lock;
+    QHash<QStringList, QString> answers;
+    std::atomic<bool> watching{false};
+};
+
+FamilyCache& familyCache() {
+    static FamilyCache cache;
+    return cache;
+}
+
+void watchFontDatabase(FamilyCache& cache) {
+    if (cache.watching.load(std::memory_order_acquire) || !qGuiApp)
+        return;
+    QWriteLocker locker(&cache.lock);
+    if (cache.watching.load(std::memory_order_relaxed))
+        return;
+    QObject::connect(qGuiApp, &QGuiApplication::fontDatabaseChanged, qGuiApp, [] {
+        auto& state = familyCache();
+        QWriteLocker clear(&state.lock);
+        state.answers.clear();
+    });
+    // A later application starts with its own fonts and must be watched again.
+    QObject::connect(qGuiApp, &QObject::destroyed, [] {
+        auto& state = familyCache();
+        QWriteLocker reset(&state.lock);
+        state.answers.clear();
+        state.watching.store(false, std::memory_order_release);
+    });
+    // The database can change before the first lookup, so answers cached without an
+    // application are dropped once one is watched.
+    cache.answers.clear();
+    cache.watching.store(true, std::memory_order_release);
+}
+
+} // namespace
+
+QString Tokens::installedFamily(const QStringList& families) {
+    auto& cache = familyCache();
+    watchFontDatabase(cache);
+    {
+        QReadLocker locker(&cache.lock);
+        if (const auto found = cache.answers.constFind(families); found != cache.answers.cend())
+            return *found;
+    }
+    QString family = lookUpInstalledFamily(families);
+    QWriteLocker locker(&cache.lock);
+    cache.answers.insert(families, family);
+    return family;
 }
 
 QVariantMap Tokens::map(Theme theme) {
