@@ -10,6 +10,7 @@
 #include "KetStyle.h"
 #include "KetTreeItem.h"
 
+#include <QAccessible>
 #include <QApplication>
 #include <QBoxLayout>
 #include <QCursor>
@@ -19,6 +20,24 @@
 #include <QTest>
 
 using namespace ket;
+
+namespace {
+
+bool near(const QColor& actual, const QColor& expected, int tolerance = 6) {
+    return qAbs(actual.red() - expected.red()) <= tolerance &&
+           qAbs(actual.green() - expected.green()) <= tolerance &&
+           qAbs(actual.blue() - expected.blue()) <= tolerance;
+}
+
+// `over` composited on the opaque `under`, as a translucent token lands on the pill.
+QColor over(const QColor& top, const QColor& under) {
+    const qreal a = top.alphaF();
+    return QColor::fromRgbF(top.redF() * a + under.redF() * (1 - a),
+                            top.greenF() * a + under.greenF() * (1 - a),
+                            top.blueF() * a + under.blueF() * (1 - a));
+}
+
+} // namespace
 
 class ControlsTest final : public QObject {
     Q_OBJECT
@@ -84,6 +103,133 @@ class ControlsTest final : public QObject {
         QCOMPARE(picker.slider()->accessibleDescription(), QStringLiteral("high"));
         picker.setSteps({QStringLiteral("only")});
         QVERIFY(!picker.slider()->isEnabled());
+    }
+
+    void stepNotchesSnapToTheNearestCentre() {
+        // Four steps across 200 px with 18 px insets: the ends sit on the insets.
+        QCOMPARE(stepNotchCentre(200, 18, 4, 0), 18.0);
+        QCOMPARE(stepNotchCentre(200, 18, 4, 3), 182.0);
+        QCOMPARE(stepNotchCentre(200, 18, 4, 1), 18.0 + 164.0 / 3);
+        QCOMPARE(stepNotchCentre(200, 18, 4, 9), 182.0); // clamped
+        QCOMPARE(stepNotchCentre(200, 18, 1, 0), 100.0); // one step sits in the middle
+        QCOMPARE(stepNotchNearest(0, 200, 18, 4), 0);
+        QCOMPARE(stepNotchNearest(-50, 200, 18, 4), 0);
+        QCOMPARE(stepNotchNearest(400, 200, 18, 4), 3);
+        const qreal gap = 164.0 / 3;
+        QCOMPARE(stepNotchNearest(18 + gap * 1.4, 200, 18, 4), 1);
+        QCOMPARE(stepNotchNearest(18 + gap * 1.6, 200, 18, 4), 2);
+        QCOMPARE(stepNotchNearest(100, 200, 18, 1), 0);
+        QCOMPARE(stepNotchNearest(100, 200, 18, 0), 0);
+    }
+
+    void stepSliderRecipesFollowTheNotchedMock() {
+        for (const Theme theme : {Theme::Light, Theme::Dark}) {
+            const SliderRecipe r = sliderRecipe({}, theme);
+            QCOMPARE(r.notchPill, Tokens::color(u"surface-hover", theme));
+            QCOMPARE(r.notch, Tokens::color(u"text-muted", theme));
+            QCOMPARE(r.track, Tokens::color(u"border-default", theme));
+            QCOMPARE(r.handleBorder, Tokens::color(u"accent", theme));
+            QCOMPARE(r.notchHeight, 36.0);
+            QCOMPARE(r.notchTrackHeight, 14.0);
+            QCOMPARE(r.notchInset, 18.0);
+            QCOMPARE(r.notchDotSize, 6.0);
+            QCOMPARE(r.notchThumbSize, 26.0);
+            QCOMPARE(r.notchRingWidth, 3.0);
+            // The end dots sit inside the track's round caps, and the thumb inside the pill.
+            QVERIFY(r.notchInset - r.notchTrackHeight / 2 > 0);
+            QVERIFY(r.notchInset >= r.notchThumbSize / 2);
+            QVERIFY(r.notchThumbSize < r.notchHeight);
+        }
+        const InteractionState focused{false, false, true, true};
+        QCOMPARE(sliderRecipe(focused, Theme::Light).focusRing,
+                 Tokens::color(u"focus-border", Theme::Light));
+        QCOMPARE(sliderRecipe({}, Theme::Light).focusRing.alpha(), 0);
+    }
+
+    void stepSlidersDrawTheirNotches_data() {
+        QTest::addColumn<bool>("dark");
+        QTest::newRow("light") << false;
+        QTest::newRow("dark") << true;
+    }
+
+    void stepSlidersDrawTheirNotches() {
+        QFETCH(bool, dark);
+        Appearance::instance().setMode(dark ? Appearance::Mode::Dark : Appearance::Mode::Light);
+        const Theme theme = dark ? Theme::Dark : Theme::Light;
+        StepSlider picker(QStringLiteral("Reasoning effort"));
+        picker.setSteps({QStringLiteral("low"), QStringLiteral("medium"), QStringLiteral("high"),
+                         QStringLiteral("xhigh")});
+        picker.setCurrentIndex(2);
+        picker.resize(300, picker.sizeHint().height());
+        picker.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&picker));
+        QSlider* track = picker.slider();
+        QCOMPARE(track->width(), 300);
+        QCOMPARE(track->height(), 36);
+        const SliderRecipe r = sliderRecipe({}, theme);
+        const QImage image = track->grab().toImage();
+        const int middle = 18;
+        const auto at = [&](int index) { return qRound(stepNotchCentre(300, 18, 4, index)); };
+        // The pill, just inside its left end.
+        QVERIFY(near(image.pixelColor(4, middle), r.notchPill));
+        // The empty track between the chosen step and the last one.
+        const int gap = (at(2) + 13 + at(3) - 3) / 2;
+        QVERIFY(near(image.pixelColor(gap, middle), over(r.track, r.notchPill)));
+        // The filled track between the first two steps.
+        QVERIFY(near(image.pixelColor((at(0) + at(1)) / 2, middle), r.fill));
+        // An unchosen step's dot, the chosen step's thumb, ring and dot.
+        QVERIFY(near(image.pixelColor(at(3), middle), r.notch, 24));
+        QVERIFY(near(image.pixelColor(at(0), middle), r.notch, 24));
+        QVERIFY(near(image.pixelColor(at(2) + 7, middle), r.handle));
+        QVERIFY(near(image.pixelColor(at(2) + 12, middle), r.handleBorder, 24));
+        QVERIFY(near(image.pixelColor(at(2), middle), r.fill, 24));
+        // The theme switches without reopening the slider.
+        Appearance::instance().setMode(dark ? Appearance::Mode::Light : Appearance::Mode::Dark);
+        const SliderRecipe other = sliderRecipe({}, dark ? Theme::Light : Theme::Dark);
+        QVERIFY(near(track->grab().toImage().pixelColor(4, middle), other.notchPill));
+    }
+
+    void stepSlidersSnapAndAnnounceTheirStep() {
+        StepSlider picker(QStringLiteral("Reasoning effort"));
+        picker.setSteps({QStringLiteral("low"), QStringLiteral("medium"), QStringLiteral("high"),
+                         QStringLiteral("xhigh")});
+        picker.resize(300, picker.sizeHint().height());
+        picker.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&picker));
+        QSlider* track = picker.slider();
+        const int middle = track->height() / 2;
+        // A click between two notches picks the nearer one.
+        QTest::mouseClick(track, Qt::LeftButton, {},
+                          QPoint(qRound(stepNotchCentre(300, 18, 4, 1)) + 20, middle));
+        QCOMPARE(picker.currentIndex(), 1);
+        QTest::mouseClick(track, Qt::LeftButton, {}, QPoint(298, middle));
+        QCOMPARE(picker.currentIndex(), 3);
+        // A drag follows the pointer from notch to notch.
+        QTest::mousePress(track, Qt::LeftButton, {}, QPoint(2, middle));
+        QCOMPARE(picker.currentIndex(), 0);
+        QTest::mouseMove(track, QPoint(qRound(stepNotchCentre(300, 18, 4, 2)) - 10, middle));
+        QCOMPARE(picker.currentIndex(), 2);
+        QTest::mouseRelease(track, Qt::LeftButton, {},
+                            QPoint(qRound(stepNotchCentre(300, 18, 4, 2)) - 10, middle));
+        QVERIFY(!track->isSliderDown());
+        // Left and Right move one step.
+        track->setFocus(Qt::TabFocusReason);
+        QTest::keyClick(track, Qt::Key_Right);
+        QCOMPARE(picker.currentIndex(), 3);
+        QTest::keyClick(track, Qt::Key_Left);
+        QTest::keyClick(track, Qt::Key_Left);
+        QCOMPARE(picker.currentStep(), QStringLiteral("medium"));
+        // It reads as a slider named after the label, with the step as its description.
+        QAccessibleInterface* accessible = QAccessible::queryAccessibleInterface(track);
+        QVERIFY(accessible);
+        QCOMPARE(accessible->role(), QAccessible::Slider);
+        QCOMPARE(accessible->text(QAccessible::Name), QStringLiteral("Reasoning effort"));
+        QCOMPARE(accessible->text(QAccessible::Description), QStringLiteral("medium"));
+        QVERIFY(accessible->valueInterface());
+        QCOMPARE(accessible->valueInterface()->currentValue().toInt(), 1);
+        // The track follows the zoom.
+        Appearance::instance().setZoom(1.25);
+        QCOMPARE(track->height(), 45);
     }
 
     void avatarsTakeInitials() {

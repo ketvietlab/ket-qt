@@ -2,12 +2,15 @@
 // The Qt Quick controls and chrome (batch 8) and editor surfaces (batch 9). Any QML warning
 // fails the test that caused it.
 #include "KetAppearance.h"
+#include "KetControlRecipes.h"
 #include "KetRecipes.h"
 
+#include <QAccessible>
 #include <QGuiApplication>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQuickItem>
+#include <QQuickWindow>
 #include <QTest>
 #include <QtQml/qqmlextensionplugin.h>
 #include <algorithm>
@@ -27,6 +30,17 @@ void countQmlWarnings(QtMsgType type, const QMessageLogContext& context, const Q
         (message.contains(QLatin1String("qrc:/")) || message.contains(QLatin1String(".qml:"))))
         ++qmlWarnings;
     previousHandler(type, context, message);
+}
+
+// The item named `name` under `root`, along visual children (Repeater delegates are not
+// QObject children).
+QQuickItem* itemNamed(QQuickItem* root, const QString& name) {
+    if (root->objectName() == name)
+        return root;
+    for (QQuickItem* child : root->childItems())
+        if (QQuickItem* found = itemNamed(child, name))
+            return found;
+    return nullptr;
 }
 
 } // namespace
@@ -109,6 +123,124 @@ class QuickChromeTest final : public QObject {
             statusItem->mapToItem(status, QPointF(0, statusItem->height() / 2)).y();
         QVERIFY(statusItem->height() < status->height() - 1);
         QVERIFY(qAbs(centre - (status->height() + 1) / 2) <= 0.5); // anchors snap to pixels
+    }
+
+    void stepSlidersDrawAndSnapToNotches_data() {
+        QTest::addColumn<bool>("dark");
+        QTest::newRow("light") << false;
+        QTest::newRow("dark") << true;
+    }
+
+    // KetStepSlider against the same recipe and geometry as ket::StepSlider (tst_controls).
+    void stepSlidersDrawAndSnapToNotches() {
+        QFETCH(bool, dark);
+        Appearance::instance().setMode(dark ? Appearance::Mode::Dark : Appearance::Mode::Light);
+        const Theme theme = dark ? Theme::Dark : Theme::Light;
+        std::unique_ptr<QObject> root = create(QByteArrayLiteral(
+            "import QtQuick\nimport Ket\n"
+            "Window { width: 400; height: 200; visible: true; color: KetTheme.t.panelBg\n"
+            "  property alias picker: picker; property alias single: single\n"
+            "  KetStepSlider { id: picker; width: 300; label: \"Reasoning effort\"\n"
+            "    steps: [\"low\", \"medium\", \"high\", \"xhigh\"]; currentIndex: 2 }\n"
+            "  KetStepSlider { id: single; y: 120; width: 300; label: \"One\"; steps: [\"a\"] }\n"
+            "}\n"));
+        QVERIFY(root);
+        auto* window = qobject_cast<QQuickWindow*>(root.get());
+        QVERIFY(QTest::qWaitForWindowExposed(window));
+        auto* picker = root->property("picker").value<QQuickItem*>();
+        auto* track = itemNamed(picker, QStringLiteral("stepSliderTrack"));
+        QVERIFY(track);
+        QCOMPARE(track->width(), 300.0);
+        QCOMPARE(track->height(), 36.0);
+        for (int index = 0; index < 4; ++index) {
+            auto* notch = itemNamed(picker, QStringLiteral("stepSliderNotch%1").arg(index));
+            QVERIFY(notch);
+            QCOMPARE(notch->width(), 26.0);
+            QCOMPARE(notch->x() + notch->width() / 2, stepNotchCentre(300, 18, 4, index));
+        }
+        auto* fill = itemNamed(picker, QStringLiteral("stepSliderFill"));
+        QCOMPARE(fill->x() + fill->width(), stepNotchCentre(300, 18, 4, 2) + 7);
+        QCOMPARE(track->property("activeFocusOnTab").toBool(), true);
+
+        // Pixels, where the scene graph can draw offscreen.
+        const QImage image = window->grabWindow();
+        if (!image.isNull()) {
+            const SliderRecipe r = sliderRecipe({}, theme);
+            const QPointF origin = track->mapToScene(QPointF(0, 0));
+            const auto pixel = [&](qreal x) {
+                return image.pixelColor(qRound(origin.x() + x), qRound(origin.y() + 18));
+            };
+            const auto near = [](const QColor& a, const QColor& b, int tolerance) {
+                return qAbs(a.red() - b.red()) <= tolerance &&
+                       qAbs(a.green() - b.green()) <= tolerance &&
+                       qAbs(a.blue() - b.blue()) <= tolerance;
+            };
+            QVERIFY(near(pixel(4), r.notchPill, 6));
+            QVERIFY(
+                near(pixel((stepNotchCentre(300, 18, 4, 0) + stepNotchCentre(300, 18, 4, 1)) / 2),
+                     r.fill, 6));
+            QVERIFY(near(pixel(stepNotchCentre(300, 18, 4, 3)), r.notch, 24));
+            QVERIFY(near(pixel(stepNotchCentre(300, 18, 4, 2) + 7), r.handle, 6));
+            QVERIFY(near(pixel(stepNotchCentre(300, 18, 4, 2) + 12), r.handleBorder, 24));
+        }
+
+        // A click between notches picks the nearer one; a drag follows the pointer.
+        const auto at = [&](qreal x) { return track->mapToScene(QPointF(x, 18)).toPoint(); };
+        QTest::mouseClick(window, Qt::LeftButton, {}, at(stepNotchCentre(300, 18, 4, 1) + 20));
+        QCOMPARE(picker->property("currentIndex").toInt(), 1);
+        QTest::mousePress(window, Qt::LeftButton, {}, at(2));
+        QCOMPARE(picker->property("currentIndex").toInt(), 0);
+        QTest::mouseMove(window, at(298));
+        QCOMPARE(picker->property("currentIndex").toInt(), 3);
+        QTest::mouseRelease(window, Qt::LeftButton, {}, at(298));
+        // A click does not show the focus ring; Left and Right move one step.
+        QVERIFY(track->hasActiveFocus());
+        QCOMPARE(picker->property("recipe")
+                     .toMap()
+                     .value(QStringLiteral("focusRing"))
+                     .value<QColor>()
+                     .alpha(),
+                 0);
+        QTest::keyClick(window, Qt::Key_Left);
+        QCOMPARE(picker->property("currentStep").toString(), QStringLiteral("high"));
+        QTest::keyClick(window, Qt::Key_Right);
+        QTest::keyClick(window, Qt::Key_Right);
+        QCOMPARE(picker->property("currentIndex").toInt(), 3);
+        // It reads as a slider named after the label, with the step index as its value, as
+        // ket::StepSlider's QSlider does; setting the value chooses the step.
+        QAccessibleInterface* accessible = QAccessible::queryAccessibleInterface(track);
+        QVERIFY(accessible);
+        QCOMPARE(accessible->role(), QAccessible::Slider);
+        QCOMPARE(accessible->text(QAccessible::Name), QStringLiteral("Reasoning effort"));
+        QCOMPARE(accessible->text(QAccessible::Description), QStringLiteral("xhigh"));
+        QAccessibleValueInterface* value = accessible->valueInterface();
+        QVERIFY(value);
+        QCOMPARE(value->currentValue().toInt(), picker->property("currentIndex").toInt());
+        QCOMPARE(value->minimumValue().toInt(), 0);
+        QCOMPARE(value->maximumValue().toInt(), 3);
+        QCOMPARE(value->minimumStepSize().toInt(), 1);
+        value->setCurrentValue(1);
+        QCOMPARE(picker->property("currentIndex").toInt(), 1);
+        picker->setProperty("currentIndex", 2);
+        QCOMPARE(value->currentValue().toInt(), 2); // the binding came back
+        QTest::keyClick(window, Qt::Key_Right);
+        QCOMPARE(value->currentValue().toInt(), 3);
+        // Tab focus shows the ring.
+        track->setFocus(false);
+        track->forceActiveFocus(Qt::TabFocusReason);
+        QCOMPARE(
+            picker->property("recipe").toMap().value(QStringLiteral("focusRing")).value<QColor>(),
+            Tokens::color(u"focus-border", theme));
+        // One step only: disabled.
+        auto* single = root->property("single").value<QQuickItem*>();
+        auto* lone = itemNamed(single, QStringLiteral("stepSliderTrack"));
+        QVERIFY(!lone->isEnabled());
+        QCOMPARE(single->property("recipe").toMap().value(QStringLiteral("opacity")).toReal(),
+                 sliderRecipe({false, false, false, false}, theme).opacity);
+        // The zoom scales the track live.
+        Appearance::instance().setZoom(1.25);
+        QCOMPARE(track->height(), 45.0);
+        Appearance::instance().setZoom(1.0);
     }
 
     void surfacesLoadAndBehave() {

@@ -360,6 +360,15 @@ struct Profile {
     qreal sliderRangePixels = 0;
     qreal sliderHeaderGap = 0;
     qreal sliderLabelsGap = 0;
+    // ket::StepSlider's notched track: the pill, its track, the end steps' inset from the
+    // pill's ends, a step's dot, the chosen step's thumb and its accent ring.
+    qreal stepSliderHeight = 0;
+    qreal stepSliderTrackHeight = 0;
+    qreal stepSliderInset = 0;
+    qreal stepSliderDotSize = 0;
+    qreal stepSliderThumbSize = 0;
+    qreal stepSliderRingWidth = 0;
+    qreal stepSliderFocusRingWidth = 0;
     qreal avatarDiameter = 0;
     qreal avatarPixels = 0;
     int avatarWeight = 0;

@@ -36,6 +36,8 @@ SliderRecipe sliderRecipe(const InteractionState& state, Theme theme) {
     recipe.label = token(u"text-main", theme);
     recipe.value = token(u"accent-text", theme);
     recipe.rangeLabel = token(u"text-muted", theme);
+    recipe.notchPill = token(u"surface-hover", theme);
+    recipe.notch = token(u"text-muted", theme);
     recipe.height = profile().sliderHeight;
     recipe.trackHeight = profile().sliderTrackHeight;
     recipe.handleSize = profile().sliderHandleSize;
@@ -45,6 +47,13 @@ SliderRecipe sliderRecipe(const InteractionState& state, Theme theme) {
     recipe.rangePixels = profile().sliderRangePixels;
     recipe.headerGap = profile().sliderHeaderGap;
     recipe.labelsGap = profile().sliderLabelsGap;
+    recipe.notchHeight = profile().stepSliderHeight;
+    recipe.notchTrackHeight = profile().stepSliderTrackHeight;
+    recipe.notchInset = profile().stepSliderInset;
+    recipe.notchDotSize = profile().stepSliderDotSize;
+    recipe.notchThumbSize = profile().stepSliderThumbSize;
+    recipe.notchRingWidth = profile().stepSliderRingWidth;
+    recipe.focusRingWidth = profile().stepSliderFocusRingWidth;
     recipe.opacity = live ? 1.0 : profile().disabledOpacity;
     return recipe;
 }
@@ -67,7 +76,31 @@ QVariantMap toVariantMap(const SliderRecipe& r) {
                   {"rangePixels", r.rangePixels},
                   {"headerGap", r.headerGap},
                   {"labelsGap", r.labelsGap},
+                  {"notchPill", r.notchPill},
+                  {"notch", r.notch},
+                  {"notchHeight", r.notchHeight},
+                  {"notchTrackHeight", r.notchTrackHeight},
+                  {"notchInset", r.notchInset},
+                  {"notchDotSize", r.notchDotSize},
+                  {"notchThumbSize", r.notchThumbSize},
+                  {"notchRingWidth", r.notchRingWidth},
+                  {"focusRingWidth", r.focusRingWidth},
                   {"opacity", r.opacity}});
+}
+
+qreal stepNotchCentre(qreal width, qreal inset, int count, int index) {
+    if (count < 2)
+        return width / 2;
+    const qreal track = qMax<qreal>(0, width - inset * 2);
+    return inset + track * qBound(0, index, count - 1) / (count - 1);
+}
+
+int stepNotchNearest(qreal x, qreal width, qreal inset, int count) {
+    if (count < 2)
+        return 0;
+    const qreal track = qMax<qreal>(1, width - inset * 2);
+    const qreal fraction = qBound<qreal>(0, (x - inset) / track, 1);
+    return qRound(fraction * (count - 1));
 }
 
 AvatarRecipe avatarRecipe(Theme theme) {

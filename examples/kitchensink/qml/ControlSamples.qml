@@ -31,11 +31,28 @@ Item {
         Column {
             width: KetTheme.px(420, KetTheme.zoom)
             spacing: KetTheme.px(20, KetTheme.zoom)
+            // The notched step slider in each state, as ControlPages.cpp shows it.
+            Repeater {
+                model: [
+                    { label: "Reasoning effort", index: 2, state: null },
+                    { label: "Hovered", index: 2, state: { hovered: true } },
+                    { label: "Pressed", index: 2, state: { hovered: true, pressed: true } },
+                    { label: "Focused", index: 1, state: { focused: true } },
+                    { label: "First step", index: 0, state: null }
+                ]
+                KetStepSlider {
+                    required property var modelData
+                    width: parent.width
+                    label: modelData.label
+                    steps: ["low", "medium", "high", "xhigh"]
+                    currentIndex: modelData.index
+                    previewState: modelData.state
+                }
+            }
             KetStepSlider {
                 width: parent.width
-                label: "Reasoning effort"
-                steps: ["low", "medium", "high", "xhigh"]
-                currentIndex: 2
+                label: "One step (disabled)"
+                steps: ["default"]
             }
             Row {
                 spacing: KetTheme.px(24, KetTheme.zoom)

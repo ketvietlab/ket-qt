@@ -305,6 +305,16 @@ Profile Profile::ketPlus() {
     p.sliderRangePixels = 10;  // `.range-labels`, kp-text-xs
     p.sliderHeaderGap = 8;
     p.sliderLabelsGap = 4;
+    // The notched step slider (ket-ios `sliderNotched`: 62/24/31/9/44/4 on a phone) at the
+    // desktop size of the KetPlus mock (`NotchedStepSlider.qml`).
+    p.stepSliderHeight = 36;
+    p.stepSliderTrackHeight = 14;
+    p.stepSliderInset = 18;
+    p.stepSliderDotSize = 6;
+    p.stepSliderThumbSize = 26;
+    p.stepSliderRingWidth = 3;
+    p.stepSliderFocusRingWidth = 2;
+
     p.avatarDiameter = 29; // `.avatar`
     p.avatarPixels = 10;   // kp-text-xs
     p.avatarWeight = 600;

@@ -62,11 +62,31 @@ QWidget* sliders(QWidget* parent) {
     auto* column = new QVBoxLayout(host);
     column->setContentsMargins(0, 0, 0, 0);
     column->setSpacing(20);
-    auto* effort = new StepSlider(QStringLiteral("Reasoning effort"), host);
-    effort->setSteps({QStringLiteral("low"), QStringLiteral("medium"), QStringLiteral("high"),
-                      QStringLiteral("xhigh")});
-    effort->setCurrentIndex(2);
-    column->addWidget(effort);
+    // The notched step slider in each state: rest, hovered, pressed, keyboard focus, the first
+    // step, and one step only (disabled).
+    const QStringList efforts{QStringLiteral("low"), QStringLiteral("medium"),
+                              QStringLiteral("high"), QStringLiteral("xhigh")};
+    const struct {
+        const char* label;
+        int index;
+        std::optional<InteractionState> state;
+    } samples[] = {
+        {"Reasoning effort", 2, std::nullopt},
+        {"Hovered", 2, InteractionState{true, false, true, false}},
+        {"Pressed", 2, InteractionState{true, true, true, false}},
+        {"Focused", 1, InteractionState{false, false, true, true}},
+        {"First step", 0, std::nullopt},
+    };
+    for (const auto& sample : samples) {
+        auto* effort = new StepSlider(QString::fromLatin1(sample.label), host);
+        effort->setSteps(efforts);
+        effort->setCurrentIndex(sample.index);
+        effort->setPreviewState(sample.state);
+        column->addWidget(effort);
+    }
+    auto* single = new StepSlider(QStringLiteral("One step (disabled)"), host);
+    single->setSteps({QStringLiteral("default")});
+    column->addWidget(single);
     auto* row = new QHBoxLayout;
     row->setSpacing(24);
     for (const auto& [value, enabled] : {std::pair{30, true}, std::pair{70, false}}) {
