@@ -104,6 +104,7 @@ if(KETQT_BUILD_WIDGETS)
         src/widgets/KetNavItem.h src/widgets/KetNavItem.cpp
         src/widgets/KetSegmentedControl.h src/widgets/KetSegmentedControl.cpp
         src/widgets/KetAnimationClock.h src/widgets/KetAnimationClock.cpp
+        src/widgets/KetSpinnerFrames.h src/widgets/KetSpinnerFrames.cpp
         src/widgets/KetActivityIndicator.h src/widgets/KetActivityIndicator.cpp
         src/widgets/KetEmptyState.h src/widgets/KetEmptyState.cpp
         src/widgets/KetBarPainter.h src/widgets/KetBarPainter.cpp
