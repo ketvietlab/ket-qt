@@ -295,6 +295,13 @@ Profile Profile::designSystem() {
     p.sliderRangePixels = px(u"text-xs");
     p.sliderHeaderGap = px(u"space-2");
     p.sliderLabelsGap = px(u"space-1");
+    p.stepSliderHeight = px(u"control-height");
+    p.stepSliderTrackHeight = px(u"space-3");
+    p.stepSliderInset = px(u"space-4");
+    p.stepSliderDotSize = px(u"space-1-5");
+    p.stepSliderThumbSize = px(u"space-6");
+    p.stepSliderRingWidth = 2;
+    p.stepSliderFocusRingWidth = 2;
     p.avatarDiameter = px(u"control-height-sm") + px(u"space-2");
     p.avatarPixels = px(u"text-xs");
     p.avatarWeight = 600;

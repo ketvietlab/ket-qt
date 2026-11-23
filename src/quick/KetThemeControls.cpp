@@ -16,8 +16,18 @@ QVariantMap QuickTheme::sliderRecipe(bool dark, qreal zoom, bool hovered, bool p
     QVariantMap recipe = toVariantMap(ket::sliderRecipe(state, themeOf(dark)));
     scaleLengths(recipe, zoom,
                  {u"height", u"trackHeight", u"handleSize", u"handleBorderWidth", u"labelPixels",
-                  u"rangePixels", u"headerGap", u"labelsGap"});
+                  u"rangePixels", u"headerGap", u"labelsGap", u"notchHeight", u"notchTrackHeight",
+                  u"notchInset", u"notchDotSize", u"notchThumbSize", u"notchRingWidth",
+                  u"focusRingWidth"});
     return recipe;
+}
+
+qreal QuickTheme::stepNotchCentre(qreal width, qreal inset, int count, int index) const {
+    return ket::stepNotchCentre(width, inset, count, index);
+}
+
+int QuickTheme::stepNotchNearest(qreal x, qreal width, qreal inset, int count) const {
+    return ket::stepNotchNearest(x, width, inset, count);
 }
 
 QVariantMap QuickTheme::avatarRecipe(bool dark, qreal zoom) const {

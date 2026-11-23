@@ -7,7 +7,10 @@ namespace ket {
 
 // A horizontal slider (`input[type=range]` with `accent-color`), drawn by ket::Style for every
 // horizontal QSlider: the filled track, a round handle, and the `.effort-picker` header and
-// `.range-labels` for ket::StepSlider.
+// `.range-labels` for ket::StepSlider. ket::StepSlider draws a notched track instead: a pill
+// (`notchPill`) holds the track with one dot (`notch`) per step; the chosen step is a thumb
+// (`handle`, ringed in `handleBorder`) and the track fills (`fill`) up to it. The end steps sit
+// `notchInset` from the pill's ends, inside the track's round caps.
 struct SliderRecipe {
     QColor track;
     QColor fill;
@@ -17,6 +20,8 @@ struct SliderRecipe {
     QColor label;
     QColor value;
     QColor rangeLabel;
+    QColor notchPill;
+    QColor notch;
     qreal height = 0;
     qreal trackHeight = 0;
     qreal handleSize = 0;
@@ -26,10 +31,23 @@ struct SliderRecipe {
     qreal rangePixels = 0;
     qreal headerGap = 0;
     qreal labelsGap = 0;
+    qreal notchHeight = 0;
+    qreal notchTrackHeight = 0;
+    qreal notchInset = 0;
+    qreal notchDotSize = 0;
+    qreal notchThumbSize = 0;
+    qreal notchRingWidth = 0;
+    qreal focusRingWidth = 0;
     qreal opacity = 0;
 };
 [[nodiscard]] SliderRecipe sliderRecipe(const InteractionState& state, Theme theme);
 [[nodiscard]] QVariantMap toVariantMap(const SliderRecipe& recipe);
+
+// The notched track's geometry, shared by both layers: the centre of step `index` of `count`
+// across a track `width` wide whose end steps sit `inset` from its ends (one step sits in the
+// middle), and the step nearest to `x`, clamped to the ends. Lengths are in the same unit.
+[[nodiscard]] qreal stepNotchCentre(qreal width, qreal inset, int count, int index);
+[[nodiscard]] int stepNotchNearest(qreal x, qreal width, qreal inset, int count);
 
 // A round avatar (`.avatar`): initials or an image on the raised surface.
 struct AvatarRecipe {

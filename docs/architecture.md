@@ -205,6 +205,13 @@ search logic. The app filters the palette's groups as its query changes.
 - **Sliders are drawn by `ket::Style`** for every horizontal `QSlider`, like tab strips and
   progress bars; the mock uses the native range input, so the track and handle follow the
   accent tokens rather than a mock literal.
+- **Step sliders are notched**, as ket-ios draws `sliderNotched` at desktop size: a pill
+  (`surface-hover`) holds a rounded track with one dot per step, the chosen step is a ringed
+  thumb and the track fills up to it, so every step shows before it is chosen. The end steps
+  sit `notchInset` from the pill's ends, inside the track's round caps. The metrics are
+  `Profile::stepSlider*` (KetPlus: pill 36, track 14, inset 18, dot 6, thumb 26, ring 3) and
+  both layers place and snap steps with `ket::stepNotchCentre` and `ket::stepNotchNearest`.
+  The widget keeps a `QSlider` inside, so keys, value and accessibility stay Qt's.
 - **Group headers** keep their action's place while it is hidden, so the name never moves
   when the header is hovered or focused.
 - **Activity groups** hold any rows, including a `ket::Gallery` of screenshots; the gallery

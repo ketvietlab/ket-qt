@@ -204,6 +204,9 @@ class QuickTheme : public QObject {
     // Controls and chrome (KetControlRecipes).
     Q_INVOKABLE QVariantMap sliderRecipe(bool dark, qreal zoom, bool hovered, bool pressed,
                                          bool enabled, bool focused) const;
+    // ket::stepNotchCentre and ket::stepNotchNearest, for KetStepSlider's notched track.
+    Q_INVOKABLE qreal stepNotchCentre(qreal width, qreal inset, int count, int index) const;
+    Q_INVOKABLE int stepNotchNearest(qreal x, qreal width, qreal inset, int count) const;
     Q_INVOKABLE QVariantMap avatarRecipe(bool dark, qreal zoom) const;
     Q_INVOKABLE QVariantMap treeItemRecipe(bool dark, qreal zoom, bool selected, bool hovered,
                                            bool pressed, bool enabled, bool focused) const;
