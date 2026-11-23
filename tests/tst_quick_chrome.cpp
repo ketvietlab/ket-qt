@@ -5,6 +5,7 @@
 #include "KetControlRecipes.h"
 #include "KetRecipes.h"
 
+#include <QAccessible>
 #include <QGuiApplication>
 #include <QQmlComponent>
 #include <QQmlEngine>
@@ -205,6 +206,25 @@ class QuickChromeTest final : public QObject {
         QTest::keyClick(window, Qt::Key_Right);
         QTest::keyClick(window, Qt::Key_Right);
         QCOMPARE(picker->property("currentIndex").toInt(), 3);
+        // It reads as a slider named after the label, with the step index as its value, as
+        // ket::StepSlider's QSlider does; setting the value chooses the step.
+        QAccessibleInterface* accessible = QAccessible::queryAccessibleInterface(track);
+        QVERIFY(accessible);
+        QCOMPARE(accessible->role(), QAccessible::Slider);
+        QCOMPARE(accessible->text(QAccessible::Name), QStringLiteral("Reasoning effort"));
+        QCOMPARE(accessible->text(QAccessible::Description), QStringLiteral("xhigh"));
+        QAccessibleValueInterface* value = accessible->valueInterface();
+        QVERIFY(value);
+        QCOMPARE(value->currentValue().toInt(), picker->property("currentIndex").toInt());
+        QCOMPARE(value->minimumValue().toInt(), 0);
+        QCOMPARE(value->maximumValue().toInt(), 3);
+        QCOMPARE(value->minimumStepSize().toInt(), 1);
+        value->setCurrentValue(1);
+        QCOMPARE(picker->property("currentIndex").toInt(), 1);
+        picker->setProperty("currentIndex", 2);
+        QCOMPARE(value->currentValue().toInt(), 2); // the binding came back
+        QTest::keyClick(window, Qt::Key_Right);
+        QCOMPARE(value->currentValue().toInt(), 3);
         // Tab focus shows the ring.
         track->setFocus(false);
         track->forceActiveFocus(Qt::TabFocusReason);

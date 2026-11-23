@@ -65,6 +65,21 @@ Column {
         objectName: "stepSliderTrack"
 
         readonly property real start: picker.recipe.notchInset - picker.recipe.notchTrackHeight / 2
+        // The value interface a Slider role reads (as QSlider gives ket::StepSlider): the step
+        // index from the first step to the last. An assistive technology that sets `value`
+        // chooses that step, and the binding comes back.
+        property int value: picker.currentIndex
+        readonly property int from: 0
+        readonly property int to: Math.max(0, picker.steps.length - 1)
+        readonly property int minimumValue: from
+        readonly property int maximumValue: to
+        readonly property int stepSize: 1
+        onValueChanged: {
+            if (value !== picker.currentIndex) {
+                picker.choose(value)
+                value = Qt.binding(() => picker.currentIndex)
+            }
+        }
 
         width: picker.width
         height: picker.recipe.notchHeight
