@@ -36,11 +36,20 @@ class Icons final {
     [[nodiscard]] static QString resourcePath(QStringView code, qreal box,
                                               IconWeight weight = IconWeight::Light);
 
-    // The icon drawn in `color` at `box` logical pixels, for `devicePixelRatio`.
+    // The icon drawn in `color` at `box` logical pixels, for `devicePixelRatio`. Pixmaps are
+    // kept in a cache of at most `pixmapCacheLimit` entries, keyed by every argument, so a
+    // repaint reuses the drawing instead of parsing the SVG again; a theme, zoom or screen
+    // change asks for another key. GUI thread only, as QPixmap is.
     [[nodiscard]] static QPixmap pixmap(QStringView code, qreal box, qreal devicePixelRatio,
                                         const QColor& color, IconWeight weight = IconWeight::Light);
+    static constexpr int pixmapCacheLimit = 512;
     // A QIcon that renders with the rules above (black; kit components tint it).
     [[nodiscard]] static QIcon icon(QStringView code, IconWeight weight = IconWeight::Light);
+
+    // For tests: SVG renders since start, and pixmaps held by the cache.
+    [[nodiscard]] static int renderCountForTest();
+    [[nodiscard]] static int pixmapCacheSizeForTest();
+    static void clearPixmapCacheForTest();
 };
 
 } // namespace ket

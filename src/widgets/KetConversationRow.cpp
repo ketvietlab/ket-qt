@@ -5,6 +5,7 @@
 #include "KetAppearance.h"
 #include "KetIcons.h"
 #include "KetProfile.h"
+#include "KetSpinnerFrames.h"
 
 #include <QPaintEvent>
 #include <QPainter>
@@ -179,17 +180,12 @@ void ConversationRow::paintEvent(QPaintEvent* event) {
     const qreal right = tagsRight(r);
 
     // The status icon; a working icon turns once per spin period.
-    const QPixmap icon = Icons::pixmap(s.icon, indicator, dpr, s.iconColor);
     const QPointF iconOrigin(qRound(indicatorLeft), qRound(top + scaled(r.indicatorTop)));
-    if (s.spinning && s.spinMs > 0) {
-        painter.save();
-        painter.translate(iconOrigin + QPointF(indicator / 2, indicator / 2));
-        painter.rotate(360.0 * qreal(AnimationClock::instance().elapsed() % s.spinMs) / s.spinMs);
-        painter.drawPixmap(QPointF(-indicator / 2, -indicator / 2), icon);
-        painter.restore();
-    } else {
-        painter.drawPixmap(iconOrigin, icon);
-    }
+    if (s.spinning && s.spinMs > 0)
+        SpinnerFrames::paint(painter, iconOrigin, s.icon, indicator, dpr, s.iconColor, s.spinMs,
+                             AnimationClock::instance().elapsed());
+    else
+        painter.drawPixmap(iconOrigin, Icons::pixmap(s.icon, indicator, dpr, s.iconColor));
     // A spinner step repaints the icon alone; the text it would clip away is not laid out.
     if (event != nullptr && indicatorRect().contains(event->rect()))
         return;
