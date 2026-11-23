@@ -34,6 +34,8 @@ static_assert(int(QuickTheme::ConversationStatus::Stopped) ==
               int(ket::ConversationStatus::Stopped));
 static_assert(int(QuickTheme::ConversationStatus::AwaitingReply) ==
               int(ket::ConversationStatus::AwaitingReply));
+static_assert(int(QuickTheme::ConversationStatus::TaskNeedsAttention) ==
+              int(ket::ConversationStatus::TaskNeedsAttention));
 
 } // namespace
 

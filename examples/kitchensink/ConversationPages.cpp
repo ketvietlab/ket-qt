@@ -101,8 +101,12 @@ QWidget* sidebar(QWidget* parent) {
         ->setPreviewState(InteractionState{true, false, true, false});
     add(QStringLiteral("Draft a new conversation"), QStringLiteral("9031"),
         ConversationStatus::NotStarted);
+    add(QStringLiteral("Large library check"), QStringLiteral("8213"),
+        ConversationStatus::WaitingOnTask);
+    add(QStringLiteral("Offline smoke test"), QStringLiteral("8215"),
+        ConversationStatus::TaskNeedsAttention);
     column->addStretch();
-    pane->setFixedSize(300, 340);
+    pane->setFixedSize(300, 430);
     return pane;
 }
 

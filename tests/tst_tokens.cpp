@@ -488,6 +488,26 @@ class TokensTest final : public QObject {
                 conversationStatusRecipe(ConversationStatus::NeedsInput, Theme::Dark).icon);
         QCOMPARE(conversationStatusLabel(ConversationStatus::AwaitingReply),
                  QStringLiteral("Waiting for you"));
+        // A finished turn whose background job will wake it: quiet, not done, not the user's.
+        const ConversationStatusRecipe waiting =
+            conversationStatusRecipe(ConversationStatus::WaitingOnTask, Theme::Dark);
+        QCOMPARE(waiting.icon, QStringLiteral("clock"));
+        QCOMPARE(waiting.iconColor, Tokens::color(u"accent-text", Theme::Dark));
+        QCOMPARE(waiting.labelColor, Tokens::color(u"text-muted", Theme::Dark));
+        QVERIFY(!waiting.spinning);
+        QCOMPARE(conversationStatusLabel(ConversationStatus::WaitingOnTask),
+                 QStringLiteral("Waiting on job"));
+        // A job only the user can clear: warning colour, not the failed reply's icon.
+        const ConversationStatusRecipe attention =
+            conversationStatusRecipe(ConversationStatus::TaskNeedsAttention, Theme::Light);
+        QCOMPARE(attention.iconColor, Tokens::color(u"warning", Theme::Light));
+        QCOMPARE(attention.labelColor, attention.iconColor);
+        QVERIFY(attention.iconColor !=
+                conversationStatusRecipe(ConversationStatus::Error, Theme::Light).iconColor);
+        QVERIFY(attention.icon !=
+                conversationStatusRecipe(ConversationStatus::NeedsInput, Theme::Light).icon);
+        QCOMPARE(conversationStatusLabel(ConversationStatus::TaskNeedsAttention),
+                 QStringLiteral("Needs attention"));
 
         QCOMPARE(composerRecipe(false, Theme::Light).border,
                  Tokens::color(u"border-default", Theme::Light));
