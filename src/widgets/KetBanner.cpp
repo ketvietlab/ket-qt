@@ -13,8 +13,9 @@
 namespace ket {
 
 Banner::Banner(BannerTone tone, const QString& title, const QString& message, QWidget* parent)
-    : QWidget(parent), tone_(tone), icon_(new Icon), title_(new QLabel(title)),
-      message_(new QLabel(message)), layout_(new QHBoxLayout(this)) {
+    : QWidget(parent), tone_(tone), icon_(new Icon(QString(), 16, this)),
+      title_(new QLabel(title, this)), message_(new QLabel(message, this)),
+      layout_(new QHBoxLayout(this)) {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setAttribute(Qt::WA_StyledBackground, false);
     for (QLabel* label : {title_, message_}) {
@@ -22,6 +23,8 @@ Banner::Banner(BannerTone tone, const QString& title, const QString& message, QW
         label->setTextFormat(Qt::PlainText);
         label->setTextInteractionFlags(Qt::TextSelectableByMouse);
     }
+    // The children are parented above: shown while parentless, a label would be a window of its
+    // own (a native one on macOS) until the layout below adopts it.
     message_->setVisible(!message.isEmpty());
 
     auto* text = new QVBoxLayout;
