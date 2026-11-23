@@ -123,6 +123,13 @@ their own notice), compiled into `KetQt::Icons` by `tools/generate_icons.py`:
   rendered at size × device pixel ratio and filled with `SourceIn`, which keeps the alpha.
   `KetButton` and `KetIconButton` take a Két code as `iconName`; `icon.source` still takes
   any other monochrome icon.
+- `ket::Icons::pixmap()` keeps up to `pixmapCacheLimit` tinted pixmaps, keyed by code, box,
+  device pixel ratio, colour and weight, so a repaint does not parse the SVG again; a theme,
+  zoom or screen change asks for another key. A working conversation's mark in the Widgets
+  layer (`SidebarRow`, `ConversationRow`) turns from frames `SpinnerFrames` draws once per
+  icon, box, ratio and colour, at least one per `AnimationClock` step of the turn, so a step
+  blits one pixmap without a rotating transform. Qt Quick turns the same recipe with
+  `rotation`.
 
 Colours that are user data, such as tag colours, are parameters.
 

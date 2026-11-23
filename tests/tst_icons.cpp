@@ -3,9 +3,37 @@
 
 #include <QFile>
 #include <QGuiApplication>
+#include <QPainter>
+#include <QSvgRenderer>
 #include <QTest>
 
 using namespace ket;
+
+namespace {
+
+// Icons::pixmap() as it drew before it had a cache: the master rendered black at whole
+// device pixels, then tinted through its alpha.
+QImage uncachedPixmap(QStringView code, qreal box, qreal dpr, const QColor& color,
+                      IconWeight weight) {
+    const int side = qMax(1, qRound(box * dpr));
+    QImage image(side, side, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::transparent);
+    image.setDevicePixelRatio(dpr);
+    QSvgRenderer renderer(Icons::resourcePath(code, box, weight));
+    if (renderer.isValid()) {
+        const qreal size = Icons::drawSize(box);
+        const qreal origin = Icons::offset(box, dpr);
+        QPainter painter(&image);
+        renderer.render(&painter, QRectF(origin, origin, size, size));
+    }
+    QPainter painter(&image);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(QRectF(0, 0, box, box), color);
+    painter.end();
+    return QPixmap::fromImage(image).toImage();
+}
+
+} // namespace
 
 class IconsTest final : public QObject {
     Q_OBJECT
@@ -74,6 +102,66 @@ class IconsTest final : public QObject {
         // The 1 px column the 17 px box adds at 2x stays empty on the left.
         for (int y = 0; y < image.height(); ++y)
             QCOMPARE(image.pixelColor(0, y).alpha(), 0);
+    }
+
+    // Every key draws what an uncached render draws; asking again renders nothing.
+    void cachedPixmapsMatchAnUncachedRender() {
+        Icons::clearPixmapCacheForTest();
+        struct Key {
+            const char16_t* code;
+            qreal box;
+            qreal dpr;
+            QColor color;
+            IconWeight weight;
+        };
+        // Neighbours differ in one argument each, so a mixed-up key draws the wrong pixmap.
+        const QList<Key> keys = {
+            {u"loading", 16, 1, QColor(0x1746ff), IconWeight::Light},
+            {u"loading", 16, 2, QColor(0x1746ff), IconWeight::Light},
+            {u"loading", 16, 1.5, QColor(0x1746ff), IconWeight::Light},
+            {u"loading", 17, 2, QColor(0x1746ff), IconWeight::Light},
+            {u"loading", 20, 2, QColor(0x1746ff), IconWeight::Light},
+            {u"loading", 16, 2, QColor(0x1746ff), IconWeight::Regular},
+            {u"loading", 16, 2, QColor(0xd92d20), IconWeight::Regular},
+            {u"loading", 16, 2, QColor(23, 70, 255, 128), IconWeight::Regular},
+            {u"close", 16, 2, QColor(23, 70, 255, 128), IconWeight::Regular},
+            {u"close", 14, 1, QColor(0x101828), IconWeight::Light},
+        };
+        for (const Key& key : keys) {
+            const QImage expected =
+                uncachedPixmap(key.code, key.box, key.dpr, key.color, key.weight);
+            const QPixmap first = Icons::pixmap(key.code, key.box, key.dpr, key.color, key.weight);
+            QCOMPARE(first.toImage(), expected);
+            QCOMPARE(first.devicePixelRatio(), key.dpr);
+        }
+        const int renders = Icons::renderCountForTest();
+        for (const Key& key : keys) {
+            const QImage expected =
+                uncachedPixmap(key.code, key.box, key.dpr, key.color, key.weight);
+            QCOMPARE(Icons::pixmap(key.code, key.box, key.dpr, key.color, key.weight).toImage(),
+                     expected);
+        }
+        QCOMPARE(Icons::renderCountForTest(), renders);
+    }
+
+    void pixmapCacheHasACeiling() {
+        Icons::clearPixmapCacheForTest();
+        const int keys = Icons::pixmapCacheLimit + 64;
+        for (int i = 0; i < keys; ++i) {
+            const QColor color(i % 256, i / 256, 128);
+            const QImage image = Icons::pixmap(u"close", 16, 1, color).toImage();
+            QCOMPARE(image, uncachedPixmap(u"close", 16, 1, color, IconWeight::Light));
+            QVERIFY(Icons::pixmapCacheSizeForTest() <= Icons::pixmapCacheLimit);
+        }
+        QCOMPARE(Icons::pixmapCacheSizeForTest(), Icons::pixmapCacheLimit);
+        // The newest entry is kept; an evicted one renders again, still the same pixels.
+        const int renders = Icons::renderCountForTest();
+        const QColor newest((keys - 1) % 256, (keys - 1) / 256, 128);
+        (void)Icons::pixmap(u"close", 16, 1, newest);
+        QCOMPARE(Icons::renderCountForTest(), renders);
+        QCOMPARE(Icons::pixmap(u"close", 16, 1, QColor(0, 0, 128)).toImage(),
+                 uncachedPixmap(u"close", 16, 1, QColor(0, 0, 128), IconWeight::Light));
+        QCOMPARE(Icons::renderCountForTest(), renders + 1);
     }
 
     void qiconUsesTheSameRules() {

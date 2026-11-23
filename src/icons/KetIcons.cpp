@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 #include "KetIcons.h"
 
+#include <QCache>
+#include <QCoreApplication>
 #include <QHash>
 #include <QIconEngine>
 #include <QImage>
@@ -58,6 +60,27 @@ QLatin1String weightName(IconWeight weight) {
     return weight == IconWeight::Regular ? QLatin1String("regular") : QLatin1String("light");
 }
 
+int renders = 0;
+
+// Every argument of Icons::pixmap(); the colour as RGBA, the ratios by value.
+QString pixmapKey(QStringView code, qreal box, qreal dpr, const QColor& color, IconWeight weight) {
+    return QStringLiteral("%1|%2|%3|%4|%5")
+        .arg(code)
+        .arg(box, 0, 'g', 17)
+        .arg(dpr, 0, 'g', 17)
+        .arg(quint64(color.rgba64()), 16, 16, QLatin1Char('0'))
+        .arg(int(weight));
+}
+
+// Emptied when the application goes, so no pixmap outlives the GUI.
+QCache<QString, QPixmap>& pixmapCache() {
+    static QCache<QString, QPixmap> cache = [] {
+        qAddPostRoutine([] { pixmapCache().clear(); });
+        return QCache<QString, QPixmap>(Icons::pixmapCacheLimit);
+    }();
+    return cache;
+}
+
 // Renders the master into a `box` x `box` image, black, at whole device pixels.
 QImage render(QStringView code, qreal box, qreal dpr, IconWeight weight) {
     ensureResources();
@@ -65,6 +88,7 @@ QImage render(QStringView code, qreal box, qreal dpr, IconWeight weight) {
     QImage image(side, side, QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::transparent);
     image.setDevicePixelRatio(dpr);
+    ++renders;
     QSvgRenderer renderer(Icons::resourcePath(code, box, weight));
     if (!renderer.isValid())
         return image;
@@ -153,17 +177,28 @@ QString Icons::resourcePath(QStringView code, qreal box, IconWeight weight) {
 
 QPixmap Icons::pixmap(QStringView code, qreal box, qreal devicePixelRatio, const QColor& color,
                       IconWeight weight) {
+    const QString key = pixmapKey(code, box, devicePixelRatio, color, weight);
+    if (const QPixmap* cached = pixmapCache().object(key))
+        return *cached;
     QImage image = render(code, box, devicePixelRatio, weight);
     QPainter painter(&image);
     // Keeps the drawing's alpha, including the 0.35 ghost layers of level icons.
     painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
     painter.fillRect(QRectF(0, 0, box, box), color);
     painter.end();
-    return QPixmap::fromImage(image);
+    const QPixmap result = QPixmap::fromImage(image);
+    pixmapCache().insert(key, new QPixmap(result));
+    return result;
 }
 
 QIcon Icons::icon(QStringView code, IconWeight weight) {
     return QIcon(new SymbolEngine(code.toString(), weight));
 }
+
+int Icons::renderCountForTest() { return renders; }
+
+int Icons::pixmapCacheSizeForTest() { return int(pixmapCache().size()); }
+
+void Icons::clearPixmapCacheForTest() { pixmapCache().clear(); }
 
 } // namespace ket

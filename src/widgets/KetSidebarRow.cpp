@@ -5,6 +5,7 @@
 #include "KetAnimationClock.h"
 #include "KetProfile.h"
 #include "KetSidebarTreeDetail.h"
+#include "KetSpinnerFrames.h"
 
 #include <QPaintEvent>
 #include <QtMath>
@@ -191,17 +192,12 @@ void SidebarRow::paintEvent(QPaintEvent* event) {
                    QSizeF(dot, dot)));
     } else {
         const ConversationStatusRecipe s = conversationStatusRecipe(status_, theme());
-        const QPixmap icon = Icons::pixmap(s.icon, mark.width(), devicePixelRatioF(), s.iconColor);
-        if (s.spinning && s.spinMs > 0) {
-            painter.save();
-            painter.translate(QRectF(mark).center());
-            painter.rotate(360.0 * qreal(AnimationClock::instance().elapsed() % s.spinMs) /
-                           s.spinMs);
-            painter.drawPixmap(QPointF(-mark.width() / 2.0, -mark.height() / 2.0), icon);
-            painter.restore();
-        } else {
-            painter.drawPixmap(mark.topLeft(), icon);
-        }
+        if (s.spinning && s.spinMs > 0)
+            SpinnerFrames::paint(painter, mark.topLeft(), s.icon, mark.width(), devicePixelRatioF(),
+                                 s.iconColor, s.spinMs, AnimationClock::instance().elapsed());
+        else
+            painter.drawPixmap(mark.topLeft(), Icons::pixmap(s.icon, mark.width(),
+                                                             devicePixelRatioF(), s.iconColor));
     }
     // A spinner step repaints the mark alone; the text it would clip away is not laid out.
     if (event != nullptr && turningRect(mark).contains(event->rect()))
