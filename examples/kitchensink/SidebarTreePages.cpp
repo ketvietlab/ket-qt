@@ -80,7 +80,7 @@ QWidget* tree(QWidget* parent) {
     parts->addPart(asks);
 
     auto* team = new SidebarTeamBranch(QStringLiteral("Mobile Refactor"));
-    team->setMemberCount(3);
+    team->setMemberCount(5);
     team->setDecisionCount(1);
     parts->addPart(team);
     auto* members = new SidebarTreeGuide(1);
@@ -98,6 +98,16 @@ QWidget* tree(QWidget* parent) {
                              ConversationStatus::Error, 1, group);
     failed->setRole(QStringLiteral("Reviewer"));
     members->addPart(failed);
+    SidebarRow* waiting = row(QStringLiteral("Large library check"), QStringLiteral("8213"),
+                              ConversationStatus::WaitingOnTask, 1, group);
+    waiting->setRole(QStringLiteral("Developer"));
+    waiting->setStatusDetail(QStringLiteral("Large library check · running 3m 14s"));
+    members->addPart(waiting);
+    SidebarRow* attention = row(QStringLiteral("Offline smoke test"), QStringLiteral("8215"),
+                                ConversationStatus::TaskNeedsAttention, 1, group);
+    attention->setRole(QStringLiteral("Developer"));
+    attention->setStatusDetail(QStringLiteral("Cleanup unverified"));
+    members->addPart(attention);
     parts->addPart(members);
     QObject::connect(team, &SidebarTeamBranch::toggled, members, &QWidget::setVisible);
     QObject::connect(repository, &QAbstractButton::toggled, parts, &QWidget::setVisible);

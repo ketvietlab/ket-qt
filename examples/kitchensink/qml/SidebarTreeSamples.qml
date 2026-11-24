@@ -58,7 +58,7 @@ Item {
                 }
                 KetSidebarTeamBranch {
                     id: team
-                    name: "Mobile Refactor"; memberCount: 3; decisionCount: 1
+                    name: "Mobile Refactor"; memberCount: 5; decisionCount: 1
                 }
                 KetSidebarTreeGuide {
                     level: 1
@@ -76,6 +76,17 @@ Item {
                     KetSidebarRow {
                         level: 1; text: "Reviewer"; number: "6913"; role: "Reviewer"
                         status: KetTheme.ConversationStatus.Error; Basic.ButtonGroup.group: rows
+                    }
+                    KetSidebarRow {
+                        level: 1; text: "Large library check"; number: "8213"; role: "Developer"
+                        status: KetTheme.ConversationStatus.WaitingOnTask
+                        statusDetail: "Large library check · running 3m 14s"
+                        Basic.ButtonGroup.group: rows
+                    }
+                    KetSidebarRow {
+                        level: 1; text: "Offline smoke test"; number: "8215"; role: "Developer"
+                        status: KetTheme.ConversationStatus.TaskNeedsAttention
+                        statusDetail: "Cleanup unverified"; Basic.ButtonGroup.group: rows
                     }
                 }
             }

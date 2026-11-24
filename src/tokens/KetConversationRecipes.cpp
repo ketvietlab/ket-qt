@@ -99,6 +99,17 @@ ConversationStatusRecipe conversationStatusRecipe(ConversationStatus status, The
         recipe.iconColor = token(u"accent-text", theme);
         recipe.labelColor = recipe.iconColor;
         break;
+    case ConversationStatus::WaitingOnTask:
+        // Not done, and not the user's to answer: the agent wakes when its job ends.
+        recipe.icon = QStringLiteral("clock");
+        recipe.iconColor = token(u"accent-text", theme);
+        break;
+    case ConversationStatus::TaskNeedsAttention:
+        // A job the user must check: the failed reply's mark in the warning colour, not danger.
+        recipe.icon = QStringLiteral("warning");
+        recipe.iconColor = token(u"warning", theme);
+        recipe.labelColor = recipe.iconColor;
+        break;
     }
     return recipe;
 }
@@ -119,6 +130,10 @@ QString conversationStatusLabel(ConversationStatus status) {
         return QStringLiteral("Stopped");
     case ConversationStatus::AwaitingReply:
         return QStringLiteral("Waiting for you");
+    case ConversationStatus::WaitingOnTask:
+        return QStringLiteral("Waiting on job");
+    case ConversationStatus::TaskNeedsAttention:
+        return QStringLiteral("Needs attention");
     }
     return {};
 }

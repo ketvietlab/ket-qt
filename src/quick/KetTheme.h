@@ -58,7 +58,9 @@ class QuickTheme : public QObject {
         Error,
         Completed,
         Stopped,
-        AwaitingReply
+        AwaitingReply,
+        WaitingOnTask,
+        TaskNeedsAttention
     };
     Q_ENUM(ConversationStatus)
     enum class TaskStatus { Running, Stopping, Completed, Failed, Stopped };
